@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 대시보드 - Spotlight</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/helpers.css">
+    <style>
+        /* Dashboard Page Specific Styles */
+        .dashboard-section { padding: 4rem 0; background-color: #f8f9fa; }
+        .dashboard-grid { display: grid; grid-template-columns: 2.5fr 1fr; gap: 2.5rem; align-items: flex-start; }
+        .dashboard-main { background: #fff; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.05); }
+        .dashboard-sidebar { position: sticky; top: 120px; }
+        
+        .status-tracker { display: flex; justify-content: space-around; padding: 2rem; border-bottom: 1px solid #eee; }
+        .status-step { text-align: center; color: #ccc; position: relative; flex: 1; }
+        .status-step.active { color: #e91e63; font-weight: bold; }
+        .status-step .step-icon { display: block; width: 40px; height: 40px; border-radius: 50%; background: #eee; margin: 0 auto 10px; line-height: 40px; font-size: 1.2rem; }
+        .status-step.active .step-icon { background: #e91e63; color: #fff; }
+        .status-step::after { content: ''; width: calc(100% - 50px); height: 2px; background: #eee; position: absolute; top: 20px; left: calc(50% + 25px); }
+        .status-step:last-child::after { display: none; }
+        .status-step.active::after { background: #e91e63; }
+
+        .dashboard-content { padding: 2.5rem; }
+        .dashboard-block { margin-bottom: 3rem; }
+        .dashboard-block h2 { font-size: 1.8rem; color: #e91e63; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.8rem; margin-bottom: 1.5rem; }
+        
+        .sidebar-card { background: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .sidebar-card h3 { font-size: 1.5rem; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+        
+        .calendar-sync-btn { display: block; width: 100%; background: #fff; color: #4285F4; border: 1px solid #ddd; text-align: center; padding: 0.8rem; border-radius: 8px; text-decoration: none; font-weight: bold; margin-bottom: 1.5rem; }
+        .communication-box { background: #f8f9fa; padding: 1rem; border-radius: 8px; min-height: 150px; text-align: center; color: #888; display: flex; align-items: center; justify-content: center; }
+
+        /* Re-using proposal styles */
+        .calendar-table { width: 100%; border-collapse: collapse; }
+        .calendar-table th, .calendar-table td { border: 1px solid #ddd; padding: 0.8rem; text-align: left; }
+        .calendar-table th { background-color: #f8f9fa; }
+        .pricing-card { margin-bottom: 1.5rem; border: 2px solid #eee; background: #fff; }
+        .pricing-card.selected { border-color: #e91e63; }
+        .btn-block { width: 100%; text-align: center; padding: 1rem; font-size: 1.2rem; }
+
+        @media (max-width: 992px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .dashboard-sidebar { position: static; margin-top: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Header content -->
+    </header>
+    <div class="nav-overlay"></div>
+
+    <main>
+        <section class="dashboard-section">
+            <div class="container">
+                <div class="dashboard-grid">
+                    <!-- Main Content -->
+                    <div class="dashboard-main">
+                        <div class="status-tracker">
+                            <div id="step-proposal" class="status-step active">
+                                <span class="step-icon">1</span> 제안 검토
+                            </div>
+                            <div id="step-payment" class="status-step">
+                                <span class="step-icon">2</span> 결제 진행
+                            </div>
+                            <div id="step-progress" class="status-step">
+                                <span class="step-icon">3</span> 프로젝트 진행
+                            </div>
+                            <div id="step-report" class="status-step">
+                                <span class="step-icon">4</span> 성과 보고
+                            </div>
+                        </div>
+                        <div class="dashboard-content">
+                            <!-- Proposal content will be dynamically inserted here -->
+                            <div id="proposal-content"></div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <aside class="dashboard-sidebar">
+                        <div class="sidebar-card">
+                            <h3>요청 정보 요약</h3>
+                            <div id="summary-content"></div>
+                        </div>
+                        <div class="sidebar-card">
+                            <h3>도구</h3>
+                            <a href="#" id="google-calendar-sync" class="calendar-sync-btn">Google 캘린더에 추가</a>
+                        </div>
+                        <div class="sidebar-card">
+                            <h3>커뮤니케이션</h3>
+                            <div class="communication-box">
+                                <p>담당자 배정 후<br>메시지 기능이 활성화됩니다.</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <!-- Footer content -->
+    </footer>
+
+    <script src="js/dashboard.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

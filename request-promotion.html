@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 홍보 접수 - Spotlight</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/helpers.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo"><img src="images/심볼2@300x-8.png" alt="Artause Logo" style="height: 40px;"></a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="spotlight.html">Spotlight</a></li>
+                    <li><a href="https://studio.example.com/?utm_source=artause_site&utm_medium=nav&utm_campaign=studio_linkout" target="_blank" rel="noopener noreferrer">Alteus Studio ↗</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger-menu">
+                <span>&equiv;</span>
+            </div>
+        </div>
+    </header>
+    <div class="nav-overlay"></div>
+
+    <main>
+        <!-- 1. Hero Section -->
+        <section class="page-banner contact-hero reveal">
+            <div class="container">
+                <h1>온라인 홍보 접수</h1>
+                <h2>공연 정보를 입력하고 자동화된 마케팅 제안을 받아보세요.</h2>
+                <p>필수 정보를 정확하게 입력할수록 더 정교한 마케팅 전략과 실행 계획이 생성됩니다.</p>
+            </div>
+        </section>
+
+        <!-- 2. Promotion Request Form Section -->
+        <section class="contact-form-section reveal">
+            <div class="container">
+                <div class="form-container">
+                    <form id="promotionRequestForm" class="contact-form">
+                        
+                        <!-- 공연 기본 정보 -->
+                        <div class="form-section active">
+                            <h3>1. 공연 기본 정보</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="performance-title">공연명*</label>
+                                    <input type="text" id="performance-title" name="performance-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="performance-company">공연 단체명*</label>
+                                    <input type="text" id="performance-company" name="performance-company" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="performance-genre">장르*</label>
+                                <select id="performance-genre" name="performance-genre" required>
+                                    <option value="">장르를 선택하세요</option>
+                                    <option value="연극">연극</option>
+                                    <option value="뮤지컬">뮤지컬</option>
+                                    <option value="무용">무용</option>
+                                    <option value="클래식">클래식</option>
+                                    <option value="콘서트">콘서트</option>
+                                    <option value="다원예술">다원예술</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="start-date">공연 시작일*</label>
+                                    <input type="date" id="start-date" name="start-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="end-date">공연 종료일*</label>
+                                    <input type="date" id="end-date" name="end-date" required>
+                                </div>
+                            </div>
+                             <div class="form-group">
+                                <label for="performance-venue">공연 장소*</label>
+                                <input type="text" id="performance-venue" name="performance-venue" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="ticket-price">티켓 가격 (주요 좌석 기준)*</label>
+                                <input type="text" id="ticket-price" name="ticket-price" placeholder="예: R석 55,000원" required>
+                            </div>
+                        </div>
+
+                        <!-- 타겟 및 목표 정보 -->
+                        <div class="form-section active">
+                            <h3>2. 타겟 및 목표</h3>
+                            <div class="form-group">
+                                <label for="target-audience">주요 타겟 관객*</label>
+                                <input type="text" id="target-audience" name="target-audience" placeholder="예: 20-30대 여성, 연인, 가족 단위 관객 등" required>
+                            </div>
+                            <div class="form-group">
+                                <label>마케팅 목표* (중복 선택 가능)</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="promotion-goal" value="인지도 상승">
+                                        인지도 상승 (공연 및 단체를 더 널리 알리고 싶어요)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="promotion-goal" value="티켓 예매 증대">
+                                        티켓 예매 증대 (실질적인 티켓 판매량을 늘리는 것이 중요해요)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="promotion-goal" value="관객 후기 확산">
+                                        관객 후기 확산 (관객들의 긍정적인 입소문을 만들고 싶어요)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 담당자 정보 -->
+                        <div class="form-section active">
+                            <h3>3. 담당자 정보</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="name">담당자 성함*</label>
+                                    <input type="text" id="name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">이메일* (계정 ID로 사용됩니다)</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 파트너 계정 생성 -->
+                        <div class="form-section active">
+                            <h3>4. 파트너 계정 생성 (선택)</h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="create-account-checkbox" name="create-account">
+                                    진행 상황 확인 및 관리를 위한 파트너 계정을 생성합니다.
+                                </label>
+                            </div>
+                            <div id="password-fields" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="password">비밀번호*</label>
+                                        <input type="password" id="password" name="password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password-confirm">비밀번호 확인*</label>
+                                        <input type="password" id="password-confirm" name="password-confirm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 알림 설정 -->
+                        <div class="form-section active">
+                            <h3>5. 알림 설정</h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="notify-kakao" name="notify-kakao">
+                                    카카오 알림톡으로 알림 받기
+                                </label>
+                                <div id="kakao-phone-field" style="display: none; margin-top: 10px;">
+                                    <input type="text" id="kakao-phone" name="kakao-phone" placeholder="휴대폰 번호 ('-' 제외)">
+                                </div>
+                            </div>
+                             <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="notify-slack" name="notify-slack">
+                                    슬랙(Slack)으로 알림 받기
+                                </label>
+                                <div id="slack-webhook-field" style="display: none; margin-top: 10px;">
+                                    <input type="text" id="slack-webhook" name="slack-webhook" placeholder="Slack Webhook URL">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group form-submit">
+                            <button type="submit" class="btn btn-primary btn-lg">자동으로 제안서 생성하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h3>Artause</h3>
+                    <p>무대 너머의 감동을 기획합니다. 데이터와 크리에이티브를 통해 공연 생태계의 새로운 가능성을 만듭니다.</p>
+                    <p><strong>사업자등록번호:</strong> 707-24-01862<br>
+                       <strong>대표:</strong> 김광현<br>
+                       <strong>주소:</strong> 경북 포항시 북구 한동로558 한동대학교 창업보육센터(2)</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="spotlight.html">Spotlight</a></li>
+                        <li><a href="https://studio.example.com/?utm_source=artause_site&utm_medium=nav&utm_campaign=studio_linkout" target="_blank" rel="noopener noreferrer">Alteus Studio ↗</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: <a href="mailto:official@artause.com">official@artause.com</a></p>
+                    <div class="footer-sns">
+                        <a href="https://www.instagram.com/artause_official/" target="_blank" title="Artause Official Instagram">Official</a>
+                        <a href="https://www.instagram.com/spotlight_performance/" target="_blank" title="Spotlight Instagram">Spotlight</a>
+                        <a href="https://www.instagram.com/artause_studio/" target="_blank" title="Alteus Studio Instagram">Studio</a>
+                        <a href="https://blog.naver.com/artause" target="_blank" title="Artause Blog">Blog</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Artause. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Script for toggling optional fields
+        document.getElementById('create-account-checkbox').addEventListener('change', function(e) {
+            const passwordFields = document.getElementById('password-fields');
+            const passwordInput = document.getElementById('password');
+            const passwordConfirmInput = document.getElementById('password-confirm');
+            if (e.target.checked) {
+                passwordFields.style.display = 'block';
+                passwordInput.required = true;
+                passwordConfirmInput.required = true;
+            } else {
+                passwordFields.style.display = 'none';
+                passwordInput.required = false;
+                passwordConfirmInput.required = false;
+            }
+        });
+
+        document.getElementById('notify-kakao').addEventListener('change', function(e) {
+            document.getElementById('kakao-phone-field').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('notify-slack').addEventListener('change', function(e) {
+            document.getElementById('slack-webhook-field').style.display = e.target.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artause Studio 공간별 촬영 예약</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Basic Meta for SEO & Social -->
+    <meta name="description" content="Artause | 데이터와 크리에이티브로 공연의 가치를 높이는 공연예술 파트너.">
+    <meta property="og:title" content="Artause">
+    <meta property="og:description" content="무대 너머의 감동을 기획합니다.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="images/spotlight_hero.jpg">
+    <meta name="theme-color" content="#0f0f12">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Artause</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="spotlight.html">Spotlight</a></li>
+                    <li><a href="studio.html">Artause Studio</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger-menu">
+                <span>&equiv;</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- This section will be dynamically populated by JavaScript -->
+        <section id="venue-hero" class="page-banner">
+            <div class="container">
+                <h1 id="venue-name-title">공간을 선택해주세요</h1>
+                <h2 id="venue-location-subtitle">스튜디오 페이지에서 예약할 공간을 먼저 선택해주세요.</h2>
+            </div>
+        </section>
+
+        <div id="booking-content" class="hidden">
+            <section class="venue-details-section">
+                <div class="container">
+                    <div class="venue-intro-grid">
+                        <div class="venue-intro-image">
+                            <img loading="lazy" id="venue-main-image" src="" alt="Venue main image">
+                        </div>
+                        <div class="venue-intro-content">
+                            <h3>공간 컨셉</h3>
+                            <p id="venue-concept"></p>
+                            <h3>상세 정보</h3>
+                            <div id="venue-details"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="studio-booking-packages">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>이 공간의 촬영 패키지</h2>
+                        <p>아래 패키지 중 원하시는 상품을 선택하여 예약을 진행하세요.</p>
+                    </div>
+                    <div id="pricing-grid" class="pricing-grid">
+                        <!-- Pricing cards will be dynamically inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="booking-calendar" class="booking-calendar-section">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>예약 스케줄 확인</h2>
+                        <p id="venue-schedule-info"></p>
+                    </div>
+                    <div class="calendar-placeholder">
+                        <p>해당 공간의 예약 캘린더는 현재 준비 중입니다. <a id="contact-link" href="contact.html?type=booking">문의하기</a>를 통해 예약을 진행해주세요.</p>
+                        <img loading="lazy" src="https://via.placeholder.com/800x400.png?text=Venue-Specific+Booking+Calendar" alt="Booking Calendar Placeholder" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h3>Artause</h3>
+                    <p>무대 너머의 감동을 기획합니다. 데이터와 크리에이티브를 통해 공연 생태계의 새로운 가능성을 만듭니다.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="spotlight.html">Spotlight</a></li>
+                        <li><a href="studio.html">Artause Studio</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: <a href="mailto:official@artause.com">official@artause.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Artause. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Venue Data ---
+            const venueData = {
+                'areum': {
+                    name: "예술공간 아름",
+                    location: "서울시 종로구",
+                    image: "images/venue_placeholder_1.jpg",
+                    concept: "따뜻한 자연광과 화이트톤 배경이 특징인 공간입니다. 배우의 순수한 매력을 담아내는 프로필 촬영에 최적화되어 있습니다.",
+                    details: "<ul><li>자연광 스튜디오 (30평)</li><li>기본 조명 장비 및 배경지 제공</li><li>탈의실 및 메이크업 공간 완비</li></ul>",
+                    schedule: "<strong>예약 가능 시간:</strong> 평일 10:00 - 18:00 (주말 별도 문의)",
+                    pricing: [
+                        { name: '베이직 프로필', price: '15만원', details: ['2컨셉', '원본 전체 제공', '보정본 4장'] },
+                        { name: '프리미엄 프로필', price: '40만원', details: ['3컨셉', '원본 전체', '보정본 8장', '헤어/메이크업 포함'], popular: true }
+                    ]
+                },
+                'playhouse': {
+                    name: "플레이하우스",
+                    location: "경기도 수원시",
+                    image: "images/venue_placeholder_2.jpg",
+                    concept: "실제 공연 무대의 조명과 분위기를 활용하여 생동감 넘치는 장면을 연출할 수 있습니다. 공연 포스터 및 영상 촬영에 추천합니다.",
+                    details: "<ul><li>소극장 무대 (50평)</li><li>기본 무대 조명 및 음향 장비 사용 가능</li><li>객석 활용 가능 (최대 80석)</li></ul>",
+                    schedule: "<strong>예약 가능 시간:</strong> 월-수 10:00 - 22:00 (공연 일정에 따라 변동)",
+                    pricing: [
+                        { name: '포스터 촬영', price: '50만원', details: ['4시간 대관', '조명 감독 포함'], popular: true },
+                        { name: '스케치 영상', price: '80만원', details: ['4시간 촬영', '2분 내외 편집 영상 제공'] }
+                    ]
+                },
+                'soom': {
+                    name: "스튜디오 숨",
+                    location: "온라인 제휴",
+                    image: "images/venue_placeholder_3.jpg",
+                    concept: "다양한 색상의 배경지와 특수 조명을 활용해 컨셉추얼하고 강렬한 인상을 주는 프로필을 만들 수 있습니다.",
+                    details: "<ul><li>호리존 스튜디오 (25평)</li><li>Profoto 조명 풀세트 구비</li><li>컬러 배경지 20종 이상 보유</li></ul>",
+                    schedule: "<strong>예약 가능 시간:</strong> 24시간 운영 (심야 시간 할증)",
+                    pricing: [
+                        { name: '컨셉 프로필', price: '30만원', details: ['2컨셉', '원본 전체', '보정본 5장'], popular: true },
+                        { name: '영상 프로필', price: '50만원', details: ['1분 내외 컨셉 영상 제작 포함'] }
+                    ]
+                }
+            };
+
+            // --- URL Parameter Logic ---
+            const params = new URLSearchParams(window.location.search);
+            const venueId = params.get('venue');
+            const selectedVenue = venueData[venueId];
+
+            if (selectedVenue) {
+                // --- Populate Page with Venue Data ---
+                
+                // 1. Hero Section
+                const hero = document.getElementById('venue-hero');
+                hero.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${selectedVenue.image}')`;
+                document.getElementById('venue-name-title').textContent = `${selectedVenue.name} 촬영 예약`;
+                document.getElementById('venue-location-subtitle').textContent = selectedVenue.location;
+
+                // 2. Venue Details
+                document.getElementById('venue-main-image').src = selectedVenue.image;
+                document.getElementById('venue-main-image').alt = selectedVenue.name;
+                document.getElementById('venue-concept').textContent = selectedVenue.concept;
+                document.getElementById('venue-details').innerHTML = selectedVenue.details;
+
+                // 3. Pricing
+                const pricingGrid = document.getElementById('pricing-grid');
+                pricingGrid.innerHTML = ''; // Clear placeholder
+                selectedVenue.pricing.forEach(pkg => {
+                    const card = document.createElement('div');
+                    card.className = `pricing-card ${pkg.popular ? 'popular' : ''}`;
+                    
+                    let detailsHtml = '';
+                    pkg.details.forEach(detail => {
+                        detailsHtml += `<li>${detail}</li>`;
+                    });
+
+                    card.innerHTML = `
+                        <h3>${pkg.name}</h3>
+                        <p class="price">${pkg.price}</p>
+                        <ul>${detailsHtml}</ul>
+                        <a href="#booking-calendar" class="btn ${pkg.popular ? 'btn-primary' : 'btn-secondary'}">이 상품으로 예약</a>
+                    `;
+                    pricingGrid.appendChild(card);
+                });
+
+                // 4. Calendar & Contact
+                document.getElementById('venue-schedule-info').innerHTML = selectedVenue.schedule;
+                const contactLink = document.getElementById('contact-link');
+                const emailSubject = `[알터즈 스튜디오] '${selectedVenue.name}' 촬영 예약 문의`;
+                contactLink.href = `contact.html?type=booking&subject=${encodeURIComponent(emailSubject)}`;
+
+
+                // Show the main content
+                document.getElementById('booking-content').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

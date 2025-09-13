@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맞춤형 홍보 제안서 - Spotlight</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/helpers.css">
+    <style>
+        /* Proposal Page Specific Styles */
+        .proposal-section { padding: 4rem 0; }
+        .proposal-header { text-align: center; margin-bottom: 3rem; }
+        .proposal-header h1 { font-size: 2.8rem; }
+        .proposal-header .lead { font-size: 1.2rem; color: #666; max-width: 700px; margin: 0 auto; }
+        .proposal-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; align-items: flex-start; }
+        .proposal-main { background: #fff; padding: 2.5rem; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.05); }
+        .proposal-sidebar { position: sticky; top: 120px; }
+        .summary-card { background: #f8f9fa; padding: 2rem; border-radius: 12px; }
+        .summary-card h3 { font-size: 1.5rem; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 0.8rem; }
+        .summary-item strong { color: #333; }
+        .proposal-block { margin-bottom: 3rem; }
+        .proposal-block h2 { font-size: 1.8rem; color: #e91e63; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.8rem; margin-bottom: 1.5rem; }
+        .strategy-item { margin-bottom: 1rem; }
+        .strategy-item h4 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .calendar-table { width: 100%; border-collapse: collapse; }
+        .calendar-table th, .calendar-table td { border: 1px solid #ddd; padding: 0.8rem; text-align: left; }
+        .calendar-table th { background-color: #f8f9fa; }
+        .pricing-options { margin-top: 2rem; }
+        .pricing-card { margin-bottom: 1.5rem; border: 2px solid #eee; }
+        .pricing-card.selected { border-color: #e91e63; box-shadow: 0 5px 20px rgba(233, 30, 99, 0.15); }
+        .pricing-card-header { padding: 1.5rem; }
+        .pricing-card-body { padding: 0 1.5rem 1.5rem; }
+        .pricing-card-body ul { margin: 0; padding-left: 1.2rem; }
+        .btn-block { width: 100%; text-align: center; padding: 1rem; font-size: 1.2rem; }
+
+        @media (max-width: 992px) {
+            .proposal-grid { grid-template-columns: 1fr; }
+            .proposal-sidebar { position: static; margin-top: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo"><img src="images/심볼2@300x-8.png" alt="Artause Logo" style="height: 40px;"></a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="spotlight.html">Spotlight</a></li>
+                    <li><a href="https://studio.example.com/?utm_source=artause_site&utm_medium=nav&utm_campaign=studio_linkout" target="_blank" rel="noopener noreferrer">Alteus Studio ↗</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger-menu">
+                <span>&equiv;</span>
+            </div>
+        </div>
+    </header>
+    <div class="nav-overlay"></div>
+
+    <main>
+        <section class="proposal-section">
+            <div class="container">
+                <div class="proposal-header">
+                    <h1><span id="performance-title-header">공연</span> 맞춤형 홍보 제안서</h1>
+                    <p class="lead">입력해주신 정보를 바탕으로 생성된 자동화 마케팅 전략입니다. 아래 제안을 검토하고 원하시는 서비스 플랜을 선택해주세요.</p>
+                </div>
+
+                <div class="proposal-grid">
+                    <!-- Main Content -->
+                    <div class="proposal-main">
+                        <!-- 1. Marketing Strategy -->
+                        <div class="proposal-block">
+                            <h2>마케팅 전략 제안</h2>
+                            <div id="marketing-strategy">
+                                <!-- Strategy items will be dynamically inserted here -->
+                            </div>
+                        </div>
+
+                        <!-- 2. Channel Calendar -->
+                        <div class="proposal-block">
+                            <h2>채널별 홍보 캘린더</h2>
+                            <table class="calendar-table">
+                                <thead>
+                                    <tr>
+                                        <th>시점</th>
+                                        <th>Instagram (Spotlight)</th>
+                                        <th>네이버 블로그 (Artause)</th>
+                                        <th>뉴스레터</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="calendar-body">
+                                    <!-- Calendar rows will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <aside class="proposal-sidebar">
+                        <div class="summary-card">
+                            <h3>요청 정보 요약</h3>
+                            <div id="summary-content">
+                                <!-- Summary items will be dynamically inserted here -->
+                            </div>
+                        </div>
+                        <div class="pricing-options">
+                             <h3>서비스 플랜 선택</h3>
+                            <div id="pricing-plans">
+                                <!-- Pricing plans will be dynamically inserted here -->
+                            </div>
+                            <button id="payment-button" class="btn btn-primary btn-lg btn-block" disabled>선택 완료 및 결제 진행</button>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <!-- Footer content from other pages -->
+    </footer>
+
+    <script src="js/proposal.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

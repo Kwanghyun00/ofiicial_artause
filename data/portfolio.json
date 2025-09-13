@@ -1,0 +1,58 @@
+{
+  "projects": [
+    {
+      "id": "the-mousetrap",
+      "title": "쥐덫",
+      "tags": [
+        "연극",
+        "포항"
+      ],
+      "image": "images/project_placeholder_1.jpg",
+      "category": "연극",
+      "subtitle": "닫힌 공간, 멈춘 시간, 완벽한 알리바이 속 진실을 찾아라.",
+      "synopsis": "폭설로 고립된 게스트하우스에서 벌어진 의문의 살인 사건.",
+      "intent": "관객 참여형 추리 경험을 설계.",
+      "status": "ongoing",
+      "details": {
+        "genre": "미스터리 스릴러",
+        "period": "2025.08.15 - 2025.11.15",
+        "venue": "포항 예술회관",
+        "runningTime": "120분"
+      },
+      "team": {
+        "director": "김연출",
+        "writer": "박작가",
+        "producer": "Artause"
+      },
+      "tickets": {
+        "link": "https://tickets.example.com/mousetrap",
+        "vendor": "Interpark"
+      }
+    },
+    {
+      "id": "did-i-say-i-love-you",
+      "title": "제가 사랑한다 말했던가요",
+      "tags": [
+        "무용",
+        "대구"
+      ],
+      "image": "images/project_placeholder_2.jpg",
+      "category": "현대무용",
+      "subtitle": "몸짓으로 써내려간 한 편의 시",
+      "synopsis": "사랑의 여러 단계를 춤으로 표현한 옴니버스.",
+      "intent": "이미지 중심의 감성 설계.",
+      "status": "finished",
+      "details": {
+        "genre": "현대무용",
+        "period": "2025.05.20 - 2025.05.25",
+        "venue": "대구 CT",
+        "runningTime": "70분"
+      },
+      "team": {
+        "director": "최안무",
+        "writer": "-",
+        "producer": "Artause"
+      }
+    }
+  ]
+}

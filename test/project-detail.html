@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title will be set dynamically -->
+    <title>Project Detail - Artause</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Basic Meta for SEO & Social -->
+    <meta name="description" content="Artause | 데이터와 크리에이티브로 공연의 가치를 높이는 공연예술 파트너.">
+    <meta property="og:title" content="Artause">
+    <meta property="og:description" content="무대 너머의 감동을 기획합니다.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="images/spotlight_hero.jpg">
+    <meta name="theme-color" content="#0f0f12">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Artause</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="spotlight.html">Spotlight</a></li>
+                    <li><a href="studio.html">Artause Studio</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger-menu">
+                <span>&equiv;</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Project Header Section - Dynamically Populated -->
+        <section class="project-header">
+            <div id="project-header-bg" class="project-header-bg"></div>
+            <div class="project-header-overlay"></div>
+            <div class="container">
+                <span id="project-category" class="project-category"></span>
+                <h1 id="project-title" class="project-title"></h1>
+                <p id="project-subtitle" class="project-subtitle"></p>
+            </div>
+        </section>
+
+        <!-- Project Content Section -->
+        <section class="project-content">
+            <div class="container">
+                <div class="project-main-layout">
+                    <!-- Left Column: Main Info -->
+                    <div id="project-main-info" class="project-main-info">
+                        <!-- Content will be injected here -->
+                    </div>
+
+                    <!-- Right Column: Sidebar Info -->
+                    <aside id="project-sidebar" class="project-sidebar">
+                        <!-- Sidebar content will be injected here -->
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h3>Artause</h3>
+                    <p>무대 너머의 감동을 기획합니다. 데이터와 크리에이티브를 통해 공연 생태계의 새로운 가능성을 만듭니다.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="spotlight.html">Spotlight</a></li>
+                        <li><a href="studio.html">Artause Studio</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: <a href="mailto:official@artause.com">official@artause.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Artause. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // NOTE: In a real-world scenario, this data would come from a database.
+            // For this example, we duplicate the data object here. A better approach
+            // would be to have a single source of truth, like a JSON file.
+            const portfolioData = [
+                 { 
+                    id: 'the-mousetrap',
+                    title: '쥐덫', 
+                    tags: ['연극', '포항'], 
+                    image: 'https://via.placeholder.com/600x800?text=쥐덫',
+                    category: '연극',
+                    subtitle: '닫힌 공간, 멈춘 시간, 완벽한 알리바이 속 진실을 찾아라.',
+                    synopsis: '폭설로 인해 게스트하우스에 고립된 사람들. 그들 사이에서 벌어진 의문의 살인 사건. 범인은 이 안에 있다! 용의자는 모두 8명. 각자의 비밀을 간직한 채 서로를 의심하는 가운데, 두 번째 살인이 일어나는데...',
+                    intent: '아가사 크리스티의 동명 소설을 원작으로, 한정된 공간이 주는 긴장감과 인간 심리의 변화를 섬세하게 그려내어 관객들이 직접 추리하는 재미를 느낄 수 있도록 연출했습니다.',
+                    status: 'ongoing',
+                    details: {
+                        genre: '미스터리 스릴러',
+                        period: '2025.08.15 - 2025.11.15',
+                        venue: '포항 예술회관',
+                        runningTime: '120분 (인터미션 포함)'
+                    },
+                    team: {
+                        director: '김연출',
+                        writer: '박작가',
+                        producer: 'Artause'
+                    }
+                },
+                { 
+                    id: 'did-i-say-i-love-you',
+                    title: '제가 사랑한다 말했던가요', 
+                    tags: ['무용', '대구'], 
+                    image: 'https://via.placeholder.com/600x800?text=제가+사랑한다+말했던가요',
+                    category: '현대무용',
+                    subtitle: '몸짓으로 써내려간 한 편의 시',
+                    synopsis: '만남과 헤어짐, 사랑의 여러 단계를 춤으로 표현한 옴니버스 형식의 공연. 언어의 한계를 넘어선 몸의 대화를 통해 관계의 본질을 탐구한다.',
+                    intent: '특정 인물의 서사를 따라가기보다, 관객 각자가 자신의 경험을 투영하여 자유롭게 감상하고 해석할 수 있는 무대를 만들고자 했습니다.',
+                    status: 'finished',
+                    details: {
+                        genre: '현대무용',
+                        period: '2025.05.20 - 2025.05.25',
+                        venue: '대구 문화예술전용극장 CT',
+                        runningTime: '70분'
+                    },
+                    team: {
+                        director: '최안무',
+                        writer: '-',
+                        producer: 'Artause'
+                    }
+                },
+                { 
+                    id: 'the-idiots',
+                    title: '백치들', 
+                    tags: ['연극', '대구'], 
+                    image: 'https://via.placeholder.com/600x800?text=백치들',
+                    category: '연극',
+                    subtitle: '가장 순수한 자, 가장 위험한 자',
+                    synopsis: '도스토옙스키의 \'백치\'를 현대적으로 재해석한 작품. 순수함으로 세상을 구원하려 했던 한 남자가 인간의 위선과 욕망 속에서 어떻게 파멸해가는지를 그린다.',
+                    intent: '선과 악의 경계가 모호한 현대 사회에서 진정한 \'선\'이란 무엇인지, 그리고 그것이 과연 존재할 수 있는지에 대한 질문을 던지고자 합니다.',
+                    status: 'ongoing',
+                    details: {
+                        genre: '드라마',
+                        period: '2025.09.01 - 2025.09.30',
+                        venue: '대구 예술발전소',
+                        runningTime: '100분'
+                    },
+                    team: {
+                        director: '이연출',
+                        writer: '도스토옙스키 (원작)',
+                        producer: 'Artause'
+                    }
+                }
+            ];
+
+            const params = new URLSearchParams(window.location.search);
+            const projectId = params.get('id');
+            const project = portfolioData.find(p => p.id === projectId);
+
+            if (project) {
+                // --- Populate Head ---
+                document.title = `${project.title} - Artause`;
+
+                // --- Populate Header ---
+                document.getElementById('project-header-bg').style.backgroundImage = `url('${project.image}')`;
+                document.getElementById('project-category').textContent = project.category;
+                document.getElementById('project-title').textContent = project.title;
+                document.getElementById('project-subtitle').textContent = project.subtitle;
+
+                // --- Populate Main Content ---
+                const mainInfo = document.getElementById('project-main-info');
+                mainInfo.innerHTML = `
+                    <div class="content-block">
+                        <h2>시놉시스</h2>
+                        <p>${project.synopsis}</p>
+                    </div>
+                    <div class="content-block">
+                        <h2>연출 의도</h2>
+                        <p>${project.intent}</p>
+                    </div>
+                `;
+
+                // --- Populate Sidebar ---
+                const sidebar = document.getElementById('project-sidebar');
+                let bookingSectionHTML = '';
+                if (project.status === 'ongoing') {
+                    bookingSectionHTML = `<a href="contact.html?type=booking&project=${encodeURIComponent(project.title)}" class="btn btn-primary">예매하기</a>`;
+                } else {
+                    bookingSectionHTML = `<div class="sidebar-block"><p><strong>이 공연은 종료되었습니다.</strong></p></div>`;
+                }
+
+                sidebar.innerHTML = `
+                    <div class="sidebar-block">
+                        <h3>공연 개요</h3>
+                        <ul>
+                            <li><strong>장르:</strong> ${project.details.genre}</li>
+                            <li><strong>공연 기간:</strong> ${project.details.period}</li>
+                            <li><strong>장소:</strong> ${project.details.venue}</li>
+                            <li><strong>관람 시간:</strong> ${project.details.runningTime}</li>
+                        </ul>
+                    </div>
+                    <div class="sidebar-block">
+                        <h3>Creative Team</h3>
+                        <ul>
+                            <li><strong>연출:</strong> ${project.team.director}</li>
+                            <li><strong>극본:</strong> ${project.team.writer}</li>
+                            <li><strong>제작:</strong> ${project.team.producer}</li>
+                        </ul>
+                    </div>
+                    ${bookingSectionHTML}
+                `;
+
+            } else {
+                // --- Handle Project Not Found ---
+                document.getElementById('project-main-info').innerHTML = '<h2>프로젝트를 찾을 수 없습니다.</h2><p><a href="spotlight.html">목록으로 돌아가기</a></p>';
+            }
+        });
+    </script>
+</body>
+</html>

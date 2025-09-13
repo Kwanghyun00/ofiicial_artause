@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>접수 완료 - Spotlight</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/helpers.css">
+    <style>
+        .completion-section { padding: 6rem 0; text-align: center; }
+        .completion-icon { font-size: 4rem; margin-bottom: 1.5rem; color: #28a745; }
+        .completion-section h1 { font-size: 2.8rem; margin-bottom: 1rem; }
+        .completion-section p { font-size: 1.2rem; color: #555; max-width: 600px; margin: 0 auto 2.5rem; }
+        .receipt-card { max-width: 500px; margin: 0 auto 2.5rem; background: #f8f9fa; padding: 2rem; border-radius: 12px; text-align: left; border: 1px solid #eee; }
+        .receipt-card h3 { font-size: 1.5rem; margin-top: 0; text-align: center; margin-bottom: 1.5rem; }
+        .receipt-item { display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 1.1rem; }
+        .receipt-item.total { font-weight: bold; color: #e91e63; border-top: 2px solid #eee; padding-top: 1rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo"><img src="images/심볼2@300x-8.png" alt="Artause Logo" style="height: 40px;"></a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="spotlight.html">Spotlight</a></li>
+                    <li><a href="https://studio.example.com/?utm_source=artause_site&utm_medium=nav&utm_campaign=studio_linkout" target="_blank" rel="noopener noreferrer">Alteus Studio ↗</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger-menu">
+                <span>&equiv;</span>
+            </div>
+        </div>
+    </header>
+    <div class="nav-overlay"></div>
+
+    <main>
+        <section class="completion-section">
+            <div class="container">
+                <div class="completion-icon">✔</div>
+                <h1>홍보 요청이 성공적으로 접수되었습니다.</h1>
+                <p>담당자가 영업일 기준 1-2일 내에 기입하신 이메일로 연락드릴 예정입니다.<br>아래 접수 내역을 확인해주세요.</p>
+
+                <div class="receipt-card">
+                    <h3>접수 내역</h3>
+                    <div id="receipt-details">
+                        <!-- Receipt details will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <a href="index.html" class="btn btn-primary">홈으로 돌아가기</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <!-- Footer content -->
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const promotionData = JSON.parse(localStorage.getItem('promotionData'));
+            const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan'));
+
+            if (!promotionData || !selectedPlan) {
+                // If data is missing, redirect to the start
+                window.location.href = 'request-promotion.html';
+                return;
+            }
+
+            const receiptDetails = document.getElementById('receipt-details');
+            receiptDetails.innerHTML = `
+                <div class="receipt-item">
+                    <span>공연명:</span>
+                    <strong>${promotionData['performance-title']}</strong>
+                </div>
+                <div class="receipt-item">
+                    <span>담당자:</span>
+                    <strong>${promotionData['name']}</strong>
+                </div>
+                <div class="receipt-item">
+                    <span>이메일:</span>
+                    <strong>${promotionData['email']}</strong>
+                </div>
+                <hr>
+                <div class="receipt-item">
+                    <span>선택 플랜:</span>
+                    <strong>${selectedPlan.name}</strong>
+                </div>
+                <div class="receipt-item total">
+                    <span>최종 결제 금액 (VAT 포함):</span>
+                    <strong>₩${parseInt(selectedPlan.price).toLocaleString()}</strong>
+                </div>
+            `;
+
+            // Clear the stored data after displaying it
+            localStorage.removeItem('promotionData');
+            localStorage.removeItem('selectedPlan');
+        });
+    </script>
+    <script src="js/main.js"></script>
+</body>
+</html>
