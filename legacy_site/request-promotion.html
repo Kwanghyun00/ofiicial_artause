@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotlight 프로모션 의뢰 - Artause</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/helpers.css">
+</head>
+<body class="app-shell-body page-request">
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <a class="app-brand" href="index.html">
+                <img src="images/아트볼2@300x-8.png" alt="Artause" />
+                <span>Artause</span>
+            </a>
+            <p class="tagline">데이터와 스토리로 공연의 가치를 증폭시키는 크리에이티브 파트너</p>
+            <nav class="app-nav">
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Overview</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="index.html" data-route="index.html">홈</a></li>
+                        <li><a class="app-nav-link" href="about.html" data-route="about.html">회사 소개</a></li>
+                        <li><a class="app-nav-link" href="spotlight.html" data-route="spotlight.html,project-detail.html">Spotlight 케이스</a></li>
+                        <li><a class="app-nav-link" href="studio.html" data-route="studio.html">Artause Studio</a></li>
+                        <li><a class="app-nav-link" href="studio-booking.html" data-route="studio-booking.html">Studio 예약</a></li>
+                    </ul>
+                </div>
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Growth</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="request-promotion.html" data-route="request-promotion.html,request-complete.html">프로모션 의뢰</a></li>
+                        <li><a class="app-nav-link" href="proposal.html" data-route="proposal.html">제안서 빌더</a></li>
+                        <li><a class="app-nav-link" href="pricing.html" data-route="pricing.html,checkout.html">요금제 · 결제</a></li>
+                        <li><a class="app-nav-link" href="services.html" data-route="services.html">서비스 개요</a></li>
+                    </ul>
+                </div>
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Operations</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="dashboard.html" data-route="dashboard.html">운영 대시보드</a></li>
+                        <li><a class="app-nav-link" href="checkout.html" data-route="checkout.html">Checkout</a></li>
+                        <li><a class="app-nav-link" href="request-complete.html" data-route="request-complete.html">제출 완료</a></li>
+                    </ul>
+                </div>
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Support</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="contact.html" data-route="contact.html">문의하기</a></li>
+                        <li><a class="app-nav-link" href="privacy.html" data-route="privacy.html">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="app-sidebar-footer">
+                <div>사업자등록번호 707-24-01862 · 대표 김광현</div>
+                <div>경북 포항시 북구 흥해읍 한동로 558 한동대학교 창업보육센터(2)</div>
+                <div><a href="mailto:artause23@gmail.com">artause23@gmail.com</a></div>
+            </div>
+        </aside>
+        <div class="app-main">
+            <header class="app-topbar">
+                <div class="app-topbar-left">
+                    <button class="app-menu-toggle" type="button" aria-expanded="false">메뉴</button>
+                    <nav class="app-topbar-links">
+                        <a href="spotlight.html" data-route="spotlight.html,project-detail.html">Spotlight</a>
+                        <a href="studio.html" data-route="studio.html,studio-booking.html">Studio</a>
+                        <a href="pricing.html" data-route="pricing.html,proposal.html">Pricing</a>
+                    </nav>
+                </div>
+                <div class="app-topbar-actions" style="gap: 8px;">
+                    <button id="saveDraftTop" class="app-link-inline" type="button">임시 저장</button>
+                    <a class="app-cta-btn" href="#promotionRequestForm">폼으로 이동</a>
+                </div>
+            </header>
+            <main class="page-wrapper">
+                <section class="app-section reveal">
+                    <span class="page-header-eyebrow">Spotlight Request</span>
+                    <h1 class="page-title">프로모션 의뢰서</h1>
+                    <p class="page-subtitle">가능한 많은 정보를 공유해주실수록 빠르게 제안서를 준비할 수 있습니다. 작성 중 언제든 임시 저장 후 다시 이어서 작성하실 수 있습니다.</p>
+                    <p id="draftTimestamp" class="draft-timestamp"></p>
+                </section>
+
+                <section class="app-section reveal">
+                    <form id="promotionRequestForm" class="form-section">
+                        <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+
+                        <div class="form-grid">
+                            <div class="form-field" data-field="projectName">
+                                <label for="projectName">프로젝트/작품명 *</label>
+                                <input id="projectName" name="projectName" type="text" required placeholder="예) 창작뮤지컬 &lt;문간 사이로&gt;" />
+                            </div>
+                            <div class="form-field" data-field="organization">
+                                <label for="organization">주최/제작사 *</label>
+                                <input id="organization" name="organization" type="text" required placeholder="예) 아트하우스 컴퍼니" />
+                            </div>
+                            <div class="form-field" data-field="projectPeriod">
+                                <label for="projectPeriod">공연/캠페인 일정 *</label>
+                                <input id="projectPeriod" name="projectPeriod" type="text" required placeholder="예) 2025.03.01 - 2025.03.28" />
+                            </div>
+                            <div class="form-field" data-field="contactName">
+                                <label for="contactName">담당자 성함 *</label>
+                                <input id="contactName" name="contactName" type="text" required />
+                            </div>
+                            <div class="form-field" data-field="contactEmail">
+                                <label for="contactEmail">이메일 *</label>
+                                <input id="contactEmail" name="contactEmail" type="email" required placeholder="example@artause.com" />
+                            </div>
+                            <div class="form-field" data-field="contactPhone">
+                                <label for="contactPhone">연락처</label>
+                                <input id="contactPhone" name="contactPhone" type="tel" placeholder="010-0000-0000" />
+                            </div>
+                        </div>
+
+                        <div class="form-field" data-field="synopsis">
+                            <label for="synopsis">프로젝트 소개 *</label>
+                            <textarea id="synopsis" name="synopsis" rows="6" maxlength="1200" required placeholder="작품/프로젝트에 대한 간략한 소개, 핵심 메시지, 목표 관객 등을 적어주세요."></textarea>
+                            <div class="field-counter" id="synopsisCounter">0 / 1200</div>
+                        </div>
+
+                        <div class="form-field" data-field="goals">
+                            <label for="goals">프로모션 목표 *</label>
+                            <textarea id="goals" name="goals" rows="4" required placeholder="예) 개막 첫 주 객석률 85% 달성, 신규 관객 비중 40% 이상 확보 등"></textarea>
+                        </div>
+
+                        <div class="form-field" data-field="channels">
+                            <span class="field-label">희망 채널(복수 선택 가능)</span>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="channels" value="instagram"> Instagram</label>
+                                <label><input type="checkbox" name="channels" value="blog"> 블로그</label>
+                                <label><input type="checkbox" name="channels" value="newsletter"> 뉴스레터</label>
+                                <label><input type="checkbox" name="channels" value="youtube"> YouTube</label>
+                                <label><input type="checkbox" name="channels" value="offline"> 오프라인 이벤트</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field" data-field="poster">
+                            <label for="posterUpload">대표 이미지/포스터</label>
+                            <input id="posterUpload" type="file" accept="image/*" />
+                            <div id="posterPreview" class="file-preview"></div>
+                        </div>
+
+                        <div class="form-field" data-field="assets">
+                            <label for="assetUpload">추가 참고자료 (최대 10개, 파일당 10MB)</label>
+                            <input id="assetUpload" type="file" multiple />
+                            <div class="asset-list">
+                                <p class="empty">첨부된 자료가 없습니다.</p>
+                                <ul id="assetList" class="asset-items"></ul>
+                            </div>
+                        </div>
+
+                        <div class="form-field" data-field="agreements">
+                            <label class="field-label">약관 동의 *</label>
+                            <label><input type="checkbox" name="agreements" value="privacy" required> 개인정보 수집 및 이용에 동의합니다.</label>
+                            <label><input type="checkbox" name="agreements" value="contact" required> 입력한 연락처로 제안 및 안내를 받는 것에 동의합니다.</label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="saveDraft" class="btn btn-secondary">임시 저장</button>
+                            <button type="submit" class="btn btn-primary">제안 요청 보내기</button>
+                        </div>
+                    </form>
+                </section>
+            </main>
+            <footer class="app-footer">
+                <div class="footer-grid">
+                    <div>
+                        <h4>Artause</h4>
+                        <p>데이터와 스토리텔링으로 공연의 가치를 증폭시키는 공연 전문 크리에이티브 하우스.</p>
+                    </div>
+                    <div>
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a href="index.html" data-route="index.html">홈</a></li>
+                            <li><a href="about.html" data-route="about.html">About</a></li>
+                            <li><a href="spotlight.html" data-route="spotlight.html">Spotlight</a></li>
+                            <li><a href="studio.html" data-route="studio.html">Studio</a></li>
+                            <li><a href="pricing.html" data-route="pricing.html">Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Services</h4>
+                        <ul>
+                            <li><a href="request-promotion.html" data-route="request-promotion.html">프로모션 의뢰</a></li>
+                            <li><a href="proposal.html" data-route="proposal.html">제안서 빌더</a></li>
+                            <li><a href="dashboard.html" data-route="dashboard.html">운영 대시보드</a></li>
+                            <li><a href="checkout.html" data-route="checkout.html">Checkout</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Contact</h4>
+                        <ul>
+                            <li><a href="mailto:artause23@gmail.com">artause23@gmail.com</a></li>
+                            <li><a href="https://www.instagram.com/artause_official/" target="_blank" rel="noopener">Instagram @artause_official</a></li>
+                            <li><a href="https://blog.naver.com/artause" target="_blank" rel="noopener">Naver Blog</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="app-footer-bottom">© 2025 Artause. All rights reserved.</div>
+            </footer>
+        </div>
+    </div>
+    <div class="nav-overlay"></div>
+    <script src="js/main.js"></script>
+    <script src="js/request-form.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#241F47" />
+      <stop offset="100%" stop-color="#5C4BFF" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#grad)" />
+  <g fill="rgba(255,255,255,0.85)">
+    <text x="50%" y="45%" font-family="'Pretendard','Inter','Arial',sans-serif" font-size="56" letter-spacing="8" text-anchor="middle" opacity="0.8">
+      ARTAUSE
+    </text>
+    <text x="50%" y="52%" font-family="'Pretendard','Inter','Arial',sans-serif" font-size="30" letter-spacing="6" text-anchor="middle" opacity="0.7">
+      PERFORMANCE
+    </text>
+  </g>
+</svg>

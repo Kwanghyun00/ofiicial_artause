@@ -1,0 +1,16 @@
+
+/* helpers.css - non-destructive UI helpers */
+:root{ --border: rgba(0,0,0,.08) }
+.nav-overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s ease; z-index:900}
+.nav-overlay.show{opacity:1; visibility:visible}
+.reveal{opacity:0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease}
+.reveal.visible{opacity:1; transform:none}
+.filter-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0 8px}
+.filter-chip{border:1px solid var(--border); background:#f5f7fb; color:#334; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:13px}
+.filter-chip.active{background:#111827; color:#fff; border-color:#111827}
+.filter-search{width:100%; max-width:360px; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; outline:none}
+.case-study-card{transition: transform .15s ease, box-shadow .15s ease}
+.case-study-card:hover{transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,.12)}
+.case-study-thumb{width:100%; aspect-ratio:3/2; background-size:cover; background-position:center; border-radius:8px 8px 0 0}
+.tag{display:inline-block; background:#eef2ff; color:#3730a3; border-radius:999px; padding:2px 8px; font-size:12px; margin-right:6px}
+.result-tag.accent{background:#ecfeff; color:#0369a1}

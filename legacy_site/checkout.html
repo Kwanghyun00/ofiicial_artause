@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotlight 결제 - Artause</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/helpers.css">
+    <style>
+        .checkout-section { padding: 4rem 0 5rem; }
+        .checkout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2.5rem; }
+        .checkout-main { background: rgba(17,17,20,0.82); border-radius: 18px; padding: 2.5rem; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.2); }
+        .checkout-summary { background: rgba(17,17,20,0.82); border-radius: 18px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.18); position: sticky; top: 120px; display: flex; flex-direction: column; gap: 1.5rem; }
+        .summary-header { display: flex; justify-content: space-between; align-items: baseline; }
+        .summary-header h3 { margin: 0; font-size: 1.6rem; }
+        .summary-price { font-size: 1.4rem; color: var(--accent); font-weight: 600; }
+        .summary-features { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem; }
+        .summary-features li::before { content: '\2022'; margin-right: 0.4rem; color: var(--accent); font-weight: 700; }
+        .payment-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .payment-option { border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .payment-option input { display: none; }
+        .payment-option.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,30,99,0.18); }
+        .field-group { margin-bottom: 1.5rem; }
+        .field-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+        .field-group input, .field-group textarea { width: 100%; padding: 0.9rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(24,24,27,0.75); color: var(--text); }
+        .field-note { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem; }
+        .checkout-actions { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+        .status-banner { margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 12px; display: none; }
+        .status-banner.success { display: block; background: rgba(16,185,129,0.18); color: #34d399; }
+        .status-banner.error { display: block; background: rgba(248,113,113,0.18); color: #f87171; }
+        .status-banner.loading { display: block; background: rgba(233,30,99,0.18); color: var(--accent); }
+        @media (max-width: 992px) {
+            .checkout-grid { grid-template-columns: 1fr; }
+            .checkout-summary { position: static; }
+        }
+    </style>
+</head>
+<body class="app-shell-body page-checkout">
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <a class="app-brand" href="index.html">
+                <img src="images/아트볼2@300x-8.png" alt="Artause" />
+                <span>Artause</span>
+            </a>
+            <p class="tagline">데이터와 스토리로 공연의 가치를 증폭시키는 크리에이티브 파트너</p>
+            <nav class="app-nav">
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Overview</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="index.html" data-route="index.html,">홈</a></li>
+                        <li><a class="app-nav-link" href="about.html" data-route="about.html">회사 소개</a></li>
+                        <li><a class="app-nav-link" href="spotlight.html" data-route="spotlight.html,project-detail.html">Spotlight 케이스</a></li>
+                        <li><a class="app-nav-link" href="studio.html" data-route="studio.html">Artause Studio</a></li>
+                        <li><a class="app-nav-link" href="studio-booking.html" data-route="studio-booking.html">Studio 예약</a></li>
+                    </ul>
+                </div>
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Growth</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="request-promotion.html" data-route="request-promotion.html,request-complete.html">프로모션 의뢰</a></li>
+                        <li><a class="app-nav-link" href="proposal.html" data-route="proposal.html">제안서 빌더</a></li>
+                        <li><a class="app-nav-link" href="pricing.html" data-route="pricing.html,checkout.html">요금제 · 결제</a></li>
+                        <li><a class="app-nav-link" href="services.html" data-route="services.html">서비스 개요</a></li>
+                    </ul>
+                </div>
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Operations</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="dashboard.html" data-route="dashboard.html">운영 대시보드</a></li>
+                        <li><a class="app-nav-link" href="checkout.html" data-route="checkout.html">Checkout</a></li>
+                        <li><a class="app-nav-link" href="request-complete.html" data-route="request-complete.html">제출 완료</a></li>
+                    </ul>
+                </div>
+                <div class="app-nav-section">
+                    <span class="app-nav-title">Support</span>
+                    <ul class="app-nav-links">
+                        <li><a class="app-nav-link" href="contact.html" data-route="contact.html">문의하기</a></li>
+                        <li><a class="app-nav-link" href="privacy.html" data-route="privacy.html">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="app-sidebar-footer">
+                <div>사업자등록번호 707-24-01862 · 대표 김광현</div>
+                <div>경북 포항시 북구 흥해읍 한동로 558 한동대학교 창업보육센터(2)</div>
+                <div><a href="mailto:artause23@gmail.com">artause23@gmail.com</a></div>
+            </div>
+        </aside>
+        <div class="app-main">
+            <header class="app-topbar">
+                <div class="app-topbar-left">
+                    <button class="app-menu-toggle" type="button" aria-expanded="false">메뉴</button>
+                    <nav class="app-topbar-links">
+                        <a href="spotlight.html" data-route="spotlight.html,project-detail.html">Spotlight</a>
+                        <a href="studio.html" data-route="studio.html,studio-booking.html">Studio</a>
+                        <a href="pricing.html" data-route="pricing.html,proposal.html">Pricing</a>
+                    </nav>
+                </div>
+                <div class="app-topbar-actions">
+                    <a class="app-cta-btn" href="request-promotion.html" data-route="request-promotion.html">프로모션 의뢰하기</a>
+                </div>
+            </header>
+            <main class="page-wrapper">
+                <section class="checkout-section">
+                            <div class="container">
+                                <h1 style="text-align:center; margin-bottom: 2.5rem;">Spotlight 결제</h1>
+                                <div class="checkout-grid">
+                                    <div class="checkout-main">
+                                        <h2>결제 정보 입력</h2>
+                                        <p style="color: var(--text-muted); margin-bottom: 2rem;">PortOne 테스트 환경과 동일한 흐름으로 결제 UX를 체험할 수 있습니다.</p>
+                
+                                        <div class="field-group">
+                                            <label>결제 수단 선택</label>
+                                            <div class="payment-methods" id="paymentMethods">
+                                                <label class="payment-option" data-method="card">
+                                                    <input type="radio" name="paymentMethod" value="card">
+                                                    <strong>신용 / 체크카드</strong>
+                                                    <p class="field-note">즉시 승인 및 이메일 영수증 발송</p>
+                                                </label>
+                                                <label class="payment-option" data-method="kakaopay">
+                                                    <input type="radio" name="paymentMethod" value="kakaopay">
+                                                    <strong>카카오페이</strong>
+                                                    <p class="field-note">카카오톡 알림으로 간편 결제</p>
+                                                </label>
+                                                <label class="payment-option" data-method="virtual">
+                                                    <input type="radio" name="paymentMethod" value="virtual">
+                                                    <strong>가상계좌</strong>
+                                                    <p class="field-note">입금 확인 후 1분 이내 자동 승인</p>
+                                                </label>
+                                            </div>
+                                        </div>
+                
+                                        <div class="field-group">
+                                            <label for="billingName">결제자 이름</label>
+                                            <input type="text" id="billingName" placeholder="예: 김홍보" autocomplete="name">
+                                        </div>
+                                        <div class="field-group">
+                                            <label for="billingEmail">이메일</label>
+                                            <input type="email" id="billingEmail" placeholder="예: billing@company.com" autocomplete="email">
+                                        </div>
+                                        <div class="field-group">
+                                            <label for="billingNote">전달 사항 (선택)</label>
+                                            <textarea id="billingNote" rows="3" placeholder="세금계산서 요청, 제작 일정 등 전달할 내용을 적어주세요."></textarea>
+                                        </div>
+                
+                                        <div class="checkout-actions">
+                                            <button id="completePayment" class="btn btn-primary">결제 완료</button>
+                                            <a href="proposal.html" class="btn btn-secondary">제안서로 돌아가기</a>
+                                        </div>
+                                        <div id="checkoutStatus" class="status-banner" role="alert"></div>
+                                    </div>
+                                    <aside class="checkout-summary" id="checkoutSummary">
+                                        <div class="summary-header">
+                                            <h3>선택한 패키지</h3>
+                                            <span class="summary-price" id="summaryPrice">-</span>
+                                        </div>
+                                        <p id="summaryPlanDescription" style="color: var(--text-muted);"></p>
+                                        <ul class="summary-features" id="summaryFeatures"></ul>
+                                        <div>
+                                            <h4 style="margin-bottom:0.5rem;">프로젝트 정보</h4>
+                                            <p id="summaryProject" style="color: var(--text-muted); font-size:0.95rem;"></p>
+                                        </div>
+                                    </aside>
+                                </div>
+                            </div>
+                        </section>
+            </main>
+            <footer class="app-footer">
+                <div class="footer-grid">
+                    <div>
+                        <h4>Artause</h4>
+                        <p>데이터와 스토리텔링으로 공연의 가치를 증폭시키는 공연 전문 크리에이티브 하우스.</p>
+                    </div>
+                    <div>
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a href="index.html" data-route="index.html">홈</a></li>
+                            <li><a href="about.html" data-route="about.html">About</a></li>
+                            <li><a href="spotlight.html" data-route="spotlight.html">Spotlight</a></li>
+                            <li><a href="studio.html" data-route="studio.html">Studio</a></li>
+                            <li><a href="pricing.html" data-route="pricing.html">Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Services</h4>
+                        <ul>
+                            <li><a href="request-promotion.html" data-route="request-promotion.html">프로모션 의뢰</a></li>
+                            <li><a href="proposal.html" data-route="proposal.html">제안서 빌더</a></li>
+                            <li><a href="dashboard.html" data-route="dashboard.html">운영 대시보드</a></li>
+                            <li><a href="checkout.html" data-route="checkout.html">Checkout</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Contact</h4>
+                        <ul>
+                            <li><a href="mailto:artause23@gmail.com">artause23@gmail.com</a></li>
+                            <li><a href="https://www.instagram.com/artause_official/" target="_blank" rel="noopener">Instagram @artause_official</a></li>
+                            <li><a href="https://blog.naver.com/artause" target="_blank" rel="noopener">Naver Blog</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="app-footer-bottom">© 2025 Artause. All rights reserved.</div>
+            </footer>
+        </div>
+    </div>
+    <div class="nav-overlay"></div>
+    <script src="js/main.js"></script>
+    <script src="js/checkout.js"></script>
+
+</body>
+</html>
+
+

@@ -1,0 +1,73 @@
+﻿@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: #f7f7fb;
+  color: #1f2937;
+  font-family: var(--font-noto-sans-kr), "Pretendard Variable", "Pretendard", "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  min-height: 100vh;
+}
+
+a {
+  @apply text-indigo-600 transition-colors;
+}
+
+a:hover {
+  @apply text-orange-500;
+}
+
+.section-heading {
+  @apply text-3xl md:text-4xl font-semibold tracking-tight text-slate-900;
+}
+
+.section-subtitle {
+  @apply text-base md:text-lg text-slate-600 max-w-2xl;
+}
+
+.card {
+  @apply bg-white rounded-3xl shadow-lg border border-white/40 backdrop-blur-sm;
+}
+
+.grid-auto-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-full bg-indigo-600 px-5 py-2 text-white text-sm font-semibold shadow-lg hover:bg-indigo-700 transition;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition;
+}
+
+input,
+textarea,
+select {
+  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200;
+}
+
+label {
+  @apply text-sm font-medium text-slate-700;
+}
+
+.form-error {
+  @apply text-sm text-red-500 mt-2;
+}
+
+.hero-gradient {
+  background: radial-gradient(80% 80% at 50% 0%, rgba(79, 70, 229, 0.15), transparent 70%),
+    linear-gradient(180deg, rgba(15, 13, 29, 0.05) 0%, transparent 100%);
+}

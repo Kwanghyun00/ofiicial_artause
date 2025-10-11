@@ -1,0 +1,114 @@
+﻿{
+  "projects": [
+    {
+      "id": "project-ensemble",
+      "title": "스포트라이트 앙상블 시즌",
+      "category": "연극",
+      "status": "completed",
+      "period": "2024.03.05 - 2024.03.28",
+      "venue": "두산아트센터 Space111",
+      "thumbnail": "images/project_placeholder_1.jpg",
+      "headline": "오프닝 4주 만에 객석 점유율 95% 달성",
+      "summary": "시즌형 스토리텔링과 SNS/뉴스레터 통합 운영으로 신규 관객 유입을 극대화했습니다.",
+      "synopsis": "시즌 내내 변주되는 앙상블 공연의 세계관을 확장시키기 위해, 관객 데이터 분석과 맞춤형 콘텐츠 캘린더를 구축했습니다.",
+      "scope": [
+        "관객 세분화 리서치",
+        "SNS · 블로그 · 뉴스레터 통합 운영",
+        "티켓 프로모션 캠페인 설계"
+      ],
+      "outcomes": [
+        "첫 주 객석 점유율 95% 기록",
+        "채널 팔로워 210% 증가",
+        "재관람 고객 비율 32% 확보"
+      ]
+    },
+    {
+      "id": "project-classic",
+      "title": "클래식 갈라 ‘사계의 울림’",
+      "category": "클래식",
+      "status": "completed",
+      "period": "2024.06.14 - 2024.06.16",
+      "venue": "롯데콘서트홀",
+      "thumbnail": "images/project_placeholder_2.jpg",
+      "headline": "프리미엄 좌석 전석 매진",
+      "summary": "VIP 타깃 리타겟팅 광고와 스토리 기반 콘텐츠로 높은 객단가의 판매를 이끌었습니다.",
+      "synopsis": "클래식 애호가뿐 아니라 신규 관객을 위한 커뮤니케이션을 강화해 프리미엄 포지셔닝을 완성했습니다.",
+      "scope": [
+        "프리미엄 고객 타깃 전략",
+        "옴니채널 캠페인 운영",
+        "리타겟팅 광고 집행"
+      ],
+      "outcomes": [
+        "프리미엄 좌석 전석 매진",
+        "콘텐츠 조회수 32만 회 달성",
+        "객단가 평균 18% 상승"
+      ]
+    },
+    {
+      "id": "project-musical",
+      "title": "창작 뮤지컬 ‘문간 사이로’",
+      "category": "뮤지컬",
+      "status": "ongoing",
+      "period": "2025.01.10 - 2025.03.02",
+      "venue": "대학로 아트원씨어터 2관",
+      "thumbnail": "images/project_placeholder_3.jpg",
+      "headline": "사전 예매 오픈 48시간 만에 70% 판매",
+      "summary": "프리 프로덕션 단계부터 팬 커뮤니티 빌딩과 디지털 아카이브를 구축하고 있습니다.",
+      "synopsis": "새로운 창작 뮤지컬의 서사를 팬들과 함께 확장시키기 위해, 릴레이 인터뷰와 비하인드 콘텐츠 시리즈를 운영합니다.",
+      "scope": [
+        "시즌 콘텐츠 캘린더 설계",
+        "팬 커뮤니티 운영",
+        "MD · 이벤트 콜라보레이션"
+      ],
+      "outcomes": [
+        "사전 예매 전환율 2.4배",
+        "커뮤니티 회원 1,200명 돌파",
+        "브랜드 협업 3건 진행 중"
+      ]
+    },
+    {
+      "id": "project-festival",
+      "title": "도심 야외 공연제 ‘밤의 파노라마’",
+      "category": "페스티벌",
+      "status": "completed",
+      "period": "2024.09.20 - 2024.09.22",
+      "venue": "서울로 7017",
+      "thumbnail": "images/project_placeholder_1.jpg",
+      "headline": "3일간 방문객 3만 2천 명 기록",
+      "summary": "도심 인근 직장인과 관광객을 동시에 공략한 옴니채널 캠페인으로 현장 유입을 극대화했습니다.",
+      "synopsis": "낮과 밤이 다른 분위기를 만들어내는 프로그램을 중심으로 콘텐츠를 제작하고, 라이브 커버리지로 화제를 확산했습니다.",
+      "scope": [
+        "이벤트 브랜딩 · 키비주얼 개발",
+        "현장 운영 매뉴얼 구축",
+        "라이브 스트리밍 및 미디어 커버리지"
+      ],
+      "outcomes": [
+        "총 방문객 3만 2천 명",
+        "SNS 언급량 520% 증가",
+        "협찬 파트너 8곳 확보"
+      ]
+    },
+    {
+      "id": "project-space",
+      "title": "Artause Studio Showcase",
+      "category": "쇼케이스",
+      "status": "ongoing",
+      "period": "2025.04.05",
+      "venue": "Artause Studio A/B",
+      "thumbnail": "images/project_placeholder_2.jpg",
+      "headline": "신규 아티스트 브랜드 론칭 프로젝트",
+      "summary": "오프라인 쇼케이스와 온라인 스트리밍을 결합한 하이브리드 런칭 캠페인을 운영하고 있습니다.",
+      "synopsis": "현장 몰입도를 높이는 공간 연출과 온라인 확장을 위한 인터랙티브 콘텐츠를 동시에 설계했습니다.",
+      "scope": [
+        "공간 연출 및 테크니컬 디렉션",
+        "라이브 스트리밍 제작",
+        "굿즈 및 콜라보 MD 개발"
+      ],
+      "outcomes": [
+        "초대권 신청률 180% 초과",
+        "실시간 시청자 4,500명",
+        "현장 구매 전환율 24%"
+      ]
+    }
+  ]
+}
