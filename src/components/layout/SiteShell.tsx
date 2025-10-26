@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { RoleGate } from "./RoleGate";
@@ -31,9 +31,11 @@ function ShellFrame({ children }: { children: ReactNode }) {
 export function SiteShell({ children }: SiteShellProps) {
   return (
     <AuthProvider>
-      <RoleProvider>
-        <ShellFrame>{children}</ShellFrame>
-      </RoleProvider>
+      <Suspense fallback={null}>
+        <RoleProvider>
+          <ShellFrame>{children}</ShellFrame>
+        </RoleProvider>
+      </Suspense>
     </AuthProvider>
   );
 }

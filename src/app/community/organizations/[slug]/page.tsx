@@ -1,3 +1,4 @@
+import Image from "next/image";
 ﻿import { notFound } from "next/navigation";
 import { CommunityPostCard } from "@/components/community/CommunityPostCard";
 import { FollowButton } from "@/components/organizations/FollowButton";
@@ -54,10 +55,12 @@ export default async function OrganizationDetailPage({ params }: OrganizationPag
     <div className="mx-auto max-w-5xl px-6 py-16">
       <section className="relative overflow-hidden rounded-3xl bg-indigo-950 text-white shadow-xl">
         {organization.cover_image_url ? (
-          <img
+          <Image
             src={organization.cover_image_url}
             alt={`${organization.name} 커버 이미지`}
-            className="absolute inset-0 h-full w-full object-cover opacity-50"
+            fill
+            className="object-cover opacity-50"
+            sizes="(min-width: 768px) 1024px, 100vw"
           />
         ) : null}
         <div className="relative flex flex-col gap-6 p-10 md:p-14">

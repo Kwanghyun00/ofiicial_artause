@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 
@@ -34,11 +35,13 @@ export function TicketCampaignCard({ campaign, status = "active" }: TicketCampai
   return (
     <div className="flex flex-col gap-4 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-lg">
       <div className="flex items-start gap-4">
-        <div className="h-16 w-16 overflow-hidden rounded-2xl bg-slate-200">
-          <img
+        <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-slate-200">
+          <Image
             src={performance?.poster_url ?? "/images/mock/poster-default.svg"}
             alt={performance?.title ?? "Artause event"}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="64px"
           />
         </div>
         <div className="flex-1">

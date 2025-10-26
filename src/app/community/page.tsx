@@ -8,6 +8,13 @@ import {
   getOrganizations,
 } from "@/lib/supabase/queries";
 
+type CampaignResult = Awaited<ReturnType<typeof getActiveTicketCampaigns>>[number];
+type ValidCampaign = Extract<CampaignResult, { id: string }>;
+
+function isValidCampaign(campaign: CampaignResult): campaign is ValidCampaign {
+  return Boolean(campaign && typeof campaign === "object" && "id" in campaign);
+}
+
 export const metadata = {
   title: "커뮤니티 & 팔로우 허브",
   description: "Artause 커뮤니티에서 공유하는 운영 노하우를 확인하고 추천 단체와 티켓 이벤트를 살펴보세요.",
@@ -22,7 +29,7 @@ export default async function CommunityPage() {
 
   const featuredPosts = posts.slice(0, 6);
   const topOrganizations = organizations.slice(0, 6);
-  const highlightedCampaigns = campaigns.slice(0, 4);
+  const highlightedCampaigns = campaigns.filter(isValidCampaign).slice(0, 4);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { TicketCampaignCard } from "@/components/marketing/TicketCampaignCard";
 import { getPerformanceBySlug } from "@/lib/supabase/queries";
 
-type ShowPerformance = Awaited<ReturnType<typeof getPerformanceBySlug>>[number];
+type ShowPerformance = Awaited<ReturnType<typeof getPerformanceBySlug>>;
 type ValidShowPerformance = Extract<ShowPerformance, { id: string }>;
 
 type ShowDetailPageProps = {
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: ShowDetailPageProps): Promise
     openGraph: {
       title: performance.title,
       description: performance.synopsis ?? undefined,
-      type: "event",
+      type: "website",
       locale: "ko_KR",
     },
   };

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type Show = {
@@ -289,11 +290,13 @@ function HomeCampaignCard({ campaign }: { campaign: Campaign }) {
   return (
     <article className="flex flex-col rounded-3xl border border-white/60 bg-white/80 p-6 shadow-lg">
       <div className="flex items-start gap-4">
-        <div className="h-16 w-16 overflow-hidden rounded-2xl bg-slate-200">
-          <img
+        <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-slate-200">
+          <Image
             src={campaign.performances?.poster_url ?? "/images/mock/poster-default.svg"}
             alt={campaign.performances?.title ?? campaign.title}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="64px"
           />
         </div>
         <div className="flex-1">

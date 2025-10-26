@@ -1,3 +1,4 @@
+import Image from "next/image";
 ﻿import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 
@@ -27,10 +28,12 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-lg transition hover:-translate-y-1">
       {post.cover_image_url ? (
         <div className="relative h-48 w-full overflow-hidden bg-slate-200">
-          <img
+          <Image
             src={post.cover_image_url}
             alt={post.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition duration-500 group-hover:scale-105"
+            sizes="(min-width: 768px) 384px, 100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-transparent to-black/10" />
         </div>

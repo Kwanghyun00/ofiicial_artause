@@ -1,3 +1,4 @@
+import Image from "next/image";
 ﻿import { notFound } from "next/navigation";
 import { CommunityPostCard } from "@/components/community/CommunityPostCard";
 import { FollowButton } from "@/components/organizations/FollowButton";
@@ -94,10 +95,14 @@ export default async function CommunityPostPage({ params }: CommunityPostPagePro
           ) : null}
           {post.cover_image_url ? (
             <div className="overflow-hidden rounded-3xl">
-              <img
+              <Image
                 src={post.cover_image_url}
                 alt={post.title}
+                width={1200}
+                height={675}
                 className="h-full w-full object-cover"
+                sizes="(min-width: 768px) 800px, 100vw"
+                priority={false}
               />
             </div>
           ) : null}

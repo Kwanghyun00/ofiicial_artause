@@ -75,20 +75,6 @@ const COMMUNITY_POST_SELECT = `
   )
 `;
 
-const TICKET_CAMPAIGN_SELECT = `
-  id,
-  slug,
-  performance_id,
-  title,
-  description,
-  reward,
-  starts_at,
-  ends_at,
-  form_link,
-  created_at,
-  updated_at
-`;
-
 const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   id,
   slug,

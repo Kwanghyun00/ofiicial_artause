@@ -9,7 +9,7 @@ export type PromotionInquiryType = (typeof promotionInquiryTypes)[number];
 export const promotionRequestSchema = z.object({
   id: z.string().uuid().optional(),
   status: z.enum(promotionRequestStatus).default('new'),
-  inquiryType: z.enum(promotionInquiryTypes, { required_error: '문의 유형을 선택해 주세요.' }),
+  inquiryType: z.enum(promotionInquiryTypes),
   organizationName: z.string().min(2, '기관명을 입력해 주세요.'),
   contactName: z.string().min(2, '담당자 이름을 입력해 주세요.'),
   contactEmail: z.string().email('올바른 이메일 주소를 입력해 주세요.'),

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 
@@ -23,10 +24,13 @@ export function PerformanceCard({ performance, asFeatured = false }: Performance
           asFeatured ? "h-[260px] w-full md:h-full md:max-w-sm" : "aspect-[3/4] w-full"
         }`}
       >
-        <img
+        <Image
           src={performance.poster_url ?? "/images/mock/poster-default.svg"}
           alt={performance.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          fill
+          className="object-cover transition duration-500 group-hover:scale-105"
+          sizes={asFeatured ? "(min-width: 768px) 320px, 100vw" : "(min-width: 768px) 240px, 100vw"}
+          priority={false}
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/35 via-transparent to-black/10 opacity-60" />
         <div className="absolute left-4 top-4 inline-flex items-center gap-2 text-xs font-medium text-white drop-shadow">
