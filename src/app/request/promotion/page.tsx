@@ -1,53 +1,73 @@
 ﻿import { PromotionRequestForm } from "@/components/forms/PromotionRequestForm";
 
-const partnerHighlights = [
-  "응모·추첨·대기열 플로우 자동화",
-  "CTR·전환 지표와 추천 랭킹 리포트 다운로드",
-  "광고·어필리에이트 슬롯 번들로 도달 확장",
+type InquiryType = "invitation" | "promotion";
+
+type PageProps = {
+  searchParams?: {
+    type?: string;
+  };
+};
+
+const inquiryHighlights = [
+  "응모부터 추첨 · 체크인까지 자동화된 초대권 운영",
+  "SNS · 뉴스레터 · 스포트라이트 등 맞춤형 채널 믹스",
+  "성과 리포트와 다음 액션을 제안하는 후속 프로세스",
 ];
 
 const proofPoints = [
   {
-    label: "평균 응모 전환율",
-    value: "32%",
-    description: "Spotlight 노출 대비 응모 완료 기준 (베타)",
+    label: "초대권 회수율",
+    value: "92%",
+    description: "프리뷰 회차 당첨자 체크인 기준 (2024 Q3)",
   },
   {
-    label: "운영 시간 절감",
+    label: "캠페인 준비 시간",
     value: "-45%",
-    description: "추첨·알림 자동화 도입 파트너 평균",
+    description: "운영 자동화 도입 시 평균 절감 (내부 데이터)",
   },
   {
-    label: "재방문 비율",
-    value: "68%",
-    description: "이벤트 종료 후 30일 이내 재응모",
+    label: "유입 전환",
+    value: "3.2배",
+    description: "스포트라이트 + SNS 동시 운영 캠페인 기준",
   },
 ];
 
-export const metadata = {
-  title: "Artause 파트너십 문의",
-  description:
-    "응모부터 성과 리포트까지 자동화된 공연 초대 캠페인을 운영하세요. 폼을 제출하면 24시간 이내 담당자가 연락드립니다.",
+const inquiryTypeMap: Record<string, InquiryType> = {
+  invitation: "invitation",
+  promotion: "promotion",
 };
 
-export default function PromotionRequestPage() {
+function resolveInquiryType(raw?: string): InquiryType {
+  if (!raw) return "invitation";
+  const normalized = raw.toLowerCase();
+  return inquiryTypeMap[normalized] ?? "invitation";
+}
+
+export const metadata = {
+  title: "아르타우스 초대권 · 홍보 문의",
+  description: "초대권 이벤트와 공연 홍보 캠페인을 한 번에 상담 받아보세요.",
+};
+
+export default function PromotionRequestPage({ searchParams }: PageProps) {
+  const defaultInquiryType = resolveInquiryType(searchParams?.type);
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-4 pb-10 text-center">
-        <p className="text-sm uppercase tracking-wide text-indigo-600">공연 파트너 전용</p>
-        <h1 className="section-heading">데이터로 증명하는 Artause 파트너십</h1>
+        <p className="text-sm uppercase tracking-wide text-indigo-600">파트너 지원</p>
+        <h1 className="section-heading">초대권 · 홍보 문의</h1>
         <p className="section-subtitle mx-auto max-w-3xl">
-          응모·추천·추첨·체크인까지 이어지는 팬 경험을 자동화하고, CTR과 전환 리포트로 결과를 보고하세요.
-          아래 폼을 작성해 주시면 24시간 내에 담당자가 연락드립니다.
+          프리뷰 초대권부터 시즌 프로모션까지 아르타우스가 운영을 도와드립니다. 문의 유형을 선택하고 공연 정보를 알려주시면
+          맞춤형 제안을 준비해 드릴게요.
         </p>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <div className="card space-y-6 p-8 md:p-10">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Artause 파트너만의 장점</h2>
+            <h2 className="text-xl font-semibold text-slate-900">아르타우스와 진행하면</h2>
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
-              {partnerHighlights.map((highlight) => (
+              {inquiryHighlights.map((highlight) => (
                 <li key={highlight} className="flex items-start gap-3">
                   <span className="mt-2 inline-block h-2 w-2 rounded-full bg-indigo-500" />
                   <span>{highlight}</span>
@@ -56,7 +76,7 @@ export default function PromotionRequestPage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-indigo-600">베타 운영 지표</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-indigo-600">성과 스냅샷</h3>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               {proofPoints.map((point) => (
                 <div key={point.label} className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 text-center">
@@ -68,15 +88,15 @@ export default function PromotionRequestPage() {
             </div>
           </div>
           <div className="rounded-2xl bg-slate-900/90 p-6 text-sm text-white">
-            <p className="font-medium">운영팀 지원 범위</p>
+            <p className="font-medium">컨설팅 범위</p>
             <p className="mt-2 text-white/80">
-              블랙리스트 관리, 추첨 로그, DM/SMS 템플릿, 체크인 리포트까지 제공하여 운영 시간을 절감해 드립니다.
-              필요하면 커스텀 워크플로 컨설팅도 함께 진행해 드려요.
+              초대권 운영 자동화, SNS/뉴스레터 운영, PR/에디토리얼, 브랜드 제휴까지 상담 가능합니다. 필요한 범위를 적어주시면
+              우선순위에 맞춰 제안서를 보내드립니다.
             </p>
           </div>
         </div>
 
-        <PromotionRequestForm />
+        <PromotionRequestForm defaultInquiryType={defaultInquiryType} />
       </div>
     </div>
   );

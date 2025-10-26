@@ -1,8 +1,10 @@
-﻿"use client";
+"use client";
 
 import type { ReactNode } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { submitTicketEntryAction, ticketEntryInitialState } from "@/app/events/tickets/[slug]/actions";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { submitTicketEntryAction } from "@/app/events/tickets/[slug]/actions";
+import { ticketEntryInitialState } from "@/app/events/tickets/[slug]/form-state";
 
 interface TicketEntryFormProps {
   campaignId: string;
@@ -12,15 +14,15 @@ interface TicketEntryFormProps {
 }
 
 export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTitle }: TicketEntryFormProps) {
-  const [state, formAction] = useFormState(submitTicketEntryAction, ticketEntryInitialState);
-  const headline = performanceTitle ? `${campaignTitle} × ${performanceTitle}` : campaignTitle;
+  const [state, formAction] = useActionState(submitTicketEntryAction, ticketEntryInitialState);
+  const headline = performanceTitle ? `${campaignTitle} · ${performanceTitle}` : campaignTitle;
 
   return (
     <form action={formAction} className="card space-y-6 p-8 md:p-10">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-slate-900">초대 응모하기</h2>
+        <h2 className="text-2xl font-semibold text-slate-900">응모 신청</h2>
         <p className="text-sm text-slate-600">
-          연락처와 간단한 메모를 남겨 주세요. 운영팀이 24시간 이내에 응모 내역을 검토하고 당첨 여부와 체크인 안내를 전달해 드립니다.
+          카카오 로그인 사용자를 대상으로만 응모를 접수합니다. Intro-first와 AdGate 조건을 통과한 이후 24시간 이내에 제출해 주세요.
         </p>
         <p className="text-sm font-medium text-slate-500">{headline}</p>
       </div>
@@ -28,24 +30,29 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
       <input type="hidden" name="campaignId" value={campaignId} />
       <input type="hidden" name="slug" value={slug} />
 
-      <Fieldset legend="연락처">
+      <Fieldset legend="신청자 정보">
         <InputField name="applicantName" label="이름" required />
         <InputField name="applicantEmail" type="email" label="이메일" required placeholder="예: example@artause.com" />
-        <InputField name="applicantPhone" label="휴대폰" placeholder="010-0000-0000" />
+        <InputField name="applicantPhone" label="연락처" placeholder="010-0000-0000" />
       </Fieldset>
 
-      <Fieldset legend="추가 전달 사항">
+      <Fieldset legend="추천 및 확인">
+        <InputField name="instagramHandle" label="Instagram 계정" placeholder="@artause" />
+        <InputField name="referralCode" label="추천 코드" placeholder="예: KYUNG123" />
+      </Fieldset>
+
+      <Fieldset legend="추가 메모">
         <TextareaField
           name="memo"
           label="메모"
-          placeholder="함께 갈 친구, 선호하는 좌석, 소개하고 싶은 SNS 링크 등을 자유롭게 입력해 주세요."
+          placeholder="함께 방문 예정인 동반자, 원하는 날짜, 배려가 필요한 사항 등을 적어주세요."
           rows={4}
         />
       </Fieldset>
 
       <label className="flex items-start gap-3 rounded-2xl bg-surface-200/60 p-4 text-sm text-slate-600">
         <input type="checkbox" name="consentMarketing" className="mt-1" />
-        <span>Artause의 초대 이벤트와 관련 소식을 이메일·SMS로 받는 데 동의합니다.</span>
+        <span>아트하우스의 추첨 결과 및 관련 알림을 이메일·SMS로 받겠습니다.</span>
       </label>
 
       {state.status === "error" && state.message ? <p className="form-error">{state.message}</p> : null}
@@ -112,7 +119,7 @@ function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" className="btn-primary w-full md:w-auto" disabled={pending || disabled}>
-      {pending ? "전송 중..." : "응모 제출"}
+      {pending ? "제출 중..." : "응모 완료"}
     </button>
   );
 }

@@ -13,6 +13,7 @@ export async function submitPromotionRequestAction(
   formData: FormData,
 ): Promise<PromotionRequestState> {
   const raw = {
+    inquiryType: formData.get('inquiryType'),
     organizationName: formData.get('organizationName'),
     contactName: formData.get('contactName'),
     contactEmail: formData.get('contactEmail'),
@@ -31,7 +32,7 @@ export async function submitPromotionRequestAction(
 
   const parsed = promotionRequestSchema.safeParse(raw);
   if (!parsed.success) {
-    const issue = parsed.error.issues[0]?.message ?? '입력 값을 다시 확인해 주세요.';
+    const issue = parsed.error.issues[0]?.message ?? '입력값을 다시 확인해 주세요.';
     return { status: 'error', message: issue };
   }
 
@@ -39,10 +40,10 @@ export async function submitPromotionRequestAction(
     await submitPromotionRequest(parsed.data);
     return {
       status: 'success',
-      message: '상담 요청이 접수되었습니다. 담당자가 24시간 이내에 연락드릴게요!',
+      message: '문의가 접수되었습니다. 담당 매니저가 24시간 이내 연락드릴게요!',
     };
   } catch (error) {
     console.error('submitPromotionRequestAction error', error);
-    return { status: 'error', message: '요청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.' };
+    return { status: 'error', message: '문의 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' };
   }
 }

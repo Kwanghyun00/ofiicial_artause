@@ -8,13 +8,13 @@ type ValidCampaign = Extract<CampaignResult, { id: string }>;
 type CampaignStatus = "active" | "upcoming" | "closed";
 
 export const metadata = {
-  title: "이벤트 허브",
-  description: "Artause에서 진행하는 티켓 이벤트와 추천/추첨 캠페인을 한 곳에서 확인하세요.",
+  title: "초대권 이벤트",
+  description: "관객 풀을 관리하며 조용한 시간대 규칙을 지키는 최소 단위의 초대권 운영 흐름입니다.",
 };
 
 export default async function EventsPage() {
   const campaigns = (await getTicketCampaigns()).filter(isCampaign);
-  const now = Date.now();
+  const now = new Date();
 
   const byStatus = campaigns.reduce<Record<CampaignStatus, ValidCampaign[]>>(
     (acc, campaign) => {
@@ -22,54 +22,55 @@ export default async function EventsPage() {
       acc[status].push(campaign);
       return acc;
     },
-    { active: [], upcoming: [], closed: [] }
+    { active: [], upcoming: [], closed: [] },
   );
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
       <section className="rounded-3xl bg-indigo-950 p-10 text-white shadow-xl md:p-14">
-        <p className="text-sm uppercase tracking-wide text-white/70">Ticket Programs</p>
-        <h1 className="mt-3 text-3xl font-semibold md:text-4xl">Artause 티켓 이벤트 허브</h1>
+        <p className="text-sm uppercase tracking-wide text-white/70">Invitation</p>
+        <h1 className="mt-3 text-3xl font-semibold md:text-4xl">초대권 이벤트와 관객 풀 관리</h1>
         <p className="mt-4 max-w-3xl text-base text-white/80 md:text-lg">
-          Free · Plus · Pro 멤버십에 따라 응모 횟수, 조기 오픈, 추가 리포트를 제공하며 추천 코드 기반으로 친구 초대 루프를 열 수 있습니다. 제휴 파트너는 CTR · 유입 지표 리포트를, 운영팀은 추첨 자동화와 체크인 로그를 실시간으로 확인합니다.
+          신청 폼, 중복 검증, 추첨 로그, 조용한 시간대 규칙을 하나의 흐름으로 연결했습니다. 지금은 최소 기능만
+          제공하고, 향후에는 파트너 콘솔과 연동해 자동화 범위를 넓혀갈 예정입니다.
         </p>
         <div className="mt-8 grid gap-4 text-sm text-white/80 md:grid-cols-3">
-          <MetricCard label="진행 중" value={`${byStatus.active.length}건`} description="현재 응모 가능한 이벤트" />
-          <MetricCard label="예정" value={`${byStatus.upcoming.length}건`} description="오픈 준비 중인 캠페인" />
-          <MetricCard label="종료" value={`${byStatus.closed.length}건`} description="성과 리포트 정리 중" />
+          <MetricCard label="진행 중" value={`${byStatus.active.length}`} description="지금 신청 가능한 이벤트" />
+          <MetricCard label="예정" value={`${byStatus.upcoming.length}`} description="곧 열리는 이벤트" />
+          <MetricCard label="마감" value={`${byStatus.closed.length}`} description="기록용 보관" />
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/pricing" className="btn-secondary border-white/40 text-white hover:border-white/60 hover:text-white">
-            멤버십 비교
+            이용 정책
           </Link>
           <Link href="/partners" className="btn-primary bg-white text-indigo-950 hover:bg-white/90">
-            스폰서십 문의
+            제휴 안내
           </Link>
         </div>
       </section>
 
       <EventsSection
         title="진행 중인 이벤트"
-        subtitle="지금 바로 응모할 수 있는 캠페인입니다. Free 멤버는 1회, Plus/Pro는 추가 응모권이 제공됩니다."
+        subtitle="관객 풀 검증을 통과한 신청자만 조용한 시간대 이전에 참여할 수 있습니다."
         campaigns={byStatus.active}
         status="active"
-        emptyMessage="현재 진행 중인 이벤트가 없습니다."
+        emptyMessage="현재 진행 중인 초대권 이벤트가 없습니다."
       />
 
       <EventsSection
         title="예정 이벤트"
-        subtitle="오픈 예정인 캠페인을 미리 확인하고 알림을 신청하세요."
+        subtitle="오픈 예정일과 제공 리워드를 미리 안내합니다."
         campaigns={byStatus.upcoming}
         status="upcoming"
-        emptyMessage="예정 이벤트가 곧 업데이트됩니다."
+        emptyMessage="예정된 초대권 이벤트가 없습니다."
       />
 
       <EventsSection
-        title="종료 이벤트"
-        subtitle="완료된 이벤트의 운영 데이터를 기반으로 리포트를 제공하고 있습니다."
+        title="아카이브"
+        subtitle="마감된 이벤트는 운영 기록과 추첨 로그 검토용으로 남겨둡니다."
         campaigns={byStatus.closed.slice(0, 6)}
         status="closed"
-        emptyMessage="종료된 이벤트가 아직 없습니다."
+        emptyMessage="아카이브할 이벤트가 없습니다."
       />
     </div>
   );
@@ -123,15 +124,16 @@ function EventsSection({ title, subtitle, campaigns, status, emptyMessage }: Eve
   );
 }
 
-function getCampaignStatus(campaign: ValidCampaign, now: number): CampaignStatus {
+function getCampaignStatus(campaign: ValidCampaign, now: Date): CampaignStatus {
+  const currentTime = now.getTime();
   const startsAt = campaign.starts_at ? new Date(campaign.starts_at).getTime() : undefined;
   const endsAt = campaign.ends_at ? new Date(campaign.ends_at).getTime() : undefined;
 
-  if (startsAt && startsAt > now) {
+  if (startsAt && startsAt > currentTime) {
     return "upcoming";
   }
 
-  if (endsAt && endsAt < now) {
+  if (endsAt && endsAt < currentTime) {
     return "closed";
   }
 

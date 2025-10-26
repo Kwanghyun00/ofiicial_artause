@@ -1,3 +1,5 @@
+"use client";
+
 ﻿import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 import { FollowButton } from "./FollowButton";

@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 
 type Performance = Database["public"]["Tables"]["performances"]["Row"];
@@ -29,55 +29,67 @@ export function PerformanceCard({ performance, asFeatured = false }: Performance
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/35 via-transparent to-black/10 opacity-60" />
-        <div className="absolute left-4 top-4 inline-flex items-center gap-2 text-xs font-medium text-white">
-          <span className="badge bg-white/15 backdrop-blur">{performance.category ?? "장르"}</span>
+        <div className="absolute left-4 top-4 inline-flex items-center gap-2 text-xs font-medium text-white drop-shadow">
+          <span className="badge bg-white/15 backdrop-blur">{performance.category ?? "Program"}</span>
           <span className="badge bg-indigo-600 text-white">{statusLabel(performance.status)}</span>
         </div>
       </div>
       <div className={`flex flex-1 flex-col gap-4 p-6 ${asFeatured ? "md:p-10" : ""}`}>
         <div>
-          <h3 className={`text-xl font-semibold text-slate-900 ${asFeatured ? "md:text-2xl" : ""}`}>
-            {performance.title}
-          </h3>
+          <h3 className={`text-xl font-semibold text-slate-900 ${asFeatured ? "md:text-2xl" : ""}`}>{performance.title}</h3>
           {performance.hero_headline ? (
-            <p className="mt-2 text-sm text-indigo-600">{performance.hero_headline}</p>
+            <p className="mt-2 text-sm text-slate-600">{performance.hero_headline}</p>
           ) : null}
-          <p className="mt-3 text-sm text-slate-600">{performance.synopsis}</p>
         </div>
-        <div className="mt-auto flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          {performance.region && <span className="badge bg-surface-200 text-slate-800">{performance.region}</span>}
-          {period && <span className="badge bg-white/80 text-slate-700">{period}</span>}
-          {performance.venue && <span className="badge bg-white/80 text-slate-700">{performance.venue}</span>}
+        <div className="grid gap-2 text-sm text-slate-600">
+          {period ? <p>진행 기간 · {period}</p> : null}
+          {performance.venue ? <p>공간 · {performance.venue}</p> : null}
+          {performance.region ? <p>지역 · {performance.region}</p> : null}
         </div>
+        {performance.hero_subtitle ? <p className="text-sm text-slate-500">{performance.hero_subtitle}</p> : null}
+        <span className="text-sm font-semibold text-indigo-600 underline-offset-2 group-hover:underline">
+          상세 보기
+        </span>
       </div>
     </Link>
   );
 }
 
-function statusLabel(status: Performance["status"]) {
+function statusLabel(status?: string | null) {
   switch (status) {
     case "ongoing":
       return "진행 중";
+    case "scheduled":
+      return "오픈 예정";
     case "completed":
       return "종료";
-    case "scheduled":
-      return "예정";
     default:
-      return "준비";
+      return "준비 중";
   }
 }
 
 function buildPeriod(start?: string | null, end?: string | null) {
   if (!start && !end) return null;
-  if (start && end) {
-    return `${formatDate(start)} ~ ${formatDate(end)}`;
+  const startDate = start ? new Date(start) : null;
+  const endDate = end ? new Date(end) : null;
+
+  if (startDate && endDate) {
+    return `${formatDate(startDate)} -> ${formatDate(endDate)}`;
   }
-  return start ? formatDate(start) : formatDate(end!);
+
+  if (startDate) {
+    return `From ${formatDate(startDate)}`;
+  }
+
+  if (endDate) {
+    return `Until ${formatDate(endDate)}`;
+  }
+
+  return null;
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("ko-KR", {
-    year: "numeric",
+function formatDate(date: Date) {
+  return date.toLocaleDateString("ko-KR", {
     month: "short",
     day: "numeric",
   });

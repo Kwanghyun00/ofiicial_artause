@@ -1,6 +1,7 @@
-﻿export type PerformanceStatus = "draft" | "scheduled" | "ongoing" | "completed";
+export type PerformanceStatus = "draft" | "scheduled" | "ongoing" | "completed";
 
 export type PromotionRequestStatus = "new" | "in_review" | "approved" | "rejected" | "completed";
+export type PromotionInquiryType = "invitation" | "promotion";
 
 export type FollowerType = "audience" | "creator";
 
@@ -282,6 +283,7 @@ export interface Database {
         Row: {
           id: string;
           status: PromotionRequestStatus;
+          inquiry_type: PromotionInquiryType;
           organization_name: string;
           contact_name: string;
           contact_email: string;
@@ -302,6 +304,7 @@ export interface Database {
         Insert: {
           id?: string;
           status?: PromotionRequestStatus;
+          inquiry_type?: PromotionInquiryType;
           organization_name: string;
           contact_name: string;
           contact_email: string;
@@ -321,6 +324,7 @@ export interface Database {
         };
         Update: {
           status?: PromotionRequestStatus;
+          inquiry_type?: PromotionInquiryType;
           performance_category?: string | null;
           performance_region?: string | null;
           performance_dates?: string | null;
@@ -426,3 +430,4 @@ export interface Database {
     };
   };
 }
+

@@ -11,6 +11,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body[data-role="partner"] {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+
 main {
   min-height: 100vh;
 }

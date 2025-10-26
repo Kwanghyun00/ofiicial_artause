@@ -1,5 +1,6 @@
 ﻿import { CommunityPostCard } from "@/components/community/CommunityPostCard";
 import { OrganizationCard } from "@/components/organizations/OrganizationCard";
+import { OrganizationsDirectory } from "@/components/organizations/OrganizationsDirectory";
 import { TicketCampaignCard } from "@/components/marketing/TicketCampaignCard";
 import {
   getActiveTicketCampaigns,
@@ -29,7 +30,8 @@ export default async function CommunityPage() {
         <p className="text-sm uppercase tracking-wide text-white/70">Artause Community</p>
         <h1 className="mt-4 text-3xl font-semibold md:text-4xl">커뮤니티가 연결하는 새로운 공연 경험</h1>
         <p className="mt-4 max-w-3xl text-base text-white/80 md:text-lg">
-          제작 노트, 캠페인 리포트, 팔로우 추천까지 커뮤니티에서 직접 공유합니다. 운영자가 서로 경험을 나누고 관객과 빠르게 소통할 수 있도록 돕습니다.
+          제작 노트, 캠페인 리포트, 야외 페스티벌부터 전통 사운드 프로젝트까지 한 화면에서 큐레이션합니다.
+          운영자가 서로 경험을 나누고 관객과 빠르게 소통할 수 있도록 돕습니다.
         </p>
       </section>
 
@@ -55,7 +57,7 @@ export default async function CommunityPage() {
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="section-heading">추천 단체</h2>
-            <p className="section-subtitle">팔로우하면 좋은 공연 단체와 페스티벌 팀을 큐레이션했습니다.</p>
+            <p className="section-subtitle">스트리트 댄스, 국악, 플리마켓까지 다양한 오프라인 씬을 망라했습니다.</p>
           </div>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
@@ -68,6 +70,8 @@ export default async function CommunityPage() {
           )}
         </div>
       </section>
+
+      <OrganizationsDirectory organizations={organizations} />
 
       <section className="mt-16">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">

@@ -1,4 +1,4 @@
-﻿import { cache } from "react";
+import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/config";
 import {
   mockCampaigns,
@@ -129,6 +129,31 @@ export const getOrganizations = cache(async () => {
 
   return data ?? [];
 });
+
+export const getOrganizationBySlug = cache(async (slug: string) => {
+  if (!slug) {
+    return null;
+  }
+
+  if (!isSupabaseConfigured) {
+    return mockOrganizations.find((organization) => organization.slug === slug) ?? null;
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("organizations")
+    .select(ORGANIZATION_SELECT)
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    console.error("getOrganizationBySlug error", error);
+    throw error;
+  }
+
+  return data ?? null;
+});
+
 
 export const getCommunityPosts = cache(async () => {
   if (!isSupabaseConfigured) {
@@ -400,6 +425,7 @@ export async function submitPromotionRequest(payload: PromotionRequestPayload) {
   const supabase = await createServerSupabaseClient();
   const insertPayload: Database["public"]["Tables"]["promotion_requests"]["Insert"] = {
     status: payload.status,
+    inquiry_type: payload.inquiryType,
     organization_name: payload.organizationName,
     contact_name: payload.contactName,
     contact_email: payload.contactEmail,
@@ -422,6 +448,7 @@ export async function submitPromotionRequest(payload: PromotionRequestPayload) {
     throw error;
   }
 }
+
 
 
 
