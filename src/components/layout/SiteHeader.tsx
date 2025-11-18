@@ -39,7 +39,7 @@ export function SiteHeader() {
   const pathname = usePathname() ?? "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const headerClass = "sticky top-0 z-50 border-b border-amber-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 backdrop-blur-xl shadow-sm";
+  const headerClass = "sticky top-0 z-50 border-b border-slate-200/60 bg-gradient-to-r from-neutral-offwhite via-white to-neutral-offwhite backdrop-blur-xl shadow-sm";
 
   return (
     <header className={headerClass}>
@@ -57,7 +57,7 @@ export function SiteHeader() {
             priority
             className="h-20 w-20 object-contain transition-transform group-hover:rotate-6 drop-shadow-md"
           />
-          <span className="hidden sm:block text-2xl font-bold bg-gradient-to-r from-amber-700 to-amber-900 bg-clip-text text-transparent">
+          <span className="hidden sm:block text-2xl font-bold bg-gradient-to-r from-deepPurple to-deepPurple-dark bg-clip-text text-transparent">
             Artause
           </span>
         </Link>
@@ -73,13 +73,13 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative px-3 py-2 transition-all duration-200 hover:text-amber-700 ${
-                  isActive ? "text-amber-800 font-bold" : "text-slate-700"
+                className={`relative px-3 py-2 transition-all duration-200 hover:text-coral ${
+                  isActive ? "text-deepPurple font-bold" : "text-slate-700"
                 }`}
               >
                 {item.label}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-600 to-amber-800 rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-coral to-coral-dark rounded-full" />
                 )}
               </Link>
             );
@@ -89,22 +89,22 @@ export function SiteHeader() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex flex-col items-center justify-center gap-1.5 rounded-xl p-2.5 transition-colors hover:bg-amber-100 md:hidden focus:outline-none focus:ring-2 focus:ring-amber-500"
+          className="flex flex-col items-center justify-center gap-1.5 rounded-xl p-2.5 transition-colors hover:bg-deepPurple/5 md:hidden focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
           aria-label="메뉴 열기"
           aria-expanded={mobileMenuOpen}
         >
           <span
-            className={`h-0.5 w-6 bg-amber-800 transition-all duration-300 ${
+            className={`h-0.5 w-6 bg-deepPurple transition-all duration-300 ${
               mobileMenuOpen ? "translate-y-2 rotate-45" : ""
             }`}
           />
           <span
-            className={`h-0.5 w-6 bg-amber-800 transition-all duration-300 ${
+            className={`h-0.5 w-6 bg-deepPurple transition-all duration-300 ${
               mobileMenuOpen ? "opacity-0" : ""
             }`}
           />
           <span
-            className={`h-0.5 w-6 bg-amber-800 transition-all duration-300 ${
+            className={`h-0.5 w-6 bg-deepPurple transition-all duration-300 ${
               mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
             }`}
           />
@@ -122,7 +122,7 @@ export function SiteHeader() {
           />
 
           {/* Mobile Menu Panel */}
-          <nav className="fixed right-0 top-[73px] z-50 h-[calc(100vh-73px)] w-64 animate-slide-in-right border-l border-amber-200 bg-gradient-to-b from-amber-50 to-white/95 backdrop-blur-xl shadow-2xl md:hidden">
+          <nav className="fixed right-0 top-[73px] z-50 h-[calc(100vh-73px)] w-64 animate-slide-in-right border-l border-slate-200/60 bg-gradient-to-b from-neutral-offwhite to-white/95 backdrop-blur-xl shadow-2xl md:hidden">
             <div className="flex flex-col gap-2 p-6">
               {navItems.map((item) => {
                 const isActive =
@@ -134,15 +134,15 @@ export function SiteHeader() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`group relative overflow-hidden rounded-2xl px-5 py-4 text-base font-medium transition-all duration-200 hover:bg-amber-100 ${
+                    className={`group relative overflow-hidden rounded-2xl px-5 py-4 text-base font-medium transition-all duration-200 hover:bg-coral/5 ${
                       isActive
-                        ? "bg-gradient-to-r from-amber-600 to-amber-800 text-white shadow-lg"
+                        ? "bg-gradient-to-r from-coral to-coral-dark text-white shadow-lg"
                         : "text-slate-700"
                     }`}
                   >
                     <span className="relative z-10">{item.label}</span>
                     {!isActive && (
-                      <span className="absolute inset-0 translate-x-full bg-gradient-to-r from-amber-50 to-amber-100 transition-transform duration-300 group-hover:translate-x-0" />
+                      <span className="absolute inset-0 translate-x-full bg-gradient-to-r from-coral/5 to-coral/10 transition-transform duration-300 group-hover:translate-x-0" />
                     )}
                   </Link>
                 );

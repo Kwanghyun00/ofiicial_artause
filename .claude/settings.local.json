@@ -24,7 +24,10 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(supabase/migrations/combined_migration.sql)",
-      "Bash(npx vercel --prod)"
+      "Bash(npx vercel --prod)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

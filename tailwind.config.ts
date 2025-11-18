@@ -20,6 +20,27 @@ const config: Config = {
           200: '#ECECF5',
           900: '#0F0D1D',
         },
+        // 2025 Design System - Neutral & Coral Accent
+        neutral: {
+          offwhite: '#FBF7F2',
+          taupe: '#EFE8DB',
+        },
+        coral: {
+          DEFAULT: '#FF6B6B',
+          light: '#FF8E8E',
+          dark: '#E85555',
+        },
+        deepPurple: {
+          DEFAULT: '#6D28D9',
+          light: '#8B5CF6',
+          dark: '#5B21B6',
+        },
+        // Deep Gradient colors for hero sections
+        gradient: {
+          violet: '#5E3AE3',
+          magenta: '#D618A0',
+          electric: '#8247E5',
+        },
       },
       fontFamily: {
         pretendard: ['"Pretendard Variable"', 'Pretendard', 'Inter', 'sans-serif'],

@@ -154,7 +154,7 @@ function Hero({ stats }: { stats: { shows: number; campaigns: number; partners: 
   return (
     <section
       ref={ref}
-      className={`relative overflow-hidden rounded-[24px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 px-6 py-12 text-white shadow-2xl transition-all duration-700 sm:px-10 sm:py-16 md:rounded-[40px] md:px-16 md:py-20 ${
+      className={`relative overflow-hidden rounded-[24px] bg-gradient-to-br from-gradient-violet via-gradient-electric to-gradient-magenta px-6 py-12 text-white shadow-2xl transition-all duration-700 sm:px-10 sm:py-16 md:rounded-[40px] md:px-16 md:py-20 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
@@ -179,7 +179,7 @@ function Hero({ stats }: { stats: { shows: number; campaigns: number; partners: 
         <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:gap-4">
           <Link
             href="/events"
-            className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 font-semibold text-indigo-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:px-8 sm:py-4"
+            className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-coral px-6 py-3.5 font-bold shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:bg-coral-dark active:scale-95 sm:px-8 sm:py-4"
           >
             진행 중인 이벤트 보기
             <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,7 +188,7 @@ function Hero({ stats }: { stats: { shows: number; campaigns: number; partners: 
           </Link>
           <Link
             href="/event-center"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/40 bg-white/10 px-6 py-3.5 font-semibold backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/20 active:scale-95 sm:px-8 sm:py-4"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/50 bg-white/15 px-6 py-3.5 font-semibold backdrop-blur-sm transition-all hover:border-white/70 hover:bg-white/25 active:scale-95 sm:px-8 sm:py-4"
           >
             이벤트 개설하기
           </Link>
@@ -209,15 +209,15 @@ function PromoSection({ shows }: { shows: Show[] }) {
   return (
     <section
       ref={ref}
-      className={`rounded-[24px] border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
+      className={`rounded-[24px] border border-slate-200/80 bg-gradient-to-br from-neutral-offwhite to-white p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
       <div className="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1">
+          <div className="inline-flex items-center gap-2 rounded-full bg-deepPurple/10 px-3 py-1">
             <span className="text-sm">🎭</span>
-            <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">Featured Shows</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-deepPurple">Featured Shows</p>
           </div>
           <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">지금 주목받는 공연</h2>
           <p className="text-sm text-slate-600 sm:text-base">
@@ -226,7 +226,7 @@ function PromoSection({ shows }: { shows: Show[] }) {
         </div>
         <Link
           href="/event-center#event-create"
-          className="group inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-5 py-3 font-semibold text-indigo-700 transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md active:scale-95 sm:px-6"
+          className="group inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-deepPurple/30 bg-white px-5 py-3 font-semibold text-deepPurple transition-all hover:border-deepPurple hover:bg-deepPurple/5 hover:shadow-md active:scale-95 sm:px-6"
         >
           <span>공연 등록하기</span>
           <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -252,15 +252,15 @@ function CampaignSection({ campaigns }: { campaigns: Campaign[] }) {
   return (
     <section
       ref={ref}
-      className={`rounded-[24px] border border-purple-200/60 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
+      className={`rounded-[24px] border border-coral/20 bg-gradient-to-br from-coral/5 to-coral/10 p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
       <div className="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-3 py-1">
+          <div className="inline-flex items-center gap-2 rounded-full bg-coral/15 px-3 py-1">
             <span className="text-sm">🎫</span>
-            <p className="text-xs font-bold uppercase tracking-wide text-purple-700">Live Events</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-coral-dark">Live Events</p>
           </div>
           <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">진행 중인 초대권 이벤트</h2>
           <p className="text-sm text-slate-600 sm:text-base">
@@ -269,7 +269,7 @@ function CampaignSection({ campaigns }: { campaigns: Campaign[] }) {
         </div>
         <Link
           href="/events"
-          className="group inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-purple-200 bg-white px-5 py-3 font-semibold text-purple-700 transition-all hover:border-purple-300 hover:bg-purple-50 hover:shadow-md active:scale-95 sm:px-6"
+          className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-coral px-5 py-3 font-bold text-white shadow-lg transition-all hover:bg-coral-dark hover:scale-105 active:scale-95 sm:px-6"
         >
           <span>전체 이벤트</span>
           <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -279,7 +279,7 @@ function CampaignSection({ campaigns }: { campaigns: Campaign[] }) {
         {campaigns.length ? (
           campaigns.map((campaign, index) => <CampaignCard key={campaign.id} campaign={campaign} index={index} />)
         ) : (
-          <div className="col-span-2 rounded-3xl border-2 border-dashed border-purple-200 bg-white p-12 text-center">
+          <div className="col-span-2 rounded-3xl border-2 border-dashed border-coral/30 bg-white p-12 text-center">
             <p className="text-lg font-medium text-slate-400">진행 중인 이벤트가 없습니다</p>
             <p className="mt-2 text-sm text-slate-500">새로운 이벤트를 기다려주세요</p>
           </div>
@@ -316,7 +316,7 @@ function FlowSection() {
   return (
     <section
       ref={ref}
-      className={`rounded-[24px] border border-slate-200 bg-white p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
+      className={`rounded-[24px] border border-slate-200/80 bg-gradient-to-br from-white to-neutral-offwhite p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
