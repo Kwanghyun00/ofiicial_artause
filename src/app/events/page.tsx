@@ -20,7 +20,7 @@
  * - closed: ends_at < 현재
  */
 import Link from "next/link";
-import { CampaignBoard } from "@/components/event-center";
+import { EventsExplorer } from "@/components/events/EventsExplorer";
 import { getTicketCampaigns } from "@/lib/supabase/queries";
 
 /**
@@ -52,11 +52,6 @@ export default async function EventsPage() {
   // 모든 캠페인 가져오기 및 유효성 검사
   const campaigns = (await getTicketCampaigns()).filter(isCampaign);
 
-  // 상태별로 캠페인 분류
-  const active = campaigns.filter((campaign) => getStatus(campaign) === "active");
-  const upcoming = campaigns.filter((campaign) => getStatus(campaign) === "upcoming");
-  const closed = campaigns.filter((campaign) => getStatus(campaign) === "closed").slice(0, 3); // 최근 3개만
-
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-10 sm:space-y-12">
       {/* Hero Section: 페이지 소개 및 이벤트 개설 CTA */}
@@ -86,86 +81,8 @@ export default async function EventsPage() {
         </div>
       </section>
 
-      {/* 모집 중인 이벤트 섹션: 현재 응모 가능한 초대권 목록 */}
-      <section className="space-y-4 sm:space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-coral text-xl text-white shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
-            🎯
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">모집 중인 이벤트</h2>
-            <p className="text-sm text-slate-600 sm:text-base">지금 바로 응모할 수 있는 초대권 이벤트입니다</p>
-          </div>
-        </div>
-        {/* CampaignBoard 컴포넌트에 활성 캠페인 데이터 전달 */}
-        <CampaignBoard campaigns={active} />
-      </section>
-
-      {/* 오픈 예정 섹션: 곧 시작될 이벤트 미리보기 */}
-      <section className="rounded-[24px] border border-deepPurple/20 bg-gradient-to-br from-deepPurple/5 to-deepPurple/10 p-6 shadow-xl sm:p-8 md:rounded-[40px] md:p-10">
-        <div className="flex items-center gap-3 mb-5 sm:mb-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-deepPurple text-xl text-white shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
-            ⏰
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">오픈 예정</h2>
-            <p className="text-sm text-slate-600 sm:text-base">곧 시작될 이벤트를 미리 확인하세요</p>
-          </div>
-        </div>
-        {/* 예정된 이벤트가 있으면 목록 표시, 없으면 빈 상태 메시지 */}
-        {upcoming.length ? (
-          <ul className="space-y-3">
-            {upcoming.map((campaign) => (
-              <li key={campaign.id} className="flex items-center justify-between rounded-2xl border border-deepPurple/20 bg-white p-5 shadow-sm transition-all hover:shadow-md">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-deepPurple/10 text-lg">📅</span>
-                  <span className="font-semibold text-slate-900">{campaign.title}</span>
-                </div>
-                <span className="rounded-full bg-deepPurple/10 px-3 py-1 text-xs font-medium text-deepPurple">
-                  {campaign.starts_at ? formatDateTime(campaign.starts_at) : "오픈 일정 미정"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="rounded-2xl border-2 border-dashed border-deepPurple/20 bg-white p-12 text-center">
-            <p className="text-lg font-medium text-slate-400">준비 중인 이벤트가 없습니다</p>
-          </div>
-        )}
-      </section>
-
-      {/* 최근 종료 섹션: 최근에 마감된 이벤트 (최대 3개) */}
-      <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-xl sm:p-8 md:rounded-[40px] md:p-10">
-        <div className="flex items-center gap-3 mb-5 sm:mb-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 text-xl shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
-            ✓
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">최근 종료</h2>
-            <p className="text-sm text-slate-600 sm:text-base">선정 결과는 이메일로 발송되었습니다</p>
-          </div>
-        </div>
-        {/* 종료된 이벤트가 있으면 그리드로 표시, 없으면 빈 상태 메시지 */}
-        {closed.length ? (
-          <div className="grid gap-4 md:grid-cols-3">
-            {closed.map((campaign) => (
-              <article key={campaign.id} className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-all hover:border-slate-300 hover:shadow-md">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className="font-bold text-slate-900 line-clamp-2">{campaign.title}</p>
-                  <span className="shrink-0 rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-600">종료</span>
-                </div>
-                <p className="text-sm text-slate-500">
-                  마감: {campaign.ends_at ? formatDateTime(campaign.ends_at) : "-"}
-                </p>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
-            <p className="text-lg font-medium text-slate-400">최근 종료된 이벤트가 없습니다</p>
-          </div>
-        )}
-      </section>
+      {/* Events Explorer: 검색 및 필터링 기능이 있는 이벤트 목록 */}
+      <EventsExplorer campaigns={campaigns} />
     </div>
   );
 }
