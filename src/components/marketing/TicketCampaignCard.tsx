@@ -22,8 +22,8 @@ type TicketCampaignCardProps = {
 };
 
 const STATUS_MAP: Record<CampaignStatus, { label: string; tone: string; dotColor: string }> = {
-  active: { label: "모집 중", tone: "bg-emerald-100 text-emerald-700", dotColor: "bg-emerald-500" },
-  upcoming: { label: "오픈 예정", tone: "bg-amber-100 text-amber-700", dotColor: "bg-amber-500" },
+  active: { label: "모집 중", tone: "bg-coral/10 text-coral-dark", dotColor: "bg-coral" },
+  upcoming: { label: "오픈 예정", tone: "bg-deepPurple/10 text-deepPurple", dotColor: "bg-deepPurple" },
   closed: { label: "마감", tone: "bg-slate-200 text-slate-600", dotColor: "bg-slate-500" },
 };
 
@@ -91,9 +91,9 @@ export function TicketCampaignCard({ campaign, status = "active" }: TicketCampai
             </div>
           )}
           {campaign.reward && (
-            <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-2 border border-amber-200">
-              <dt className="text-amber-600">🎁</dt>
-              <dd className="font-semibold text-amber-900">{campaign.reward}</dd>
+            <div className="flex items-center gap-2 rounded-lg bg-coral/5 px-3 py-2 border border-coral/20">
+              <dt className="text-coral">🎁</dt>
+              <dd className="font-semibold text-coral-dark">{campaign.reward}</dd>
             </div>
           )}
         </dl>
@@ -120,7 +120,7 @@ export function TicketCampaignCard({ campaign, status = "active" }: TicketCampai
           {/* CTA Button */}
           <Link
             href={`/events/${campaign.slug ?? campaign.id}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 font-semibold text-white shadow-md transition-all hover:shadow-lg hover:scale-[1.02] active:scale-95"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 font-bold text-white shadow-md transition-all hover:bg-coral-dark hover:shadow-lg hover:scale-[1.02] active:scale-95"
           >
             <span>이벤트 상세보기</span>
             <span className="transition-transform group-hover:translate-x-1">→</span>

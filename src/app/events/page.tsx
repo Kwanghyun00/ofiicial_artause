@@ -60,7 +60,7 @@ export default async function EventsPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-10 sm:space-y-12">
       {/* Hero Section: 페이지 소개 및 이벤트 개설 CTA */}
-      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600 p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
+      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-gradient-violet via-gradient-electric to-gradient-magenta p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
         <div className="relative">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
@@ -77,7 +77,7 @@ export default async function EventsPage() {
           <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
             <Link
               href="/event-center#event-create"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/40 bg-white/10 px-5 py-3 font-semibold backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/20 active:scale-95 sm:px-6"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/50 bg-white/15 px-5 py-3 font-semibold backdrop-blur-sm transition-all hover:border-white/70 hover:bg-white/25 active:scale-95 sm:px-6"
             >
               <span>이벤트 개설하기</span>
               <span>+</span>
@@ -89,7 +89,7 @@ export default async function EventsPage() {
       {/* 모집 중인 이벤트 섹션: 현재 응모 가능한 초대권 목록 */}
       <section className="space-y-4 sm:space-y-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-xl shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-coral text-xl text-white shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
             🎯
           </div>
           <div>
@@ -102,9 +102,9 @@ export default async function EventsPage() {
       </section>
 
       {/* 오픈 예정 섹션: 곧 시작될 이벤트 미리보기 */}
-      <section className="rounded-[24px] border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-xl sm:p-8 md:rounded-[40px] md:p-10">
+      <section className="rounded-[24px] border border-deepPurple/20 bg-gradient-to-br from-deepPurple/5 to-deepPurple/10 p-6 shadow-xl sm:p-8 md:rounded-[40px] md:p-10">
         <div className="flex items-center gap-3 mb-5 sm:mb-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-xl shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-deepPurple text-xl text-white shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
             ⏰
           </div>
           <div>
@@ -116,19 +116,19 @@ export default async function EventsPage() {
         {upcoming.length ? (
           <ul className="space-y-3">
             {upcoming.map((campaign) => (
-              <li key={campaign.id} className="flex items-center justify-between rounded-2xl border border-amber-200 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+              <li key={campaign.id} className="flex items-center justify-between rounded-2xl border border-deepPurple/20 bg-white p-5 shadow-sm transition-all hover:shadow-md">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-lg">📅</span>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-deepPurple/10 text-lg">📅</span>
                   <span className="font-semibold text-slate-900">{campaign.title}</span>
                 </div>
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+                <span className="rounded-full bg-deepPurple/10 px-3 py-1 text-xs font-medium text-deepPurple">
                   {campaign.starts_at ? formatDateTime(campaign.starts_at) : "오픈 일정 미정"}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="rounded-2xl border-2 border-dashed border-amber-200 bg-white p-12 text-center">
+          <div className="rounded-2xl border-2 border-dashed border-deepPurple/20 bg-white p-12 text-center">
             <p className="text-lg font-medium text-slate-400">준비 중인 이벤트가 없습니다</p>
           </div>
         )}

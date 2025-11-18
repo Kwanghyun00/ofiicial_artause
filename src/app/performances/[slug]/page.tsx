@@ -112,7 +112,7 @@ export default async function PerformancePage({ params }: Props): Promise<React.
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16">
       {/* Hero Section: 공연 제목, 기획사, 장소/날짜 정보를 그라디언트 배경과 함께 표시 */}
-      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
+      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-gradient-violet via-gradient-electric to-gradient-magenta p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
 
         <div className="relative z-10">
@@ -214,7 +214,7 @@ export default async function PerformancePage({ params }: Props): Promise<React.
             {performance.tags.map((tag: string) => (
               <span
                 key={tag}
-                className="rounded-full bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100"
+                className="rounded-full bg-deepPurple/10 px-4 py-2 text-sm font-medium text-deepPurple transition-colors hover:bg-deepPurple/15"
               >
                 #{tag}
               </span>
@@ -225,9 +225,9 @@ export default async function PerformancePage({ params }: Props): Promise<React.
 
       {/* Ticket Campaigns Section: 진행 중인 초대권 응모 이벤트 (있을 경우에만 표시) */}
       {activeCampaigns.length > 0 && (
-        <section className="mt-10 rounded-[24px] border border-purple-200/60 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-xl sm:mt-12 sm:p-8 md:rounded-[40px] md:p-10">
+        <section className="mt-10 rounded-[24px] border border-coral/20 bg-gradient-to-br from-coral/5 to-coral/10 p-6 shadow-xl sm:mt-12 sm:p-8 md:rounded-[40px] md:p-10">
           <div className="mb-6 flex items-center gap-3 sm:mb-8">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-2xl shadow-lg">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-coral text-2xl text-white shadow-lg">
               🎫
             </div>
             <div>
@@ -254,13 +254,13 @@ export default async function PerformancePage({ params }: Props): Promise<React.
               return (
                 <article
                   key={campaign.id}
-                  className="group relative overflow-hidden rounded-3xl border border-purple-200 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-6"
+                  className="group relative overflow-hidden rounded-3xl border border-coral/20 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-6"
                 >
-                  <div className="absolute right-0 top-0 h-32 w-32 bg-gradient-to-br from-purple-500 to-pink-500 opacity-5 blur-2xl transition-opacity group-hover:opacity-10"></div>
+                  <div className="absolute right-0 top-0 h-32 w-32 bg-coral opacity-5 blur-2xl transition-opacity group-hover:opacity-10"></div>
                   <div className="relative space-y-3 sm:space-y-4">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{campaign.title}</h3>
-                      <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm">
+                      <span className="shrink-0 rounded-full bg-coral/10 px-2.5 py-1 text-xs font-bold text-coral-dark shadow-sm">
                         진행중
                       </span>
                     </div>
@@ -283,7 +283,7 @@ export default async function PerformancePage({ params }: Props): Promise<React.
                     </div>
                     <Link
                       href={`/events/tickets/${campaign.slug ?? campaign.id}`}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg active:scale-95"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-coral px-6 py-3.5 font-bold text-white shadow-md transition-all hover:bg-coral-dark hover:scale-105 hover:shadow-lg active:scale-95"
                     >
                       <span>응모하기</span>
                       <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -310,7 +310,7 @@ export default async function PerformancePage({ params }: Props): Promise<React.
             {/* 다른 진행 중인 이벤트 페이지로 이동하는 CTA 버튼 */}
             <Link
               href="/events"
-              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-indigo-700 hover:shadow-lg active:scale-95"
+              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-coral px-6 py-3 font-bold text-white shadow-md transition-all hover:bg-coral-dark hover:shadow-lg active:scale-95"
             >
               <span>다른 이벤트 보기</span>
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

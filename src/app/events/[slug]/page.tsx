@@ -98,9 +98,9 @@ function getStatus(campaign: Exclude<CampaignRecord, null> & { id: string }): Ca
 function statusBadge(status: CampaignStatus) {
   switch (status) {
     case "active":
-      return "bg-emerald-500/20 text-emerald-100";
+      return "bg-coral/20 text-white";
     case "upcoming":
-      return "bg-amber-500/20 text-amber-100";
+      return "bg-deepPurple/20 text-white";
     case "closed":
       return "bg-slate-500/30 text-slate-100";
   }
