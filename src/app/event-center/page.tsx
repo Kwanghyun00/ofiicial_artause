@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { EventCreationWizard, AttendanceConsole } from "@/components/event-center";
+import { EnhancedEventCreationWizard, AttendanceConsole } from "@/components/event-center";
 import { getPartnerCampaigns, getCampaignEntries } from "@/lib/supabase/queries";
 import { getPartnerSession } from "@/lib/auth/partner-session";
 import { partnerLogout } from "../partner/login/actions";
@@ -98,7 +98,7 @@ export default async function EventCenterPage() {
       </section>
 
       {/* 이벤트 생성 */}
-      <EventCreationWizard />
+      <EnhancedEventCreationWizard />
 
       {/* 관람 체크 */}
       <AttendanceConsole campaigns={campaignsForAttendance} guests={guestsData} />
