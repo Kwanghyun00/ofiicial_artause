@@ -1,4 +1,4 @@
-﻿create extension if not exists "uuid-ossp";
+create extension if not exists "uuid-ossp";
 
 create or replace function public.trigger_set_timestamps()
 returns trigger as $$
@@ -34,6 +34,7 @@ create table if not exists public.performances (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_performances_updated_at on public.performances;
 create trigger trg_performances_updated_at
   before update on public.performances
   for each row
@@ -60,6 +61,7 @@ create table if not exists public.promotion_requests (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_promotion_requests_updated_at on public.promotion_requests;
 create trigger trg_promotion_requests_updated_at
   before update on public.promotion_requests
   for each row
@@ -78,6 +80,7 @@ create table if not exists public.ticket_campaigns (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_ticket_campaigns_updated_at on public.ticket_campaigns;
 create trigger trg_ticket_campaigns_updated_at
   before update on public.ticket_campaigns
   for each row

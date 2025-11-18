@@ -1,8 +1,9 @@
-﻿export interface TicketEntryPayload {
+export interface TicketEntryPayload {
   campaignId: string;
-  applicantName: string;
-  applicantEmail: string;
-  applicantPhone?: string;
-  answers?: Record<string, unknown>;
-  consentMarketing: boolean;
+  contactHash: string;
+  adSessionId?: string | null;
+  fingerprint?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  referralFactor?: number;
+  noveltyOverride?: number;
 }

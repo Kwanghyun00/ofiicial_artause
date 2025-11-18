@@ -87,11 +87,24 @@ const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   form_link,
   created_at,
   updated_at,
+  status,
+  allocation,
+  algorithm_version,
+  config,
+  snapshot_seed,
+  last_draw_at,
+  ticket_purchase_url,
+  partner_name,
+  partner_email,
+  partner_phone,
+  approved_at,
+  approved_by,
   performances (
     id,
     slug,
     title,
     poster_url,
+    region,
     organization_id
   )
 `;
@@ -278,6 +291,7 @@ export const getActiveTicketCampaigns = cache(async () => {
   const { data, error } = await supabase
     .from("ticket_campaigns")
     .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
+    .eq("status", "approved")  // 승인된 것만
     .lte("starts_at", now)
     .gte("ends_at", now)
     .order("ends_at", { ascending: true });
@@ -387,16 +401,10 @@ export async function submitTicketEntry(payload: TicketEntryPayload) {
   }
 
   const supabase = await createServerSupabaseClient();
-  const insertPayload: Database["public"]["Tables"]["ticket_entries"]["Insert"] = {
-    campaign_id: payload.campaignId,
-    applicant_name: payload.applicantName,
-    applicant_email: payload.applicantEmail,
-    applicant_phone: payload.applicantPhone ?? null,
-    answers: payload.answers ?? null,
-    consent_marketing: payload.consentMarketing,
-  };
+  const { error } = await supabase.functions.invoke("campaign-entry-submit", {
+    body: payload,
+  });
 
-  const { error } = await supabase.from("ticket_entries").insert(insertPayload);
   if (error) {
     console.error("submitTicketEntry error", error);
     throw error;
@@ -434,6 +442,91 @@ export async function submitPromotionRequest(payload: PromotionRequestPayload) {
     throw error;
   }
 }
+
+/**
+ * 공연 종사자의 이벤트 목록 조회 (본인이 등록한 것만)
+ */
+export const getPartnerCampaigns = cache(async (partnerEmail: string) => {
+  if (!isSupabaseConfigured) {
+    console.info('[Mock] getPartnerCampaigns:', partnerEmail);
+    return mockCampaigns;
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("ticket_campaigns")
+    .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
+    .eq("partner_email", partnerEmail)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getPartnerCampaigns error", error);
+    throw error;
+  }
+
+  return data ?? [];
+});
+
+/**
+ * 특정 캠페인의 응모자 목록 조회 (권한 검증 포함)
+ */
+export const getCampaignEntries = cache(async (campaignId: string, partnerEmail: string) => {
+  if (!isSupabaseConfigured) {
+    console.info('[Mock] getCampaignEntries:', campaignId, partnerEmail);
+    return [];
+  }
+
+  const supabase = await createServerSupabaseClient();
+
+  // 1. 권한 확인: 이 캠페인이 해당 공연 종사자의 것인지 검증
+  const { data: campaign } = await supabase
+    .from("ticket_campaigns")
+    .select("partner_email")
+    .eq("id", campaignId)
+    .single();
+
+  if (!campaign || campaign.partner_email !== partnerEmail) {
+    throw new Error("권한이 없습니다.");
+  }
+
+  // 2. 응모자 목록 조회
+  const { data, error } = await supabase
+    .from("ticket_entries")
+    .select("*")
+    .eq("campaign_id", campaignId)
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    console.error("getCampaignEntries error", error);
+    throw error;
+  }
+
+  return data ?? [];
+});
+
+/**
+ * 승인 대기 중인 캠페인 목록 (관리자용)
+ */
+export const getPendingCampaigns = cache(async () => {
+  if (!isSupabaseConfigured) {
+    console.info('[Mock] getPendingCampaigns');
+    return [];
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("ticket_campaigns")
+    .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
+    .eq("status", "pending_approval")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getPendingCampaigns error", error);
+    throw error;
+  }
+
+  return data ?? [];
+});
 
 
 

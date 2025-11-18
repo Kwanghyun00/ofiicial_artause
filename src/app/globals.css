@@ -5,7 +5,7 @@
 }
 
 body {
-  background-color: #f7f7fb;
+  background: linear-gradient(to bottom, #fffbeb 0%, #fefce8 50%, #ffffff 100%);
   color: #1f2937;
   font-family: var(--font-noto-sans-kr), "Pretendard Variable", "Pretendard", "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -16,29 +16,42 @@ body[data-role="partner"] {
   color: #f8fafc;
 }
 
-
 main {
   min-height: 100vh;
 }
 
+/* Accessibility: Focus Styles */
+*:focus-visible {
+  @apply outline-none ring-2 ring-amber-500 ring-offset-2 ring-offset-white transition-shadow;
+}
+
+body[data-role="partner"] *:focus-visible {
+  @apply ring-offset-slate-900;
+}
+
+/* Improved Link Accessibility */
 a {
-  @apply text-indigo-600 transition-colors;
+  @apply text-amber-700 transition-colors;
 }
 
 a:hover {
-  @apply text-orange-500;
+  @apply text-amber-900;
+}
+
+a:focus-visible {
+  @apply underline decoration-2 underline-offset-4;
 }
 
 .section-heading {
-  @apply text-3xl md:text-4xl font-semibold tracking-tight text-slate-900;
+  @apply text-3xl md:text-4xl font-bold tracking-tight text-amber-950;
 }
 
 .section-subtitle {
-  @apply text-base md:text-lg text-slate-600 max-w-2xl;
+  @apply text-base md:text-lg text-slate-700 max-w-2xl;
 }
 
 .card {
-  @apply bg-white rounded-3xl shadow-lg border border-white/40 backdrop-blur-sm;
+  @apply bg-white rounded-3xl shadow-lg border border-amber-100/40 backdrop-blur-sm;
 }
 
 .grid-auto-fill {
@@ -52,17 +65,17 @@ a:hover {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-full bg-indigo-600 px-5 py-2 text-white text-sm font-semibold shadow-lg hover:bg-indigo-700 transition;
+  @apply inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-600 to-amber-700 px-6 py-3 text-white text-sm font-bold shadow-lg hover:from-amber-700 hover:to-amber-800 transition-all hover:scale-105;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:border-indigo-500 hover:text-indigo-600 transition;
+  @apply inline-flex items-center justify-center rounded-full border-2 border-amber-300 px-5 py-2 text-sm font-semibold text-amber-800 hover:border-amber-500 hover:bg-amber-50 transition;
 }
 
 input,
 textarea,
 select {
-  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200;
+  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200;
 }
 
 label {
@@ -74,6 +87,6 @@ label {
 }
 
 .hero-gradient {
-  background: radial-gradient(80% 80% at 50% 0%, rgba(79, 70, 229, 0.15), transparent 70%),
-    linear-gradient(180deg, rgba(15, 13, 29, 0.05) 0%, transparent 100%);
+  background: radial-gradient(80% 80% at 50% 0%, rgba(245, 158, 11, 0.15), transparent 70%),
+    linear-gradient(180deg, rgba(217, 119, 6, 0.05) 0%, transparent 100%);
 }

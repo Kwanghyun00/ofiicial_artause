@@ -1,4 +1,4 @@
-﻿create table if not exists public.performance_submissions (
+create table if not exists public.performance_submissions (
   id uuid primary key default uuid_generate_v4(),
   status text not null default 'pending' check (status in ('pending','in_review','approved','rejected','published')),
   submission_type text not null default 'listing' check (submission_type in ('listing','full_service')),
@@ -23,6 +23,7 @@
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_performance_submissions_updated_at on public.performance_submissions;
 create trigger trg_performance_submissions_updated_at
   before update on public.performance_submissions
   for each row

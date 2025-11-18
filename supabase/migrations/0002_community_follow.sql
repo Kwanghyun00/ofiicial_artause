@@ -1,4 +1,4 @@
-﻿create table if not exists public.organizations (
+create table if not exists public.organizations (
   id uuid primary key default uuid_generate_v4(),
   slug text unique not null,
   name text not null,
@@ -16,6 +16,7 @@
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_organizations_updated_at on public.organizations;
 create trigger trg_organizations_updated_at
   before update on public.organizations
   for each row
@@ -38,6 +39,7 @@ create table if not exists public.community_posts (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists trg_community_posts_updated_at on public.community_posts;
 create trigger trg_community_posts_updated_at
   before update on public.community_posts
   for each row

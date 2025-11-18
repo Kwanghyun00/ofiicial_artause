@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import type { Database } from "@/lib/supabase/types";
 
 type CampaignRow = Database["public"]["Tables"]["ticket_campaigns"]["Row"];
@@ -7,10 +7,11 @@ type CampaignRow = Database["public"]["Tables"]["ticket_campaigns"]["Row"];
 type Campaign = CampaignRow & {
   slug?: string | null;
   performances?: {
-    slug: string;
     title: string;
-    poster_url: string | null;
+    region?: string | null;
+    poster_url?: string | null;
   } | null;
+  entry_count?: number;
 };
 
 type CampaignStatus = "active" | "upcoming" | "closed";
@@ -20,65 +21,113 @@ type TicketCampaignCardProps = {
   status?: CampaignStatus;
 };
 
-const STATUS_MAP: Record<CampaignStatus, { label: string; tone: string }> = {
-  active: { label: "진행 중", tone: "bg-emerald-500/15 text-emerald-700" },
-  upcoming: { label: "예정", tone: "bg-amber-500/15 text-amber-700" },
-  closed: { label: "마감", tone: "bg-slate-500/15 text-slate-600" },
+const STATUS_MAP: Record<CampaignStatus, { label: string; tone: string; dotColor: string }> = {
+  active: { label: "모집 중", tone: "bg-emerald-100 text-emerald-700", dotColor: "bg-emerald-500" },
+  upcoming: { label: "오픈 예정", tone: "bg-amber-100 text-amber-700", dotColor: "bg-amber-500" },
+  closed: { label: "마감", tone: "bg-slate-200 text-slate-600", dotColor: "bg-slate-500" },
 };
 
 export function TicketCampaignCard({ campaign, status = "active" }: TicketCampaignCardProps) {
-  const performance = campaign.performances;
-  const closesAt = campaign.ends_at ? formatDate(campaign.ends_at) : null;
-  const campaignUrl = `/events/${campaign.slug ?? campaign.id}`;
   const statusMeta = STATUS_MAP[status];
+  const closesAt = campaign.ends_at ? formatDate(campaign.ends_at) : null;
+  const performanceTitle = campaign.performances?.title;
+  const region = campaign.performances?.region;
+  const posterUrl = campaign.performances?.poster_url;
+  const entryCount = campaign.entry_count ?? 0;
 
   return (
-    <div className="flex flex-col gap-4 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-lg">
-      <div className="flex items-start gap-4">
-        <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-slate-200">
+    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+      {/* Thumbnail Image */}
+      <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+        {posterUrl ? (
           <Image
-            src={performance?.poster_url ?? "/images/mock/poster-default.svg"}
-            alt={performance?.title ?? "Artause event"}
+            src={posterUrl}
+            alt={`${performanceTitle ?? campaign.title} 포스터`}
             fill
-            className="object-cover"
-            sizes="64px"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-        </div>
-        <div className="flex-1">
-          <p className="text-xs uppercase tracking-wide text-slate-500">초대권 이벤트</p>
-          <h3 className="mt-1 text-lg font-semibold text-slate-900">{campaign.title}</h3>
-          <p className="mt-1 text-sm text-slate-600 line-clamp-2">
-            {campaign.description ?? "관객 풀을 검증한 뒤 필요한 수량만큼 초대권을 배포합니다."}
-          </p>
-        </div>
-        <span className={`badge ${statusMeta.tone}`}>{statusMeta.label}</span>
-      </div>
-      <div className="grid gap-3 text-xs text-slate-600 md:grid-cols-2">
-        {performance ? (
-          <div>
-            <p className="font-semibold text-slate-800">연동 공연</p>
-            <p className="mt-1 text-slate-600">{performance.title}</p>
-            <Link href={`/shows/${performance.slug}`} className="mt-2 inline-flex text-indigo-600 underline-offset-2 hover:underline">
-              공연 살펴보기
-            </Link>
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+              <span className="text-5xl">🎫</span>
+              <p className="mt-2 text-xs text-slate-400">이벤트 이미지</p>
+            </div>
           </div>
-        ) : null}
-        <div>
-          <p className="font-semibold text-slate-800">운영 원칙</p>
-          <ul className="mt-1 space-y-1">
-            <li>신청자 정보 최소 항목만 수집</li>
-            <li>중복 신청 및 추천 코드 검증</li>
-            <li>조용한 시간대(22시~08시) 발송 제한</li>
-          </ul>
+        )}
+        {/* Status Badge - Absolute positioned */}
+        <div className="absolute left-3 top-3">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-lg backdrop-blur-sm ${statusMeta.tone}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${statusMeta.dotColor} animate-pulse`}></span>
+            {statusMeta.label}
+          </span>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-        {closesAt ? <span>마감 {closesAt}</span> : null}
-        <Link href={campaignUrl} className="btn-secondary border-slate-200 text-slate-700 hover:border-slate-300">
-          이벤트 상세
-        </Link>
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        {/* Title & Description */}
+        <header className="space-y-2">
+          <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight">
+            {campaign.title}
+          </h3>
+          <p className="text-sm text-slate-600 line-clamp-2">
+            {campaign.description ?? "SNS 홍보와 연동된 초대권 이벤트입니다."}
+          </p>
+        </header>
+
+        {/* Meta Information */}
+        <dl className="space-y-2 text-sm">
+          {performanceTitle && (
+            <div className="flex items-center gap-2">
+              <dt className="text-slate-500">🎭</dt>
+              <dd className="font-medium text-slate-900 truncate">{performanceTitle}</dd>
+            </div>
+          )}
+          {region && (
+            <div className="flex items-center gap-2">
+              <dt className="text-slate-500">📍</dt>
+              <dd className="text-slate-700">{region}</dd>
+            </div>
+          )}
+          {campaign.reward && (
+            <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-2 border border-amber-200">
+              <dt className="text-amber-600">🎁</dt>
+              <dd className="font-semibold text-amber-900">{campaign.reward}</dd>
+            </div>
+          )}
+        </dl>
+
+        {/* Social Proof & Deadline */}
+        <div className="mt-auto space-y-3 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs text-slate-600">
+            {entryCount > 0 && (
+              <div className="flex items-center gap-1">
+                <span>👥</span>
+                <span className="font-semibold text-slate-900">{entryCount.toLocaleString()}명</span>
+                <span>참여 중</span>
+              </div>
+            )}
+            {closesAt && (
+              <div className="flex items-center gap-1 ml-auto">
+                <span>⏰</span>
+                <span className="font-medium text-slate-900">{closesAt}</span>
+                <span>마감</span>
+              </div>
+            )}
+          </div>
+
+          {/* CTA Button */}
+          <Link
+            href={`/events/${campaign.slug ?? campaign.id}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 font-semibold text-white shadow-md transition-all hover:shadow-lg hover:scale-[1.02] active:scale-95"
+          >
+            <span>이벤트 상세보기</span>
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        </div>
       </div>
-    </div>
+    </article>
   );
 }
 

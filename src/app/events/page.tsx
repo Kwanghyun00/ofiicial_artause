@@ -1,141 +1,221 @@
-﻿import Link from "next/link";
-import { TicketCampaignCard } from "@/components/marketing/TicketCampaignCard";
+/**
+ * 이벤트 목록 페이지
+ *
+ * 진행 중/예정/종료된 초대권 이벤트를 한눈에 볼 수 있는 페이지입니다.
+ * URL: /events
+ *
+ * 주요 기능:
+ * - Hero 섹션: 페이지 소개 및 이벤트 개설 CTA
+ * - 모집 중인 이벤트: 현재 응모 가능한 초대권 목록
+ * - 오픈 예정: 곧 시작될 이벤트 미리보기
+ * - 최근 종료: 최근에 마감된 이벤트 (최대 3개)
+ *
+ * 데이터 소스:
+ * - Supabase: ticket_campaigns 테이블
+ * - Supabase 미설정 시 목업 데이터 사용
+ *
+ * 이벤트 상태 분류:
+ * - active: starts_at <= 현재 <= ends_at (또는 날짜 미설정)
+ * - upcoming: starts_at > 현재
+ * - closed: ends_at < 현재
+ */
+import Link from "next/link";
+import { CampaignBoard } from "@/components/event-center";
 import { getTicketCampaigns } from "@/lib/supabase/queries";
 
+/**
+ * 타입 정의
+ * Supabase 쿼리 결과의 배열 요소 타입을 추출합니다
+ */
 type CampaignResult = Awaited<ReturnType<typeof getTicketCampaigns>>[number];
 type ValidCampaign = Extract<CampaignResult, { id: string }>;
 
-type CampaignStatus = "active" | "upcoming" | "closed";
-
+/**
+ * 페이지 메타데이터
+ * SEO 최적화를 위한 제목과 설명
+ */
 export const metadata = {
-  title: "초대권 이벤트",
-  description: "관객 풀을 관리하며 조용한 시간대 규칙을 지키는 최소 단위의 초대권 운영 흐름입니다.",
+  title: "초대권 이벤트 모아보기",
+  description: "SNS 홍보와 연동된 초대권 이벤트를 한 곳에서 확인하고 응모하세요.",
 };
 
+/**
+ * 이벤트 페이지 메인 컴포넌트
+ *
+ * 데이터 처리:
+ * - 모든 캠페인을 가져와서 상태별로 분류합니다
+ * - active: 지금 응모 가능
+ * - upcoming: 곧 시작 예정
+ * - closed: 최근 종료 (최대 3개만 표시)
+ */
 export default async function EventsPage() {
+  // 모든 캠페인 가져오기 및 유효성 검사
   const campaigns = (await getTicketCampaigns()).filter(isCampaign);
-  const now = new Date();
 
-  const byStatus = campaigns.reduce<Record<CampaignStatus, ValidCampaign[]>>(
-    (acc, campaign) => {
-      const status = getCampaignStatus(campaign, now);
-      acc[status].push(campaign);
-      return acc;
-    },
-    { active: [], upcoming: [], closed: [] },
-  );
+  // 상태별로 캠페인 분류
+  const active = campaigns.filter((campaign) => getStatus(campaign) === "active");
+  const upcoming = campaigns.filter((campaign) => getStatus(campaign) === "upcoming");
+  const closed = campaigns.filter((campaign) => getStatus(campaign) === "closed").slice(0, 3); // 최근 3개만
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16">
-      <section className="rounded-3xl bg-indigo-950 p-10 text-white shadow-xl md:p-14">
-        <p className="text-sm uppercase tracking-wide text-white/70">Invitation</p>
-        <h1 className="mt-3 text-3xl font-semibold md:text-4xl">초대권 이벤트와 관객 풀 관리</h1>
-        <p className="mt-4 max-w-3xl text-base text-white/80 md:text-lg">
-          신청 폼, 중복 검증, 추첨 로그, 조용한 시간대 규칙을 하나의 흐름으로 연결했습니다. 지금은 최소 기능만
-          제공하고, 향후에는 파트너 콘솔과 연동해 자동화 범위를 넓혀갈 예정입니다.
-        </p>
-        <div className="mt-8 grid gap-4 text-sm text-white/80 md:grid-cols-3">
-          <MetricCard label="진행 중" value={`${byStatus.active.length}`} description="지금 신청 가능한 이벤트" />
-          <MetricCard label="예정" value={`${byStatus.upcoming.length}`} description="곧 열리는 이벤트" />
-          <MetricCard label="마감" value={`${byStatus.closed.length}`} description="기록용 보관" />
-        </div>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/pricing" className="btn-secondary border-white/40 text-white hover:border-white/60 hover:text-white">
-            이용 정책
-          </Link>
-          <Link href="/partners" className="btn-primary bg-white text-indigo-950 hover:bg-white/90">
-            제휴 안내
-          </Link>
+    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-10 sm:space-y-12">
+      {/* Hero Section: 페이지 소개 및 이벤트 개설 CTA */}
+      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-purple-600 via-pink-600 to-rose-600 p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
+            <span className="h-2 w-2 rounded-full bg-yellow-300 animate-pulse"></span>
+            <p className="text-xs font-medium uppercase tracking-wider">Live Events</p>
+          </div>
+          <h1 className="mt-4 text-3xl font-bold sm:mt-6 sm:text-4xl md:text-5xl lg:text-6xl">
+            지금 응모 가능한 초대권
+          </h1>
+          <p className="mt-3 max-w-2xl text-base text-white/90 sm:mt-4 sm:text-lg md:text-xl">
+            공연 단체가 직접 등록한 초대권 이벤트에 지금 바로 응모하세요.
+            선정 결과는 이메일로 안내드립니다.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
+            <Link
+              href="/event-center#event-create"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/40 bg-white/10 px-5 py-3 font-semibold backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/20 active:scale-95 sm:px-6"
+            >
+              <span>이벤트 개설하기</span>
+              <span>+</span>
+            </Link>
+          </div>
         </div>
       </section>
 
-      <EventsSection
-        title="진행 중인 이벤트"
-        subtitle="관객 풀 검증을 통과한 신청자만 조용한 시간대 이전에 참여할 수 있습니다."
-        campaigns={byStatus.active}
-        status="active"
-        emptyMessage="현재 진행 중인 초대권 이벤트가 없습니다."
-      />
+      {/* 모집 중인 이벤트 섹션: 현재 응모 가능한 초대권 목록 */}
+      <section className="space-y-4 sm:space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-xl shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
+            🎯
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">모집 중인 이벤트</h2>
+            <p className="text-sm text-slate-600 sm:text-base">지금 바로 응모할 수 있는 초대권 이벤트입니다</p>
+          </div>
+        </div>
+        {/* CampaignBoard 컴포넌트에 활성 캠페인 데이터 전달 */}
+        <CampaignBoard campaigns={active} />
+      </section>
 
-      <EventsSection
-        title="예정 이벤트"
-        subtitle="오픈 예정일과 제공 리워드를 미리 안내합니다."
-        campaigns={byStatus.upcoming}
-        status="upcoming"
-        emptyMessage="예정된 초대권 이벤트가 없습니다."
-      />
+      {/* 오픈 예정 섹션: 곧 시작될 이벤트 미리보기 */}
+      <section className="rounded-[24px] border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-xl sm:p-8 md:rounded-[40px] md:p-10">
+        <div className="flex items-center gap-3 mb-5 sm:mb-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-xl shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
+            ⏰
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">오픈 예정</h2>
+            <p className="text-sm text-slate-600 sm:text-base">곧 시작될 이벤트를 미리 확인하세요</p>
+          </div>
+        </div>
+        {/* 예정된 이벤트가 있으면 목록 표시, 없으면 빈 상태 메시지 */}
+        {upcoming.length ? (
+          <ul className="space-y-3">
+            {upcoming.map((campaign) => (
+              <li key={campaign.id} className="flex items-center justify-between rounded-2xl border border-amber-200 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-lg">📅</span>
+                  <span className="font-semibold text-slate-900">{campaign.title}</span>
+                </div>
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+                  {campaign.starts_at ? formatDateTime(campaign.starts_at) : "오픈 일정 미정"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-amber-200 bg-white p-12 text-center">
+            <p className="text-lg font-medium text-slate-400">준비 중인 이벤트가 없습니다</p>
+          </div>
+        )}
+      </section>
 
-      <EventsSection
-        title="아카이브"
-        subtitle="마감된 이벤트는 운영 기록과 추첨 로그 검토용으로 남겨둡니다."
-        campaigns={byStatus.closed.slice(0, 6)}
-        status="closed"
-        emptyMessage="아카이브할 이벤트가 없습니다."
-      />
+      {/* 최근 종료 섹션: 최근에 마감된 이벤트 (최대 3개) */}
+      <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-xl sm:p-8 md:rounded-[40px] md:p-10">
+        <div className="flex items-center gap-3 mb-5 sm:mb-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 text-xl shadow-lg sm:h-12 sm:w-12 sm:text-2xl">
+            ✓
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">최근 종료</h2>
+            <p className="text-sm text-slate-600 sm:text-base">선정 결과는 이메일로 발송되었습니다</p>
+          </div>
+        </div>
+        {/* 종료된 이벤트가 있으면 그리드로 표시, 없으면 빈 상태 메시지 */}
+        {closed.length ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            {closed.map((campaign) => (
+              <article key={campaign.id} className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-all hover:border-slate-300 hover:shadow-md">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <p className="font-bold text-slate-900 line-clamp-2">{campaign.title}</p>
+                  <span className="shrink-0 rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-600">종료</span>
+                </div>
+                <p className="text-sm text-slate-500">
+                  마감: {campaign.ends_at ? formatDateTime(campaign.ends_at) : "-"}
+                </p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+            <p className="text-lg font-medium text-slate-400">최근 종료된 이벤트가 없습니다</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
 
+/**
+ * Type guard: 캠페인 데이터 유효성 검사
+ * @param record - 검사할 캠페인 레코드
+ * @returns id 필드가 있는 유효한 캠페인 여부
+ */
 function isCampaign(record: CampaignResult): record is ValidCampaign {
   return Boolean(record && typeof record === "object" && "id" in record);
 }
 
-type MetricCardProps = {
-  label: string;
-  value: string;
-  description: string;
-};
+/**
+ * 캠페인 상태 타입
+ * - active: 현재 진행 중
+ * - upcoming: 시작 예정
+ * - closed: 종료됨
+ */
+type CampaignStatus = "active" | "upcoming" | "closed";
 
-function MetricCard({ label, value, description }: MetricCardProps) {
-  return (
-    <div className="rounded-2xl border border-white/20 bg-white/10 p-5">
-      <p className="text-xs uppercase tracking-wide text-white/60">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-2 text-xs text-white/70">{description}</p>
-    </div>
-  );
-}
-
-type EventsSectionProps = {
-  title: string;
-  subtitle: string;
-  campaigns: ValidCampaign[];
-  status: CampaignStatus;
-  emptyMessage: string;
-};
-
-function EventsSection({ title, subtitle, campaigns, status, emptyMessage }: EventsSectionProps) {
-  return (
-    <section className="mt-14">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 className="section-heading">{title}</h2>
-          <p className="section-subtitle">{subtitle}</p>
-        </div>
-      </div>
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
-        {campaigns.length ? (
-          campaigns.map((campaign) => <TicketCampaignCard key={campaign.id} campaign={campaign} status={status} />)
-        ) : (
-          <div className="card p-10 text-center text-sm text-slate-500 md:col-span-2">{emptyMessage}</div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function getCampaignStatus(campaign: ValidCampaign, now: Date): CampaignStatus {
-  const currentTime = now.getTime();
-  const startsAt = campaign.starts_at ? new Date(campaign.starts_at).getTime() : undefined;
-  const endsAt = campaign.ends_at ? new Date(campaign.ends_at).getTime() : undefined;
-
-  if (startsAt && startsAt > currentTime) {
-    return "upcoming";
-  }
-
-  if (endsAt && endsAt < currentTime) {
-    return "closed";
-  }
-
+/**
+ * 캠페인 상태 판별 함수
+ * @param campaign - 캠페인 데이터
+ * @returns 현재 시간 기준 캠페인 상태
+ *
+ * 로직:
+ * - starts_at > 현재: upcoming (아직 시작 안함)
+ * - ends_at < 현재: closed (이미 종료)
+ * - 그 외: active (진행 중)
+ */
+function getStatus(campaign: ValidCampaign): CampaignStatus {
+  const now = Date.now();
+  const starts = campaign.starts_at ? new Date(campaign.starts_at).getTime() : null;
+  const ends = campaign.ends_at ? new Date(campaign.ends_at).getTime() : null;
+  if (starts && starts > now) return "upcoming";
+  if (ends && ends < now) return "closed";
   return "active";
+}
+
+/**
+ * 날짜/시간 포맷팅 함수
+ * @param value - ISO 8601 날짜 문자열
+ * @returns "MM월 DD일 HH:MM" 형식의 한국어 날짜/시간 문자열
+ */
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("ko-KR", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

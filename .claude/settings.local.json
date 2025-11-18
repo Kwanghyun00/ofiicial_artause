@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "WebFetch(domain:web.ducksticket.com)",
+      "Bash(where:*)",
+      "Bash(npm install:*)",
+      "Bash(combined_migration.sql)",
+      "Bash(powershell -Command \"scoop --version\")",
+      "Bash(supabase --version:*)",
+      "Bash(powershell -ExecutionPolicy RemoteSigned -Command \"irm get.scoop.sh | iex\")",
+      "Bash(powershell -Command \"scoop bucket add supabase https://github.com/supabase/scoop-bucket.git\")",
+      "Bash(powershell -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable(''Path'',''Machine'') + '';'' + [System.Environment]::GetEnvironmentVariable(''Path'',''User''); scoop bucket add supabase https://github.com/supabase/scoop-bucket.git\")",
+      "Bash(powershell -Command \"& ''C:\\Users\\김광현\\scoop\\shims\\scoop.cmd'' bucket add supabase https://github.com/supabase/scoop-bucket.git\")",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -Command \"& ''C:\\Users\\김광현\\scoop\\shims\\scoop.ps1'' bucket add supabase https://github.com/supabase/scoop-bucket.git\")",
+      "Bash(powershell:*)",
+      "Bash(C:Users김광현scoopshimssupabase.exe db push)",
+      "Bash(\"C:\\Users\\김광현\\scoop\\shims\\supabase.exe\" db push)",
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Bash(supabase/migrations/combined_migration.sql)",
+      "Bash(npx vercel --prod)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

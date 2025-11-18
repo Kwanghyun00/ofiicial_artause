@@ -1,245 +1,484 @@
-import Image from "next/image";
-import Link from "next/link";
+/**
+ * HomeLanding 컴포넌트
+ *
+ * 메인 페이지의 핵심 랜딩 섹션을 구성하는 컴포넌트입니다.
+ *
+ * 주요 기능:
+ * - Hero 섹션: 플랫폼 소개 및 통계 표시
+ * - PromoSection: 주목받는 공연 목록 (포스터 이미지 포함)
+ * - CampaignSection: 진행 중인 초대권 이벤트
+ * - FlowSection: 서비스 이용 절차 안내
+ *
+ * 인터랙션:
+ * - 스크롤 애니메이션 (Intersection Observer)
+ * - 호버 효과 및 이미지 확대
+ * - 순차적 애니메이션 (staggered animation)
+ *
+ * 반응형:
+ * - 모바일: 1열, 컴팩트한 레이아웃
+ * - 태블릿: 2열 그리드
+ * - 데스크톱: 3열 그리드 (공연 카드)
+ */
+"use client";
 
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+
+/**
+ * 공연 데이터 타입
+ * performances 테이블에서 가져온 공연 정보
+ */
 type Show = {
   id: string;
   slug: string;
   title: string;
-  hero_headline?: string | null;
-  hero_subtitle?: string | null;
-  category?: string | null;
   region?: string | null;
+  tags?: string[] | null;
   period_start?: string | null;
   period_end?: string | null;
-  venue?: string | null;
   poster_url?: string | null;
 };
 
+/**
+ * 초대권 캠페인 데이터 타입
+ * ticket_campaigns 테이블에서 가져온 이벤트 정보
+ */
 type Campaign = {
   id: string;
   slug?: string | null;
   title: string;
   description?: string | null;
   reward?: string | null;
-  starts_at?: string | null;
   ends_at?: string | null;
-  form_link?: string | null;
-  performances?: {
-    slug: string;
-    title: string;
-    poster_url: string | null;
-  } | null;
 };
 
+/**
+ * 공연 단체 데이터 타입
+ * organizations 테이블에서 가져온 파트너 정보
+ */
 type Organization = {
   id: string;
   name: string;
   region?: string | null;
-  tagline?: string | null;
 };
 
+/**
+ * HomeLanding Props
+ * 서버에서 fetch한 데이터를 전달받음
+ */
 type Props = {
-  featuredShows: Show[];
-  campaigns: Campaign[];
-  organizations: Organization[];
+  featuredShows: Show[];      // 주목받는 공연 목록
+  campaigns: Campaign[];       // 진행 중인 초대권 이벤트
+  organizations: Organization[]; // 협업 파트너 목록 (통계용)
 };
 
+/**
+ * HomeLanding 메인 컴포넌트
+ * 데이터를 받아서 각 섹션에 전달
+ */
 export function HomeLanding({ featuredShows, campaigns, organizations }: Props) {
-  const highlightedShows = featuredShows.slice(0, 3);
-  const activeCampaigns = campaigns.filter((campaign) => getCampaignStatus(campaign) === "active").slice(0, 3);
-  const trustedPartners = organizations.slice(0, 3);
-
-  const heroStats = [
-    { label: "이번 주 업데이트", value: `${featuredShows.length}건` },
-    { label: "진행 중인 초대권", value: `${activeCampaigns.length}건` },
-    { label: "제휴 단체", value: `${organizations.length}곳` },
-  ];
+  const promoShows = featuredShows.slice(0, 4);
+  const activeCampaigns = campaigns.slice(0, 2);
+  const partnerCount = organizations.length;
 
   return (
-    <div className="space-y-16 md:space-y-20">
-      <section className="rounded-[32px] bg-slate-950 px-6 py-12 text-white shadow-2xl md:px-10 md:py-16">
-        <p className="text-sm uppercase tracking-[0.2em] text-white/70">Offline Arts Navigator</p>
-        <h1 className="mt-4 text-3xl font-semibold leading-tight md:text-5xl">
-          공연·전시 정보와 초대권 이벤트를 한 번에 정리한 아트하우스
-        </h1>
-        <p className="mt-6 max-w-3xl text-base text-white/80 md:text-lg">
-          카피를 위한 화려한 모션 대신, 실제 오프라인 프로그램 정보를 한국어로 빠르게 전달합니다.
-          공연·전시 데이터와 초대권 이벤트를 묶어 관객 흐름을 정리하고, 내부 관객 풀도 조용히 관리할 수 있습니다.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/shows" className="btn-primary bg-white text-slate-950 hover:bg-white/90">
-            공연 · 전시 둘러보기
-          </Link>
-          <Link href="/events" className="btn-secondary border-white/40 text-white hover:border-white/60 hover:text-white">
-            초대권 이벤트 보기
-          </Link>
-        </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {heroStats.map((stat) => (
-            <div key={stat.label} className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/80">
-              <p className="text-xs uppercase tracking-widest text-white/60">{stat.label}</p>
-              <p className="mt-3 text-3xl font-semibold text-white">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-6 md:grid-cols-3">
-        {servicePillars.map((pillar) => (
-          <article key={pillar.title} className="card h-full space-y-3 p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">{pillar.category}</p>
-            <h2 className="text-xl font-semibold text-slate-900">{pillar.title}</h2>
-            <p className="text-sm leading-relaxed text-slate-600">{pillar.description}</p>
-            <ul className="space-y-2 text-sm text-slate-500">
-              {pillar.points.map((point) => (
-                <li key={point} className="flex items-start gap-3">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </section>
-
-      <section>
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="section-heading">이번 주 포커스</h2>
-            <p className="section-subtitle">모바일에서 쉽게 읽히도록 재정리한 공연·전시 요약입니다.</p>
-          </div>
-          <Link href="/shows" className="btn-secondary">
-            전체 보기
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {highlightedShows.length ? (
-            highlightedShows.map((show) => <HomeShowCard key={show.id} show={show} />)
-          ) : (
-            <div className="card p-8 text-sm text-slate-500">등록된 공연 정보가 없습니다.</div>
-          )}
-        </div>
-      </section>
-
-      <section>
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="section-heading">초대권 이벤트</h2>
-            <p className="section-subtitle">
-              리드 수집 폼과 내부 추첨 로직을 연결한 최소 단위의 초대권 운영 흐름입니다.
-            </p>
-          </div>
-          <Link href="/events" className="btn-secondary">
-            이벤트 전체 보기
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {activeCampaigns.length ? (
-            activeCampaigns.map((campaign) => <HomeCampaignCard key={campaign.id} campaign={campaign} />)
-          ) : (
-            <div className="card p-8 text-sm text-slate-500">현재 진행 중인 초대권 이벤트가 없습니다.</div>
-          )}
-        </div>
-      </section>
-
-      <section className="card space-y-6 p-8 md:p-10">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-indigo-500">Audience Ops</p>
-            <h2 className="text-2xl font-semibold text-slate-900">관객 풀과 초대 대상 관리</h2>
-            <p className="mt-2 text-sm text-slate-600">
-              신청 폼부터 추첨 결과, 조용한 시간대 발송 규칙까지 필요한 최소 항목만 남겼습니다.
-              내부 전용으로 정리된 명단은 외부에 노출되지 않습니다.
-            </p>
-          </div>
-          <Link href="/request/promotion" className="btn-primary">
-            제휴 문의 보내기
-          </Link>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {audienceOps.map((item) => (
-            <div key={item.title} className="rounded-3xl border border-slate-100 bg-white p-6">
-              <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-              <p className="mt-2 text-sm text-slate-600">{item.description}</p>
-            </div>
-          ))}
-        </div>
-        <div className="rounded-3xl border border-dashed border-slate-200 p-6 text-sm text-slate-600">
-          <p className="font-semibold text-slate-900">함께하는 단체</p>
-          <div className="mt-3 grid gap-4 md:grid-cols-3">
-            {trustedPartners.length ? (
-              trustedPartners.map((org) => (
-                <div key={org.id}>
-                  <p className="text-base font-semibold text-slate-900">{org.name}</p>
-                  {org.tagline ? <p className="text-sm text-slate-500">{org.tagline}</p> : null}
-                  {org.region ? <p className="text-xs text-slate-400">{org.region}</p> : null}
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-slate-500">등록된 제휴 단체가 없습니다.</p>
-            )}
-          </div>
-        </div>
-      </section>
+    <div className="space-y-16 md:space-y-24">
+      <Hero stats={{ shows: featuredShows.length, campaigns: campaigns.length, partners: partnerCount }} />
+      <PromoSection shows={promoShows} />
+      <CampaignSection campaigns={activeCampaigns} />
+      <FlowSection />
     </div>
   );
 }
 
-const servicePillars = [
-  {
-    category: "Discovery",
-    title: "공연 · 전시 한눈에",
-    description: "KOPIS 기반 메타데이터와 자체 검수 노트로 공연·전시 정보를 통일된 카드로 보여줍니다.",
-    points: ["모바일 최적화 카드", "지역/장르 필터", "소개 문장 자동 요약"],
-  },
-  {
-    category: "Invitation",
-    title: "초대권 이벤트 운영",
-    description: "내부 전용 초대권 폼을 만들어 신청자를 받고, 조용한 시간대 규칙을 검증해 발송합니다.",
-    points: ["카카오 간편 로그인", "추첨 로그 저장", "조용한 시간대 자동 적용"],
-  },
-  {
-    category: "Ops",
-    title: "관객 풀 관리",
-    description: "캠페인별 중복 신청을 줄이고, 추천인 · 신규 관객 등의 상태를 바로 확인할 수 있습니다.",
-    points: ["중복 체크 & 경고", "추천 코드 추적", "내부 메모 필드"],
-  },
-];
+/**
+ * 스크롤 애니메이션 커스텀 훅
+ *
+ * Intersection Observer를 사용하여 요소가 뷰포트에 들어왔을 때
+ * 애니메이션을 트리거합니다.
+ *
+ * 사용법:
+ * ```tsx
+ * const { ref, isVisible } = useScrollAnimation();
+ * <div ref={ref} className={isVisible ? "animate-fade-in" : "opacity-0"}>
+ * ```
+ *
+ * @returns ref - 관찰할 요소에 attach할 ref
+ * @returns isVisible - 요소가 뷰포트에 보이는지 여부
+ */
+function useScrollAnimation() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const audienceOps = [
-  {
-    title: "관객 세그먼트",
-    description: "신규/재방문/추천 관객을 구분해 초대권을 배분합니다.",
-  },
-  {
-    title: "조용한 시간대",
-    description: "22시~08시에는 알림을 예약 발송해 피로도를 낮춥니다.",
-  },
-  {
-    title: "명단 감사 로그",
-    description: "누가 언제 초청 상태를 바꿨는지 기록을 남깁니다.",
-  },
-];
+  useEffect(() => {
+    // Intersection Observer 설정
+    // threshold: 0.1 = 요소의 10%가 보이면 트리거
+    // rootMargin: 뷰포트 하단 100px 전에 미리 트리거
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true); // 한번 보이면 계속 표시 (다시 숨기지 않음)
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -100px 0px" }
+    );
 
-function getCampaignStatus(campaign: Campaign): "active" | "upcoming" | "closed" {
-  const now = Date.now();
-  const startsAt = campaign.starts_at ? new Date(campaign.starts_at).getTime() : null;
-  const endsAt = campaign.ends_at ? new Date(campaign.ends_at).getTime() : null;
+    const currentRef = ref.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
 
-  if (startsAt && startsAt > now) return "upcoming";
-  if (endsAt && endsAt < now) return "closed";
-  return "active";
+    // 클린업: 컴포넌트 언마운트 시 관찰 중지
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
+  return { ref, isVisible };
 }
 
-function formatDateRange(start?: string | null, end?: string | null) {
-  if (!start && !end) return null;
-  const startText = start ? formatDate(start) : null;
-  const endText = end ? formatDate(end) : null;
+/**
+ * Hero 섹션
+ *
+ * 메인 페이지 최상단의 히어로 섹션
+ * - 플랫폼 소개 문구
+ * - CTA 버튼 (이벤트 보기, 이벤트 개설)
+ * - 통계 표시 (공연 수, 이벤트 수, 파트너 수)
+ */
+function Hero({ stats }: { stats: { shows: number; campaigns: number; partners: number } }) {
+  const { ref, isVisible } = useScrollAnimation();
 
-  if (startText && endText) {
-    return `${startText} ~ ${endText}`;
-  }
-  return startText ?? `~ ${endText}`;
+  return (
+    <section
+      ref={ref}
+      className={`relative overflow-hidden rounded-[24px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 px-6 py-12 text-white shadow-2xl transition-all duration-700 sm:px-10 sm:py-16 md:rounded-[40px] md:px-16 md:py-20 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
+      <div className="relative z-10">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <p className="text-xs font-medium uppercase tracking-wider">Invitation Hub</p>
+        </div>
+        <h1 className="mt-4 max-w-4xl text-3xl font-bold leading-tight tracking-tight sm:mt-6 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+          공연 초대권 이벤트,
+          <br />
+          <span className="bg-gradient-to-r from-yellow-200 to-pink-200 bg-clip-text text-transparent">
+            한 곳에서 쉽게
+          </span>
+        </h1>
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg md:text-xl">
+          이벤트 등록부터 응모, 당첨자 선정, 관람 체크까지.
+          <br className="hidden sm:block" />
+          공연 초대권 운영의 모든 과정을 간편하게 관리하세요.
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:gap-4">
+          <Link
+            href="/events"
+            className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 font-semibold text-indigo-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:px-8 sm:py-4"
+          >
+            진행 중인 이벤트 보기
+            <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+          <Link
+            href="/event-center"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/40 bg-white/10 px-6 py-3.5 font-semibold backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/20 active:scale-95 sm:px-8 sm:py-4"
+          >
+            이벤트 개설하기
+          </Link>
+        </div>
+        <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-3">
+          <Stat label="등록된 공연" value={`${stats.shows}+`} icon="🎭" />
+          <Stat label="진행 중 이벤트" value={`${stats.campaigns}+`} icon="🎫" />
+          <Stat label="협업 파트너" value={`${stats.partners}+`} icon="🤝" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PromoSection({ shows }: { shows: Show[] }) {
+  const { ref, isVisible } = useScrollAnimation();
+
+  return (
+    <section
+      ref={ref}
+      className={`rounded-[24px] border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      <div className="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1">
+            <span className="text-sm">🎭</span>
+            <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">Featured Shows</p>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">지금 주목받는 공연</h2>
+          <p className="text-sm text-slate-600 sm:text-base">
+            SNS에서 화제가 되고 있는 공연들을 한눈에 확인하세요
+          </p>
+        </div>
+        <Link
+          href="/event-center#event-create"
+          className="group inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-5 py-3 font-semibold text-indigo-700 transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md active:scale-95 sm:px-6"
+        >
+          <span>공연 등록하기</span>
+          <span className="transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+      </div>
+      <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {shows.length ? (
+          shows.map((show, index) => <PromoCard key={show.id} show={show} index={index} />)
+        ) : (
+          <div className="col-span-full rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+            <p className="text-lg font-medium text-slate-400">아직 등록된 공연이 없습니다</p>
+            <p className="mt-2 text-sm text-slate-500">첫 번째 공연을 등록해주세요</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CampaignSection({ campaigns }: { campaigns: Campaign[] }) {
+  const { ref, isVisible } = useScrollAnimation();
+
+  return (
+    <section
+      ref={ref}
+      className={`rounded-[24px] border border-purple-200/60 bg-gradient-to-br from-purple-50 to-pink-50 p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      <div className="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-3 py-1">
+            <span className="text-sm">🎫</span>
+            <p className="text-xs font-bold uppercase tracking-wide text-purple-700">Live Events</p>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">진행 중인 초대권 이벤트</h2>
+          <p className="text-sm text-slate-600 sm:text-base">
+            지금 바로 응모할 수 있는 초대권 이벤트를 확인하세요
+          </p>
+        </div>
+        <Link
+          href="/events"
+          className="group inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-purple-200 bg-white px-5 py-3 font-semibold text-purple-700 transition-all hover:border-purple-300 hover:bg-purple-50 hover:shadow-md active:scale-95 sm:px-6"
+        >
+          <span>전체 이벤트</span>
+          <span className="transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+      </div>
+      <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 md:grid-cols-2">
+        {campaigns.length ? (
+          campaigns.map((campaign, index) => <CampaignCard key={campaign.id} campaign={campaign} index={index} />)
+        ) : (
+          <div className="col-span-2 rounded-3xl border-2 border-dashed border-purple-200 bg-white p-12 text-center">
+            <p className="text-lg font-medium text-slate-400">진행 중인 이벤트가 없습니다</p>
+            <p className="mt-2 text-sm text-slate-500">새로운 이벤트를 기다려주세요</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function FlowSection() {
+  const { ref, isVisible } = useScrollAnimation();
+
+  const steps = [
+    {
+      icon: "📝",
+      title: "이벤트 등록",
+      detail: "공연 정보와 초대권 수량을 입력하면 이벤트 페이지가 자동으로 생성됩니다",
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      icon: "🎯",
+      title: "응모 & 선정",
+      detail: "관객이 응모하면 당첨자를 선정하고 이메일로 결과를 안내합니다",
+      color: "from-purple-500 to-pink-500"
+    },
+    {
+      icon: "✅",
+      title: "관람 체크",
+      detail: "공연 당일 당첨자의 참석 여부를 확인하고 기록으로 남깁니다",
+      color: "from-emerald-500 to-teal-500"
+    },
+  ];
+
+  return (
+    <section
+      ref={ref}
+      className={`rounded-[24px] border border-slate-200 bg-white p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">간단한 3단계로 완료</h2>
+        <p className="mt-3 text-base text-slate-600 sm:text-lg">복잡한 과정 없이 누구나 쉽게 초대권 이벤트를 운영할 수 있습니다</p>
+      </div>
+      <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-3">
+        {steps.map((step, index) => (
+          <article
+            key={step.title}
+            className={`group relative overflow-hidden rounded-3xl bg-slate-50 p-5 transition-all duration-500 hover:scale-105 hover:shadow-lg sm:p-6 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+            style={{ transitionDelay: `${index * 100}ms` }}
+          >
+            <div className={`absolute right-0 top-0 h-32 w-32 bg-gradient-to-br ${step.color} opacity-10 blur-2xl transition-opacity group-hover:opacity-20`}></div>
+            <div className="relative">
+              <span className="text-4xl sm:text-5xl">{step.icon}</span>
+              <div className="mt-3 flex items-center gap-2 sm:mt-4">
+                <span className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${step.color} text-xs font-bold text-white shadow-md`}>
+                  {index + 1}
+                </span>
+                <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{step.title}</h3>
+              </div>
+              <p className="mt-2 text-sm text-slate-600 sm:mt-3 sm:text-base">{step.detail}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * 공연 프로모션 카드
+ *
+ * 공연 정보를 카드 형태로 표시하는 컴포넌트
+ * - 포스터 이미지 (있으면 표시, 없으면 플레이스홀더)
+ * - 공연 제목, 지역, 기간, 태그
+ * - 호버 시 이미지 확대 효과
+ * - 클릭 시 공연 상세 페이지로 이동
+ *
+ * @param show - 공연 데이터
+ * @param index - 순차 애니메이션을 위한 인덱스
+ */
+function PromoCard({ show, index }: { show: Show; index: number }) {
+  const period = formatPeriod(show.period_start, show.period_end);
+
+  return (
+    <article
+      className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+      style={{ animationDelay: `${index * 100}ms` }} // 순차 애니메이션: 100ms씩 지연
+    >
+      {/* Poster Image: 고정 높이 (모바일 192px, 태블릿+ 224px) */}
+      <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 sm:h-56">
+        {show.poster_url ? (
+          <Image
+            src={show.poster_url}
+            alt={`${show.title} 포스터`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+              <span className="text-4xl sm:text-5xl">🎭</span>
+              <p className="mt-2 text-xs text-slate-400 sm:text-sm">포스터 준비 중</p>
+            </div>
+          </div>
+        )}
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative space-y-2 p-4 sm:space-y-3 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 transition-colors group-hover:bg-indigo-50 group-hover:text-indigo-700">
+            📍 {show.region ?? "미정"}
+          </span>
+          <span className="text-xs text-slate-500">{period ?? "일정 협의 중"}</span>
+        </div>
+        <h3 className="line-clamp-2 text-base font-bold text-slate-900 sm:text-lg">{show.title}</h3>
+        {show.tags && show.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {show.tags.slice(0, 2).map((tag) => (
+              <span key={tag} className="rounded-lg bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 transition-colors hover:bg-indigo-100">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+        <Link
+          href={`/performances/${show.slug}`}
+          className="group/link inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition-all hover:gap-2 hover:text-indigo-700 active:scale-95"
+        >
+          <span>자세히 보기</span>
+          <span className="transition-transform group-hover/link:translate-x-1">→</span>
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }) {
+  const closesAt = campaign.ends_at ? formatDate(campaign.ends_at) : null;
+
+  return (
+    <article
+      className="group relative overflow-hidden rounded-3xl border border-purple-200 bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-xl sm:p-6"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <div className="absolute right-0 top-0 h-32 w-32 bg-gradient-to-br from-purple-500 to-pink-500 opacity-5 blur-2xl transition-opacity group-hover:opacity-10"></div>
+      <div className="relative space-y-3 sm:space-y-4">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="min-h-[3rem] text-lg font-bold text-slate-900 line-clamp-2 sm:text-xl">{campaign.title}</h3>
+          <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm">진행중</span>
+        </div>
+        <p className="text-sm text-slate-600 line-clamp-2 sm:text-base">{campaign.description ?? "지금 바로 응모할 수 있는 초대권 이벤트입니다"}</p>
+        <div className="space-y-2">
+          {campaign.reward && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-slate-500">🎁 제공:</span>
+              <span className="font-semibold text-slate-900">{campaign.reward}</span>
+            </div>
+          )}
+          {closesAt && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-slate-500">⏰ 마감:</span>
+              <span className="font-semibold text-slate-900">{closesAt}</span>
+            </div>
+          )}
+        </div>
+        <Link
+          href={`/events/${campaign.slug ?? campaign.id}`}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:shadow-lg active:scale-95"
+        >
+          <span>응모하기</span>
+          <span className="transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function Stat({ label, value, icon }: { label: string; value: string; icon?: string }) {
+  return (
+    <div className="group rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-sm transition-all hover:scale-105 hover:border-white/40 hover:bg-white/20 sm:p-6">
+      {icon && <span className="text-2xl sm:text-3xl">{icon}</span>}
+      <p className="mt-2 text-xs font-medium uppercase tracking-wider text-white/70 sm:mt-3 sm:text-sm">{label}</p>
+      <p className="mt-1 text-3xl font-bold text-white sm:mt-2 sm:text-4xl">{value}</p>
+    </div>
+  );
+}
+
+function formatPeriod(start?: string | null, end?: string | null) {
+  if (!start && !end) return null;
+  const startText = start ? formatDate(start) : "?";
+  const endText = end ? formatDate(end) : "?";
+  return `${startText} ~ ${endText}`;
 }
 
 function formatDate(value: string) {
@@ -247,113 +486,4 @@ function formatDate(value: string) {
     month: "short",
     day: "numeric",
   });
-}
-
-function HomeShowCard({ show }: { show: Show }) {
-  const dateRange = formatDateRange(show.period_start, show.period_end);
-
-  return (
-    <article className="group flex flex-col rounded-3xl border border-white/60 bg-white/70 p-6 shadow-lg transition hover:-translate-y-1">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">{show.category ?? "Program"}</p>
-          <h3 className="mt-2 text-xl font-semibold text-slate-900">{show.title}</h3>
-          {show.hero_headline ? <p className="mt-1 text-sm text-slate-600">{show.hero_headline}</p> : null}
-        </div>
-        {show.region ? <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{show.region}</span> : null}
-      </div>
-      <dl className="mt-4 space-y-2 text-sm text-slate-600">
-        {dateRange ? (
-          <div className="flex items-start gap-2">
-            <dt className="text-xs uppercase tracking-wide text-slate-400">기간</dt>
-            <dd>{dateRange}</dd>
-          </div>
-        ) : null}
-        {show.venue ? (
-          <div className="flex items-start gap-2">
-            <dt className="text-xs uppercase tracking-wide text-slate-400">공간</dt>
-            <dd>{show.venue}</dd>
-          </div>
-        ) : null}
-      </dl>
-      <Link href={`/shows/${show.slug}`} className="mt-6 inline-flex items-center text-sm font-semibold text-indigo-600 underline-offset-4 group-hover:underline">
-        상세 보기
-      </Link>
-    </article>
-  );
-}
-
-function HomeCampaignCard({ campaign }: { campaign: Campaign }) {
-  const status = getCampaignStatus(campaign);
-  const closesAt = campaign.ends_at ? new Date(campaign.ends_at).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : null;
-
-  return (
-    <article className="flex flex-col rounded-3xl border border-white/60 bg-white/80 p-6 shadow-lg">
-      <div className="flex items-start gap-4">
-        <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-slate-200">
-          <Image
-            src={campaign.performances?.poster_url ?? "/images/mock/poster-default.svg"}
-            alt={campaign.performances?.title ?? campaign.title}
-            fill
-            className="object-cover"
-            sizes="64px"
-          />
-        </div>
-        <div className="flex-1">
-          <p className="text-xs uppercase tracking-wide text-slate-500">초대권 이벤트</p>
-          <h3 className="mt-1 text-lg font-semibold text-slate-900">{campaign.title}</h3>
-          <p className="mt-1 text-sm text-slate-600 line-clamp-2">
-            {campaign.description ?? "관객 풀 검증 후 초대권을 배포하는 이벤트입니다."}
-          </p>
-        </div>
-        <span className={`badge ${statusBadge(status)}`}>{statusLabel(status)}</span>
-      </div>
-      <dl className="mt-4 space-y-2 text-sm text-slate-600">
-        {campaign.reward ? (
-          <div className="flex items-start gap-2">
-            <dt className="text-xs uppercase tracking-wide text-slate-400">선물</dt>
-            <dd>{campaign.reward}</dd>
-          </div>
-        ) : null}
-        {closesAt ? (
-          <div className="flex items-start gap-2">
-            <dt className="text-xs uppercase tracking-wide text-slate-400">마감</dt>
-            <dd>{closesAt}</dd>
-          </div>
-        ) : null}
-      </dl>
-      <div className="mt-6 flex flex-wrap gap-3 text-sm">
-        <Link href={`/events/${campaign.slug ?? campaign.id}`} className="btn-secondary">
-          이벤트 상세
-        </Link>
-        {campaign.form_link ? (
-          <a href={campaign.form_link} className="btn-secondary border-slate-200 text-slate-700 hover:border-slate-300" target="_blank" rel="noreferrer">
-            신청 폼 열기
-          </a>
-        ) : null}
-      </div>
-    </article>
-  );
-}
-
-function statusLabel(status: "active" | "upcoming" | "closed") {
-  switch (status) {
-    case "active":
-      return "진행 중";
-    case "upcoming":
-      return "예정";
-    case "closed":
-      return "마감";
-  }
-}
-
-function statusBadge(status: "active" | "upcoming" | "closed") {
-  switch (status) {
-    case "active":
-      return "bg-emerald-100 text-emerald-700";
-    case "upcoming":
-      return "bg-amber-100 text-amber-700";
-    case "closed":
-      return "bg-slate-200 text-slate-600";
-  }
 }

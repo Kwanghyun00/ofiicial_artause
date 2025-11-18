@@ -1,179 +1,205 @@
 ---
-title: "파트너(B2B: 공연 단체/종사자) PRD"
+title: "파트너(Partner: 공연 종사자) PRD"
 inherits: "./PRD_MAIN.md"
-version: 1.0.0
-last_updated: 2025-10-25T00:00:00+09:00 # KST
+version: 2.0.0
+last_updated: 2025-11-16T00:00:00+09:00
 owner: PM-Name
-status: draft
+status: active
 routes:
-  - "partner.domain.com/dashboard"
-  - "partner.domain.com/shows"
-  - "partner.domain.com/shows/new"
-  - "partner.domain.com/shows/{showId}/edit"
-  - "partner.domain.com/events"
-  - "partner.domain.com/events/new"
-  - "partner.domain.com/ads"
-  - "partner.domain.com/reports"
-  - "partner.domain.com/billing"
-assumptions:
-  kakao_login_only: true
-  audience_membership: "none"   # 관객 무료
-  timezone: "Asia/Seoul"
+  - "/event-center"
+  - "/event-center/create"
+  - "/event-center/events/{id}"
+timezone: "Asia/Seoul"
 ---
 
 # 0) 문서 목적
-<!-- BEGIN: Purpose -->
-공연 단체/종사자(파트너)가 작품/이벤트/광고를 셀프 운영하고 성과를 확인·정산할 수 있도록, B2B 포털의 정보 구조·화면·로직·정책·QA 기준을 정의한다.  
-정책/수치는 `PRD_MAIN.md`의 `policy_defaults`를 상속한다.
-<!-- END: Purpose -->
+공연 종사자(파트너)가 티켓 초대 이벤트를 등록하고 관리할 수 있도록, 파트너 포털의 정보 구조·화면·로직·정책·QA 기준을 정의한다.
+정책/수치는 `PRD_MAIN.md`를 상속한다.
 
 # 1) IA & 접근 가드
-- **도메인**: `{{toggles.domains.b2b}}`
-- **보호 라우트**: 모든 `partner.*` 경로는 **카카오 로그인 + 파트너 승인** 필요
+- **도메인**: `/event-center/**`
+- **보호 라우트**: 모든 경로 로그인 필요
 - **가드 규칙**
-  - 미로그인/미승인 사용자는 파트너 신청 화면으로 리다이렉트
-  - 관객/일반 회원이 접근 시 **403**(역할 랜딩으로 안전 리다이렉트)
-  - Admin 기능은 **비노출**
+  - 미로그인 사용자는 로그인 페이지로 리다이렉트
+  - 파트너는 자신이 생성한 이벤트만 조회/수정 가능
 
-# 2) 파트너 온보딩 플로우
-<!-- BEGIN: Partner Flow -->
-1) **카카오 로그인** → 2) **파트너 신청**(회사/담당/사업자 정보 업로드) 제출  
-3) **Admin 심사**: 승인/보류/반려(사유 기록)  
-4) **승인 후** 대시보드 접근, 작품 등록 → 이벤트 생성 → 광고/리포트 운영  
-예외) 반려 시 사유 노출 및 재신청 가능. 승인 전에는 모든 운영 화면이 잠김.
-<!-- END: Partner Flow -->
+# 2) 파트너 플로우
+1) **로그인** → 파트너 대시보드 접근
+2) **이벤트 생성** (`/event-center/create`)
+   - 공연 정보 입력
+   - 티켓 이벤트 정보 입력
+   - 파트너 연락처 입력
+   - 제출 → **pending_approval** 상태로 저장
+3) **승인 대기** → 관리자 검토
+4) **승인 후** → 이벤트가 관객에게 노출되며 응모 시작
+5) **응모 현황 확인** (향후) → 응모자 수, 통계 확인
 
 # 3) 페이지별 기능 정의
 
-## 3.1 대시보드 `/dashboard`
-- **KPI 카드**: 노출, 클릭, AdGate 검증, 응모 수/율, 추첨 결과(당첨/대기/낙첨), 예산 소진(광고), 주간 변화
-- **알림**: 마감 임박 캠페인, 소재 만료, 심사 상태 변경
-- **빠른 액션**: 작품 만들기, 이벤트 만들기, 광고 만들기, 리포트 다운로드
+## 3.1 대시보드 `/event-center`
 
-## 3.2 작품 관리 `/shows`
-### 목록
-- 필터: 상태(draft/review/published/rejected), 기간, 장르
-- 카드: 포스터/제목/기간/상태/최근 수정/연결된 이벤트 수
-### 신규/수정 `/shows/new`, `/shows/{id}/edit`
-- **필수 메타**: 제목, 장르, 런타임, 등급, 기간(시작/종료), 장소(이름/주소), 시놉시스, 캐스팅, 예매 링크
-- **미디어**: 포스터(권장 1200×1800, ≤1.5MB), 스틸 3–10장(≤800KB)
-- **좌석/회차**: 회차별 일시(KST), 회차 메모(옵션)
-- **검수 제출**: draft → review(락), Admin 승인 시 published
-- **상태 전이**: draft ↔ review → published / rejected(사유 필수)
-- **밸리데이션**: 필수 필드 누락·잘못된 링크 시 저장/제출 불가(필드단위 에러)
+### 3.1.1 데이터 의존성
+- GET /api/partner/events → 내가 생성한 이벤트 목록
 
-## 3.3 이벤트(초대권) `/events`, `/events/new`
-- **캠페인 기본**: 제목, 대상 공연(1:n 가능), 좌석 수(K명), 응모 기간/마감, 추첨 일시(KST), 참여 자격(설명)
-- **가중치 정책(설정값 가시화)**:  
-  - 신규 {{policy_defaults.lottery.newbie_days}}일 +{{policy_defaults.lottery.newbie_bonus}}, 추천 +{{policy_defaults.lottery.referral_unit}}/명(cap {{policy_defaults.lottery.referral_cap}}),  
-    연속 낙첨 +{{policy_defaults.lottery.loss_unit}}/회(cap {{policy_defaults.lottery.loss_cap}}), 조기 응모 {{policy_defaults.lottery.early_bird_hours}}h +{{policy_defaults.lottery.early_bird_bonus}}, 지역 +{{policy_defaults.lottery.region_bonus}},  
-    최근 당첨 {{policy_defaults.lottery.cooldown_days}}일 ×{{policy_defaults.lottery.cooldown_factor}}, **상한** ≤ {{policy_defaults.lottery.weight_cap}}
-- **AdGate 규칙(필수)**: 허용 도메인(화이트리스트에서 선택), **`utm_campaign` 필수**, 최소 체류 {{policy_defaults.adgate.min_dwell_sec}}초, TTL {{policy_defaults.adgate.ttl_hours}}h
-- **운영 옵션**: 중복/부정 필터(디바이스/IP 스로틀, 블랙리스트 적용), 응모당 필수 동의 고지문
-- **현황 탭**: 실시간 응모 수/추이, AdGate 검증율, 중복 차단 건수, 예상 추첨 좌석 대비 경쟁률
-- **내보내기**: CSV(응모자 id/연락/AdGate 상태/가중치 분해/타임스탬프)
-- **상태 전이**: draft → running → closed → drawing_done
+### 3.1.2 UI 블록
+- **요약 카드** (향후):
+  - 총 이벤트 수
+  - 승인 대기 중인 이벤트
+  - 진행 중인 이벤트
+  - 총 응모자 수
 
-## 3.4 광고 `/ads`
-- **슬롯 선택**: `home_hero`, `shows_infeed_xN`, `show_detail_sidebar`, `pre_apply_interstitial`(AdGate 유도)
-- **타게팅**: 장르/지역/공연ID/기간/요일/시간대, 신규/휴면 세그먼트(옵션)
-- **과금/예산**: CPM/CPC, 일/총 예산, 페이싱(even/asap), 빈도캡(24h 3회/세션 2회/연속 금지)
-- **크리에이티브**: 이미지(규격/용량 검사), 대체텍스트, UTM 자동 부착
-- **승인 흐름**: 제출→심사→집행, 만료/중지 지원
-- **로그**: 노출/클릭/AdGate 전환(assist), 오류 사유
+- **이벤트 목록**:
+  - 상태별 필터 (전체/승인대기/승인됨/거부됨/종료)
+  - 이벤트 카드: 제목, 상태, 응모 기간, 생성일
+  - 클릭 → 상세 페이지 (향후)
 
-## 3.5 리포트 `/reports`
-- **퍼널**: 노출 → 클릭 → AdGate 검증 → 응모 → 당첨/대기/낙첨
-- **세그먼트**: 장르/슬롯/캠페인/기간/지역/디바이스
-- **다운로드**: CSV/XLSX, 날짜·타임존 KST 고정
-- **어트리뷰션**: Last AdGate Touch(검증 후 TTL 내 응모를 해당 캠페인 기여)
+- **빠른 액션**:
+  - "새 이벤트 만들기" 버튼
 
-## 3.6 정산 `/billing`
-- **집행 요약**: 기간 선택, 캠페인별 비용(CPM/CPC), VAT 표기
-- **청구서**: PDF 다운로드, 사업자 정보 노출
-- **상태**: 결제 대기/완료/조정, 이의신청 메모
+### 3.1.3 상태 배지
+- `pending_approval`: 노란색, "승인 대기"
+- `approved`: 초록색, "승인됨"
+- `rejected`: 빨간색, "거부됨"
+- `closed`: 회색, "종료됨"
 
-# 4) 기능 명세(로직/정책)
+## 3.2 이벤트 생성 `/event-center/create`
 
-## 4.1 인증/권한
-- **카카오 로그인 전용**, 승인된 사용자만 `partner.*` 접근
-- 권한 롤(확장): `partner_owner`, `partner_staff`(초기에는 동일 권한 가능)
+### 3.2.1 폼 섹션
 
-## 4.2 작품 검수
-- 제출 시 필수 필드 검증 → review 전환, 수정 잠금
-- Admin 승인/반려(사유 저장), 반려 후 재제출 가능
-- 공개 상태에서의 주요 변경(제목/기간/장소)은 **재검수 요구**(표시 배지)
+**1) 공연 정보**
+- 공연 제목 (필수, 2자 이상)
+- 공연 설명 (선택)
+- 공연 날짜 (필수, 날짜 선택기)
+- 티켓 구매 URL (선택, URL 형식)
 
-## 4.3 이벤트 운영
-- 중복 방지: `UNIQUE(campaignId, kakaoUserId)`(서버 보장)
-- AdGate 미검증 응모는 서버에서 **412** 반환(프론트 안내 동기화)
-- 추첨은 Admin에서 실행(시드 고정, 재현 보장). 파트너는 **결과 열람**만
-- 대기자 승급은 시스템 자동(로그/알림 기록)
+**2) 이벤트 정보**
+- 이벤트 제목 (필수, 2자 이상)
+- 이벤트 설명 (선택, 마크다운 지원)
+- 제공 티켓 수 (필수, 최소 1)
+- 응모 시작일 (필수, 날짜+시간 선택기)
+- 응모 종료일 (필수, 시작일 이후)
 
-## 4.4 광고 집행
-- 우선순위: **지정 스폰서 > Direct > House**
-- 빈도캡/페이싱은 서버가 강제, 위반 시 요청 거부 및 로그 기록
-- 목적 URL에는 UTM 자동 부착(`utm_source=partner&utm_medium={slot}&utm_campaign={id}`)
+**3) 파트너 정보**
+- 담당자 이름 (필수, 2자 이상)
+- 담당자 이메일 (필수, 이메일 형식)
+- 담당자 연락처 (필수, 전화번호 형식)
+- 홍보 채널 URL (선택)
 
-## 4.5 리포팅
-- 모든 지표는 KST 집계(일자 경계 00:00)
-- 퍼널 단계의 母수/자식수 일관성 보장(필터 조합 시 문구로 경고)
-- AdGate 전환율 = 검증성공/스폰서 방문 유입(중복 제거)
+### 3.2.2 검증 규칙
+- 필수 필드 누락 시 제출 불가
+- 응모 종료일 > 응모 시작일 검증
+- URL 필드는 형식 검증
+- 실시간 필드별 검증 (blur 시점)
 
-# 5) 카피/오류 메시지(핵심)
-- **심사 대기**: “검수 중입니다. 평균 1영업일 소요.”
-- **반려**: “반려 사유: {사유}. 수정 후 재제출하세요.”
-- **AdGate 설정 누락**: “허용 도메인/필수 UTM/체류 시간/TTL을 설정해주세요.”
-- **소재 오류**: “규격 또는 용량을 확인하세요. (권장 {규격}, ≤{용량})”
-- **권한 오류(403)**: “파트너 승인 후 접근 가능합니다.”
+### 3.2.3 제출 로직
+**POST /api/partner/events**
+- Body: `createEventCampaignSchema` (ticket-campaign.ts)
+- 성공 (201):
+  - "이벤트가 등록되었습니다. 관리자 승인 후 공개됩니다."
+  - 대시보드로 리다이렉트
+- 실패:
+  - 422 (검증): 필드별 에러 메시지 표시
+  - 5xx: 재시도 버튼 + 에러 메시지
+
+### 3.2.4 저장/임시 저장
+- 현재: 제출 시 바로 pending_approval 저장
+- 향후: 임시 저장 (draft 상태) 기능 추가 고려
+
+## 3.3 이벤트 상세/수정 (향후)
+
+### 3.3.1 `/event-center/events/{id}`
+- 이벤트 상세 정보 표시
+- 상태에 따라 수정 가능 여부 결정:
+  - `pending_approval`: 수정 가능
+  - `approved`: 수정 불가 (재검토 요청 가능)
+  - `rejected`: 사유 표시, 수정 후 재제출 가능
+  - `closed`: 읽기 전용
+
+### 3.3.2 응모 현황 (향후)
+- 실시간 응모자 수
+- 응모 추이 차트
+- 응모자 목록 다운로드 (CSV) - 관리자 승인 필요
+
+# 4) 기능 명세
+
+## 4.1 권한
+- 파트너는 자신이 생성한 이벤트만 조회 가능
+- 다른 파트너의 이벤트는 조회 불가 (403)
+
+## 4.2 이벤트 생성
+- 제출 시 자동으로 `pending_approval` 상태
+- 파트너 정보(이름, 이메일, 연락처)는 이벤트에 저장
+- 관리자가 연락 시 사용
+
+## 4.3 상태 전이
+- `pending_approval` → `approved` (관리자 승인)
+- `pending_approval` → `rejected` (관리자 거부)
+- `approved` → `closed` (이벤트 종료 시각 도래 시 자동)
+
+## 4.4 알림 (향후)
+- 이벤트 승인 시: 이메일 알림
+- 이벤트 거부 시: 이메일 + 사유 안내
+- 응모자 수 마일스톤 달성 시: 알림 (예: 100명 돌파)
+
+# 5) 카피/오류 메시지
+
+**성공 메시지:**
+- "이벤트가 성공적으로 등록되었습니다. 관리자 승인 후 공개됩니다."
+- "이벤트가 수정되었습니다."
+
+**오류 메시지:**
+- 권한 없음 (403): "접근 권한이 없습니다."
+- 검증 실패 (422): 필드별 상세 메시지
+- 서버 오류 (5xx): "일시적인 오류가 발생했습니다. 다시 시도해주세요."
+
+**안내 메시지:**
+- 승인 대기: "관리자 검토 중입니다. 평균 1-2 영업일 소요됩니다."
+- 거부: "이벤트가 거부되었습니다. 사유: {reason}"
 
 # 6) 분석(태깅) & KPI
 
 ## 6.1 이벤트 태깅
-- `partner_login_{success|fail}`
-- `partner_show_submit_{attempt|review|published|rejected}`
-- `partner_event_create_{attempt|running|closed}`
-- `partner_ad_submit_{attempt|approved|rejected|running|stopped}`
-- `partner_report_download { type }`
-- `partner_billing_invoice_{view|download}`
+- `partner_dashboard_view`
+- `partner_create_event_attempt`
+- `partner_create_event_success{eventId}`
+- `partner_create_event_error{code, reason}`
+- `partner_event_detail_view{eventId, status}`
 
 ## 6.2 KPI(파트너)
-- 응모 퍼널 전환(노출→클릭→AdGate→응모)
-- 이벤트 경쟁률(응모/좌석), 당첨 확정률, 대기자 승급률
-- 광고 CTR/AdGate 전환율, CAC(옵션), 재집행률
-- 검수 리드타임, 반려율(사유별)
+- 이벤트 생성 완료율
+- 승인율 (approved / submitted)
+- 평균 승인 소요 시간
+- 재제출률 (rejected 후 재제출)
+- 파트너 재등록률 (repeat creator)
 
-# 7) QA 수락 기준(Definition of Done)
+# 7) QA 수락 기준
 
 ## 7.1 접근/보안
-- 미승인 사용자의 `partner.*` 접근은 **항상 403** ⇒ PASS
-- 카카오 로그인 외 수단 **미노출** ⇒ PASS
+- 미로그인 사용자는 파트너 페이지 접근 불가 ⇒ PASS
+- 파트너는 타인의 이벤트 조회 시 403 ⇒ PASS
 
-## 7.2 작품
-- 필수 메타 누락 시 저장/제출 불가, 필드 단위 에러 표기 ⇒ PASS
-- review 상태에서 편집 잠금, 승인/반려가 로그에 남음 ⇒ PASS
-- 공개 이후 주요 변경은 재검수 플래그 표시 ⇒ PASS
+## 7.2 이벤트 생성
+- 필수 필드 누락 시 제출 불가 + 필드 에러 표시 ⇒ PASS
+- 제출 성공 시 pending_approval 상태로 저장 ⇒ PASS
+- 파트너 정보(이름, 이메일, 연락처)가 이벤트에 저장 ⇒ PASS
 
-## 7.3 이벤트
-- AdGate 규칙이 메인 정책 범위 내에서만 저장(허용 도메인/UTM/체류/TTL) ⇒ PASS
-- 중복 응모 차단(서버 유니크), 미검증 응모는 412 반환 ⇒ PASS
-- 현황 수치(응모/검증율)와 다운로드 CSV의 합계 일치 ⇒ PASS
+## 7.3 검증
+- 응모 종료일 < 시작일 시 검증 에러 ⇒ PASS
+- URL 필드 형식 검증 ⇒ PASS
+- 이메일/전화번호 형식 검증 ⇒ PASS
 
-## 7.4 광고
-- 우선순위(스폰서 > Direct > House) 및 빈도캡(24h 3·세션 2·연속 금지) 준수 ⇒ PASS
-- 소재 규격/용량 검사 정확, UTM 자동 부착 ⇒ PASS
-
-## 7.5 리포트/정산
-- 퍼널 계산 일관성, 기간·세그먼트 필터 정확 ⇒ PASS
-- 청구서 PDF 생성 및 금액 합계/세부 합 일치 ⇒ PASS
+## 7.4 상태 표시
+- 대시보드에서 각 이벤트의 현재 상태가 정확히 표시 ⇒ PASS
+- 거부된 이벤트는 사유 표시 ⇒ PASS (향후)
 
 # 8) 오픈 이슈
-- 작품 “주요 변경”의 재검수 범위(필드 리스트) 확정
-- 광고 심사 SLA(시간)와 예외 기준(공익/긴급) 정의
-- CSV 내 개인정보 마스킹 수준/열 구체화
-- 파트너 롤 세분화(`owner`/`staff`) 및 권한 차등 여부
+- 이벤트 수정 기능 우선순위
+- 응모 현황 실시간 조회 범위
+- CSV 다운로드 권한 및 개인정보 마스킹 수준
+- 임시 저장(draft) 기능 필요성
+- 파트너 등급제 (무료/유료) 도입 여부
 
-# 9) 부록/링크
-- 상위 정책: `./PRD_MAIN.md#3-공통-정책상속-기준`
+# 9) 참조 문서
+- 상위 정책: `./PRD_MAIN.md`
 - 관객 PRD: `./PRD_AUDIENCE.md`
 - 어드민 PRD: `./PRD_ADMIN.md`

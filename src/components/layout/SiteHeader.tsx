@@ -1,236 +1,156 @@
+/**
+ * SiteHeader 컴포넌트
+ *
+ * 전체 사이트의 상단 헤더 (네비게이션 바)
+ *
+ * 주요 기능:
+ * - 로고: 홈으로 이동, 호버 시 회전 효과
+ * - 데스크톱 네비게이션: 활성 페이지 표시 (하단 인디케이터)
+ * - 모바일 메뉴: 햄버거 아이콘, 슬라이드 패널
+ * - Sticky 헤더: 스크롤 시에도 상단 고정
+ *
+ * 반응형:
+ * - 모바일 (< 768px): 햄버거 메뉴
+ * - 데스크톱 (>= 768px): 가로 네비게이션
+ *
+ * 접근성:
+ * - ARIA 라벨 (메뉴 버튼, 로고)
+ * - 키보드 포커스 스타일
+ * - 활성 상태 명시적 표시
+ */
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "./AuthContext";
-import { useRole } from "./RoleContext";
 
-const audienceNav = [
+/**
+ * 네비게이션 메뉴 아이템 설정
+ * 새 페이지 추가 시 이 배열에 추가
+ */
+const navItems = [
   { href: "/", label: "홈" },
-  { href: "/shows", label: "공연·전시" },
-  { href: "/events", label: "초대권 이벤트" },
-  { href: "/community", label: "커뮤니티" },
-  { href: "/company", label: "회사 소개" },
-];
-
-const partnerNav = [
-  { href: "/partners", label: "제휴 안내" },
-  { href: "/request/promotion", label: "프로모션 문의" },
+  { href: "/events", label: "이벤트" },
+  { href: "/event-center", label: "운영 허브" },
 ];
 
 export function SiteHeader() {
   const pathname = usePathname() ?? "/";
-  const { user, logout } = useAuth();
-  const { role, setRole, resetChoice } = useRole();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isPartnerView = role === "partner";
-  const navItems = isPartnerView ? partnerNav : audienceNav;
-  const canSwitchRole = !user;
-
-  const headerClass = isPartnerView
-    ? "sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 text-white backdrop-blur"
-    : "sticky top-0 z-50 border-b border-white/30 bg-white/80 text-slate-900 backdrop-blur-xl";
-
-  const handleRoleChange = (nextRole: "audience" | "partner") => {
-    if (!canSwitchRole || nextRole === role) return;
-    setRole(nextRole);
-  };
-
-  const handleLogout = () => {
-    logout();
-    resetChoice();
-  };
-
-  const brandTitle = "Artause";
-  const brandSubtitle = isPartnerView ? "제휴 운영 콘솔" : "오프라인 문화예술 인사이트";
-  const roleBadge = user?.role === "partner" ? "파트너 계정" : "관객 전용";
+  const headerClass = "sticky top-0 z-50 border-b border-amber-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 backdrop-blur-xl shadow-sm";
 
   return (
     <header className={headerClass}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div
-            className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border ${
-              isPartnerView ? "border-emerald-300/70 bg-emerald-400/20" : "border-indigo-200 bg-white"
-            }`}
-            aria-label="Artause symbol"
-          >
-            <Image
-              src="/images/brand/artause-symbol.png"
-              alt="Artause symbol"
-              width={40}
-              height={40}
-              priority
-              className="h-10 w-10 object-contain"
-              sizes="40px"
-            />
-          </div>
-          <div className="leading-tight">
-            <span className="text-lg font-semibold">{brandTitle}</span>
-            <p className="text-xs opacity-70">{brandSubtitle}</p>
-          </div>
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:px-6">
+        <Link
+          href="/"
+          className="group flex items-center gap-3 transition-transform hover:scale-105"
+          aria-label="Artause 홈"
+        >
+          <Image
+            src="/images/brand/artause-symbol.png"
+            alt="Artause logo"
+            width={120}
+            height={120}
+            priority
+            className="h-20 w-20 object-contain transition-transform group-hover:rotate-6 drop-shadow-md"
+          />
+          <span className="hidden sm:block text-2xl font-bold bg-gradient-to-r from-amber-700 to-amber-900 bg-clip-text text-transparent">
+            Artause
+          </span>
         </Link>
 
+        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
           {navItems.map((item) => {
-            const isAnchor = item.href.includes("#");
-            const isActive = isAnchor
-              ? pathname.startsWith("/partner")
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const baseClass = isPartnerView ? "hover:text-emerald-300" : "hover:text-indigo-600";
-            const activeClass = isPartnerView ? "text-emerald-300" : "text-indigo-600";
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${baseClass} ${isActive ? activeClass : "opacity-80"}`}
+                className={`relative px-3 py-2 transition-all duration-200 hover:text-amber-700 ${
+                  isActive ? "text-amber-800 font-bold" : "text-slate-700"
+                }`}
               >
                 {item.label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-600 to-amber-800 rounded-full" />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
-          {user ? (
-              <div
-                className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-xs backdrop-blur md:text-sm ${
-                  isPartnerView ? "border-white/10 bg-white/5 text-white/80" : "border-slate-200 bg-white text-slate-600"
-                }`}
-              >
-                <div className={`flex h-9 w-9 items-center justify-center rounded-full text-white ${user.avatarColor}`}>
-                  {user.name.charAt(0)}
-                </div>
-                <div className="leading-tight">
-                  <p className={`text-sm font-semibold ${isPartnerView ? "text-white" : "text-slate-900"}`}>{user.name}</p>
-                  <p className="text-[11px] opacity-70">
-                    {user.tier} · {user.role === "partner" ? user.organization ?? "파트너" : "관객"}
-                  </p>
-                </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs ${
-                    isPartnerView ? "border-white/20 text-white/70" : "border-slate-200 text-slate-500"
-                  }`}
-                >
-                  {roleBadge}
-                </span>
-                {user.role === "audience" ? (
-                  <Link
-                    href="/me"
-                    className={`rounded-full px-3 py-1 text-xs transition ${
-                      isPartnerView
-                        ? "border-white/20 text-white/80 hover:border-white/40 hover:text-white"
-                        : "border-slate-200 text-slate-600 hover:border-slate-400 hover:text-slate-900"
-                    }`}
-                  >
-                    내 신청 내역
-                  </Link>
-                ) : (
-                  <Link
-                    href="/partner"
-                    className={`rounded-full px-3 py-1 text-xs transition ${
-                      isPartnerView
-                        ? "border-white/20 text-white/80 hover:border-white/40 hover:text-white"
-                        : "border-slate-200 text-slate-600 hover:border-slate-400 hover:text-slate-900"
-                    }`}
-                  >
-                    파트너 콘솔
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className={`rounded-full px-3 py-1 text-xs transition ${
-                    isPartnerView
-                      ? "border-white/20 text-white/80 hover:border-white/40 hover:text-white"
-                      : "border-slate-200 text-slate-600 hover:border-slate-400 hover:text-slate-900"
-                  }`}
-                >
-                  로그아웃
-                </button>
-              </div>
-          ) : (
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <span className="opacity-60">화면 선택</span>
-              <button
-                type="button"
-                onClick={() => handleRoleChange("audience")}
-                className={`rounded-full px-3 py-1 ${
-                  !isPartnerView
-                    ? "bg-indigo-600 text-white"
-                    : "border border-white/30 text-white/80"
-                }`}
-              >
-                관객
-              </button>
-              <button
-                type="button"
-                onClick={() => handleRoleChange("partner")}
-                className={`rounded-full px-3 py-1 ${
-                  isPartnerView ? "bg-emerald-400 text-slate-950" : "border border-slate-200 text-slate-600"
-                }`}
-              >
-                파트너
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 md:hidden">
-          {canSwitchRole ? (
-            <button
-              type="button"
-              onClick={() => handleRoleChange(isPartnerView ? "audience" : "partner")}
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                isPartnerView ? "bg-emerald-400 text-slate-950" : "bg-indigo-600 text-white"
-              }`}
-            >
-              {isPartnerView ? "Audience" : "Partner"}
-            </button>
-          ) : (
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">{roleBadge}</span>
-          )}
-          {user ? (
-            <>
-              {user.role === "audience" ? (
-                <Link
-                  href="/me"
-                  className={`rounded-full px-3 py-1 text-xs transition ${
-                    isPartnerView
-                      ? "border-white/40 text-white/80 hover:border-white/70"
-                      : "border-slate-200 text-slate-600 hover:border-slate-400"
-                  }`}
-                >
-                  내 신청 내역
-                </Link>
-              ) : (
-                <Link
-                  href="/partner"
-                  className={`rounded-full px-3 py-1 text-xs transition ${
-                    isPartnerView
-                      ? "border-white/40 text-white/80 hover:border-white/70"
-                      : "border-slate-200 text-slate-600 hover:border-slate-400"
-                  }`}
-                >
-                  파트너 콘솔
-                </Link>
-              )}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className={`rounded-full px-3 py-1 text-xs transition ${
-                  isPartnerView
-                    ? "border-white/40 text-white/80 hover:border-white/70"
-                    : "border-slate-200 text-slate-600 hover:border-slate-400"
-                }`}
-              >
-                로그아웃
-              </button>
-            </>
-          ) : null}
-        </div>
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="flex flex-col items-center justify-center gap-1.5 rounded-xl p-2.5 transition-colors hover:bg-amber-100 md:hidden focus:outline-none focus:ring-2 focus:ring-amber-500"
+          aria-label="메뉴 열기"
+          aria-expanded={mobileMenuOpen}
+        >
+          <span
+            className={`h-0.5 w-6 bg-amber-800 transition-all duration-300 ${
+              mobileMenuOpen ? "translate-y-2 rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`h-0.5 w-6 bg-amber-800 transition-all duration-300 ${
+              mobileMenuOpen ? "opacity-0" : ""
+            }`}
+          />
+          <span
+            className={`h-0.5 w-6 bg-amber-800 transition-all duration-300 ${
+              mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
+            }`}
+          />
+        </button>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Mobile Menu Panel */}
+          <nav className="fixed right-0 top-[73px] z-50 h-[calc(100vh-73px)] w-64 animate-slide-in-right border-l border-amber-200 bg-gradient-to-b from-amber-50 to-white/95 backdrop-blur-xl shadow-2xl md:hidden">
+            <div className="flex flex-col gap-2 p-6">
+              {navItems.map((item) => {
+                const isActive =
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`group relative overflow-hidden rounded-2xl px-5 py-4 text-base font-medium transition-all duration-200 hover:bg-amber-100 ${
+                      isActive
+                        ? "bg-gradient-to-r from-amber-600 to-amber-800 text-white shadow-lg"
+                        : "text-slate-700"
+                    }`}
+                  >
+                    <span className="relative z-10">{item.label}</span>
+                    {!isActive && (
+                      <span className="absolute inset-0 translate-x-full bg-gradient-to-r from-amber-50 to-amber-100 transition-transform duration-300 group-hover:translate-x-0" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        </>
+      )}
     </header>
   );
 }

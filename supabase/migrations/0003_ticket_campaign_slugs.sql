@@ -1,4 +1,4 @@
-﻿alter table if exists public.ticket_campaigns
+alter table if exists public.ticket_campaigns
   add column if not exists slug text unique default uuid_generate_v4()::text;
 
 create index if not exists ticket_campaigns_slug_idx on public.ticket_campaigns (slug);
