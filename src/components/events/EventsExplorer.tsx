@@ -144,7 +144,7 @@ export function EventsExplorer({ campaigns }: Props) {
         </div>
 
         {filteredCampaigns.length > 0 ? (
-          <CampaignBoard campaigns={filteredCampaigns} />
+          <CampaignBoard campaigns={filteredCampaigns as any} />
         ) : (
           <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
             <div className="text-6xl mb-4">🔍</div>

@@ -27,7 +27,11 @@
       "Bash(npx vercel --prod)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(NUL)",
+      "Bash(if exist nul del /f nul)",
+      "Bash(git checkout:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { TicketEntryForm } from "@/components/forms/TicketEntryForm";
+import { TicketEntryFormSteps } from "@/components/forms/TicketEntryFormSteps";
 import { getTicketCampaignBySlug } from "@/lib/supabase/queries";
 
 interface EventDetailPageProps {
@@ -67,7 +67,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           </div>
         </div>
 
-        <TicketEntryForm
+        <TicketEntryFormSteps
           campaignId={campaign.id}
           slug={campaign.slug ?? campaign.id}
           campaignTitle={campaign.title}
