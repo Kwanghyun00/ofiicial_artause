@@ -31,7 +31,10 @@
       "Bash(NUL)",
       "Bash(if exist nul del /f nul)",
       "Bash(git checkout:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(taskkill:*)",
+      "Bash(git reset:*)",
+      "Bash(.gitignore)"
     ],
     "deny": [],
     "ask": []

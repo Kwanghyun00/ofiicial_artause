@@ -78,8 +78,8 @@ type Props = {
  * 데이터를 받아서 각 섹션에 전달
  */
 export function HomeLanding({ featuredShows, campaigns, organizations }: Props) {
-  const promoShows = featuredShows.slice(0, 4);
-  const activeCampaigns = campaigns.slice(0, 2);
+  const promoShows = featuredShows.slice(0, 6);
+  const activeCampaigns = campaigns.slice(0, 4);
   const partnerCount = organizations.length;
 
   return (
@@ -87,7 +87,7 @@ export function HomeLanding({ featuredShows, campaigns, organizations }: Props) 
       <Hero stats={{ shows: featuredShows.length, campaigns: campaigns.length, partners: partnerCount }} />
       <PromoSection shows={promoShows} />
       <CampaignSection campaigns={activeCampaigns} />
-      <FlowSection />
+      <CTASection />
     </div>
   );
 }
@@ -289,80 +289,7 @@ function CampaignSection({ campaigns }: { campaigns: Campaign[] }) {
   );
 }
 
-function FlowSection() {
-  const { ref, isVisible } = useScrollAnimation();
 
-  const steps = [
-    {
-      icon: "📝",
-      title: "이벤트 등록",
-      detail: "공연 정보와 초대권 수량을 입력하면 이벤트 페이지가 자동으로 생성됩니다",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      icon: "🎯",
-      title: "응모 & 선정",
-      detail: "관객이 응모하면 당첨자를 선정하고 이메일로 결과를 안내합니다",
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      icon: "✅",
-      title: "관람 체크",
-      detail: "공연 당일 당첨자의 참석 여부를 확인하고 기록으로 남깁니다",
-      color: "from-emerald-500 to-teal-500"
-    },
-  ];
-
-  return (
-    <section
-      ref={ref}
-      className={`rounded-[24px] border border-slate-200/80 bg-gradient-to-br from-white to-neutral-offwhite p-6 shadow-xl transition-all duration-700 sm:p-8 md:rounded-[40px] md:p-10 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
-    >
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">간단한 3단계로 완료</h2>
-        <p className="mt-3 text-base text-slate-600 sm:text-lg">복잡한 과정 없이 누구나 쉽게 초대권 이벤트를 운영할 수 있습니다</p>
-      </div>
-      <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-3">
-        {steps.map((step, index) => (
-          <article
-            key={step.title}
-            className={`group relative overflow-hidden rounded-3xl bg-slate-50 p-5 transition-all duration-500 hover:scale-105 hover:shadow-lg sm:p-6 ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-            style={{ transitionDelay: `${index * 100}ms` }}
-          >
-            <div className={`absolute right-0 top-0 h-32 w-32 bg-gradient-to-br ${step.color} opacity-10 blur-2xl transition-opacity group-hover:opacity-20`}></div>
-            <div className="relative">
-              <span className="text-4xl sm:text-5xl">{step.icon}</span>
-              <div className="mt-3 flex items-center gap-2 sm:mt-4">
-                <span className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${step.color} text-xs font-bold text-white shadow-md`}>
-                  {index + 1}
-                </span>
-                <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{step.title}</h3>
-              </div>
-              <p className="mt-2 text-sm text-slate-600 sm:mt-3 sm:text-base">{step.detail}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/**
- * 공연 프로모션 카드
- *
- * 공연 정보를 카드 형태로 표시하는 컴포넌트
- * - 포스터 이미지 (있으면 표시, 없으면 플레이스홀더)
- * - 공연 제목, 지역, 기간, 태그
- * - 호버 시 이미지 확대 효과
- * - 클릭 시 공연 상세 페이지로 이동
- *
- * @param show - 공연 데이터
- * @param index - 순차 애니메이션을 위한 인덱스
- */
 function PromoCard({ show, index }: { show: Show; index: number }) {
   const period = formatPeriod(show.period_start, show.period_end);
 
@@ -461,6 +388,69 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
         </Link>
       </div>
     </article>
+  );
+}
+
+function CTASection() {
+  const { ref, isVisible } = useScrollAnimation();
+
+  return (
+    <section
+      ref={ref}
+      className={`relative overflow-hidden rounded-[24px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 text-white shadow-2xl transition-all duration-700 sm:p-12 md:rounded-[40px] md:p-16 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
+      <div className="relative text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm mb-6">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <p className="text-xs font-medium uppercase tracking-wider">Get Started</p>
+        </div>
+        <h2 className="text-3xl font-bold md:text-4xl lg:text-5xl">
+          지금 바로 시작하세요
+        </h2>
+        <p className="mt-4 max-w-2xl mx-auto text-base text-white/90 md:text-lg">
+          공연 홍보가 필요하신가요? 초대권 이벤트로 더 많은 관객과 만나보세요.
+          <br className="hidden sm:block" />
+          무료로 시작하고, 간편하게 관리하세요.
+        </p>
+        <div className="mt-8 flex flex-col gap-3 items-center justify-center sm:flex-row sm:gap-4">
+          <Link
+            href="/event-center"
+            className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4 font-bold text-indigo-600 shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+          >
+            <span>이벤트 개설하기</span>
+            <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+          <Link
+            href="/events"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/50 bg-white/15 px-8 py-4 font-semibold backdrop-blur-sm transition-all hover:border-white/70 hover:bg-white/25 active:scale-95"
+          >
+            <span>이벤트 둘러보기</span>
+          </Link>
+        </div>
+        <div className="mt-8 grid gap-4 sm:gap-6 md:grid-cols-3 max-w-3xl mx-auto">
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
+            <span className="text-3xl">⚡</span>
+            <p className="mt-3 text-sm font-semibold">5분이면 완료</p>
+            <p className="mt-1 text-xs text-white/80">간단한 정보 입력만으로 이벤트 개설</p>
+          </div>
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
+            <span className="text-3xl">💰</span>
+            <p className="mt-3 text-sm font-semibold">이용료 무료</p>
+            <p className="mt-1 text-xs text-white/80">플랫폼 이용에 비용이 들지 않습니다</p>
+          </div>
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
+            <span className="text-3xl">📈</span>
+            <p className="mt-3 text-sm font-semibold">즉각적인 홍보</p>
+            <p className="mt-1 text-xs text-white/80">SNS 인증으로 자연스러운 확산</p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { EnhancedEventCreationWizard, AttendanceConsole } from "@/components/event-center";
+import { OperationFlowSection } from "@/components/common/OperationFlowSection";
 import { getPartnerCampaigns, getCampaignEntries } from "@/lib/supabase/queries";
 import { getPartnerSession } from "@/lib/auth/partner-session";
 import { partnerLogout } from "../partner/login/actions";
@@ -96,6 +97,9 @@ export default async function EventCenterPage() {
           </div>
         </div>
       </section>
+
+      {/* 운영 프로세스 */}
+      <OperationFlowSection />
 
       {/* 이벤트 생성 */}
       <EnhancedEventCreationWizard />

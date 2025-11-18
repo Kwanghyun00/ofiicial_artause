@@ -353,6 +353,167 @@ export async function applyPenalty(data: {
 }
 
 /**
+ * 향상된 이벤트 생성 (상세 정보 포함)
+ * EnhancedEventCreationWizard에서 호출됨
+ */
+export async function createEnhancedEventCampaign(formData: {
+  // Basic Info
+  oneLineIntro: string;
+  posterImage: string; // URL after upload
+  stillImages: string[]; // URLs after upload
+  eventTitle: string;
+  eventDescription: string;
+
+  // Performance Details
+  venueName: string;
+  venueAddress: string;
+  performancePeriodStart: string;
+  performancePeriodEnd: string;
+  sessionsPerWeek: number;
+  runningTime: number;
+  ageRating: string;
+
+  // SNS & Marketing
+  snsInstagram: string;
+  snsYoutube: string;
+  snsTiktok: string;
+  hashtags: string[];
+
+  // Production Team
+  productionTeam: Array<{
+    role: string;
+    name: string;
+    contact: string;
+  }>;
+
+  // Ticket Allocation
+  ticketAllocations: Array<{
+    date: string;
+    time: string;
+    quantity: number;
+  }>;
+
+  // Event Settings
+  startsAt: string;
+  endsAt: string;
+  ticketPurchaseUrl: string;
+
+  // Partner Info
+  partnerEmail: string;
+  partnerPhone: string;
+}): Promise<ActionResult<{ performanceId: string; campaignId: string }>> {
+  // 1. Mock 모드 처리
+  if (!isSupabaseConfigured) {
+    console.info('[Mock Mode] 향상된 이벤트 생성 요청:', formData);
+    return {
+      success: true,
+      data: {
+        performanceId: 'mock-perf-' + Date.now(),
+        campaignId: 'mock-camp-' + Date.now(),
+      },
+    };
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // 2. 공연 정보 생성 (performances 테이블)
+    const performanceSlug = generateSlug(formData.eventTitle, formData.startsAt);
+    const { data: performance, error: perfError } = await supabase
+      .from('performances')
+      .insert({
+        slug: performanceSlug,
+        title: formData.eventTitle,
+        synopsis: formData.eventDescription || null,
+        venue: formData.venueName,
+        period_start: formData.performancePeriodStart,
+        period_end: formData.performancePeriodEnd,
+        poster_url: formData.posterImage || null,
+        ticket_link: formData.ticketPurchaseUrl || null,
+        status: 'draft',
+        is_featured: false,
+      })
+      .select('id')
+      .single();
+
+    if (perfError || !performance) {
+      console.error('Performance creation error:', perfError);
+      return {
+        success: false,
+        error: '공연 정보 생성에 실패했습니다.',
+      };
+    }
+
+    // 3. 이벤트 캠페인 생성 (ticket_campaigns 테이블 - enhanced fields 포함)
+    const totalTickets = formData.ticketAllocations.reduce((sum, alloc) => sum + alloc.quantity, 0);
+    const campaignSlug = generateSlug(formData.eventTitle, formData.startsAt);
+    const { data: campaign, error: campError } = await supabase
+      .from('ticket_campaigns')
+      .insert({
+        slug: campaignSlug,
+        performance_id: performance.id,
+        title: formData.eventTitle,
+        description: formData.eventDescription || null,
+        reward: `${totalTickets}매`,
+        starts_at: formData.startsAt,
+        ends_at: formData.endsAt,
+        ticket_purchase_url: formData.ticketPurchaseUrl || null,
+        status: 'pending_approval',
+
+        // Enhanced fields
+        one_line_intro: formData.oneLineIntro,
+        poster_image: formData.posterImage,
+        still_images: JSON.stringify(formData.stillImages),
+        venue_name: formData.venueName,
+        venue_address: formData.venueAddress,
+        performance_period_start: formData.performancePeriodStart,
+        performance_period_end: formData.performancePeriodEnd,
+        sessions_per_week: formData.sessionsPerWeek,
+        running_time: formData.runningTime,
+        age_rating: formData.ageRating,
+        sns_instagram: formData.snsInstagram || null,
+        sns_youtube: formData.snsYoutube || null,
+        sns_tiktok: formData.snsTiktok || null,
+        hashtags: JSON.stringify(formData.hashtags),
+        production_team: JSON.stringify(formData.productionTeam),
+        ticket_allocations: JSON.stringify(formData.ticketAllocations),
+        partner_email: formData.partnerEmail,
+        partner_phone: formData.partnerPhone,
+      })
+      .select('id')
+      .single();
+
+    if (campError || !campaign) {
+      console.error('Campaign creation error:', campError);
+      // 공연 정보도 롤백 (실패 시)
+      await supabase.from('performances').delete().eq('id', performance.id);
+      return {
+        success: false,
+        error: '이벤트 생성에 실패했습니다.',
+      };
+    }
+
+    // 4. 캐시 무효화
+    revalidatePath('/event-center');
+    revalidatePath('/events');
+
+    return {
+      success: true,
+      data: {
+        performanceId: performance.id,
+        campaignId: campaign.id,
+      },
+    };
+  } catch (error) {
+    console.error('Unexpected error in createEnhancedEventCampaign:', error);
+    return {
+      success: false,
+      error: '서버 오류가 발생했습니다.',
+    };
+  }
+}
+
+/**
  * Slug 생성 헬퍼 함수
  */
 function generateSlug(title: string, date: string): string {
