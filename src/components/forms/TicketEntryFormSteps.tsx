@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { MultiStepForm, FormStep } from "./MultiStepForm";
 import { submitTicketEntryAction } from "@/app/events/tickets/[slug]/actions";
 import { ticketEntryInitialState } from "@/app/events/tickets/[slug]/form-state";
@@ -10,6 +11,7 @@ interface TicketEntryFormStepsProps {
   slug: string;
   campaignTitle: string;
   performanceTitle?: string;
+  availableDates?: string[]; // Available dates from campaign
 }
 
 export function TicketEntryFormSteps({
@@ -17,6 +19,7 @@ export function TicketEntryFormSteps({
   slug,
   campaignTitle,
   performanceTitle,
+  availableDates = [],
 }: TicketEntryFormStepsProps) {
   const [state, formAction] = useActionState(submitTicketEntryAction, ticketEntryInitialState);
   const headline = performanceTitle ? `${campaignTitle} · ${performanceTitle}` : campaignTitle;
@@ -57,7 +60,7 @@ export function TicketEntryFormSteps({
   };
 
   const validateTicketInfo = () => {
-    const date = (document.querySelector('[name="preferredDate"]') as HTMLInputElement)?.value;
+    const date = (document.querySelector('[name="preferredDate"]') as HTMLInputElement | HTMLSelectElement)?.value;
     const count = (document.querySelector('[name="ticketCount"]') as HTMLSelectElement)?.value;
 
     if (!date || !count) {
@@ -72,11 +75,23 @@ export function TicketEntryFormSteps({
     const rulesAgreed = (document.querySelector('[name="rulesAgreed"]') as HTMLInputElement)?.checked;
 
     if (!rulesAgreed) {
-      alert("이용 규칙에 동의해주세요.");
+      alert("필수 약관에 동의해주세요.");
       return false;
     }
 
     return true;
+  };
+
+  /**
+   * Format date for display
+   */
+  const formatDateDisplay = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const dayOfWeek = days[date.getDay()];
+    return `${month}월 ${day}일 (${dayOfWeek})`;
   };
 
   /**
@@ -118,16 +133,16 @@ export function TicketEntryFormSteps({
       validate: validateSNSInfo,
       content: (
         <div className="space-y-4">
-          {/* 인스타그램 팔로우 안내 */}
-          <div className="rounded-2xl border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-5">
+          {/* 인스타그램 팔로우 안내 - v0 style */}
+          <div className="rounded-2xl border-2 border-[#8B7BA8]/30 bg-gradient-to-r from-[#8B7BA8]/10 to-[#E8D5D5]/30 p-5">
             <div className="flex items-start gap-3">
               <span className="text-2xl" aria-hidden="true">✨</span>
               <div className="flex-1">
-                <p className="mb-2 font-bold text-purple-900">
+                <p className="mb-2 font-bold text-[#2D2A26]">
                   📸 @artause_official 팔로우 필수!
                 </p>
-                <p className="text-sm text-purple-800">
-                  인스타그램에서 <strong className="font-bold">@artause_official</strong>을
+                <p className="text-sm text-[#6B6560]">
+                  인스타그램에서 <strong className="font-bold text-[#8B7BA8]">@artause_official</strong>을
                   팔로우하고 응모해주세요. 최신 공연 및 전시 초대권 이벤트 소식을 가장 먼저
                   받아보실 수 있습니다.
                 </p>
@@ -149,7 +164,7 @@ export function TicketEntryFormSteps({
               required
               placeholder="https://instagram.com/yourhandle 또는 블로그 주소"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-[#6B6560]">
               공연 관람 후 후기를 남길 인스타그램, 블로그, 또는 기타 SNS 주소를 입력해주세요.
             </p>
           </div>
@@ -165,24 +180,57 @@ export function TicketEntryFormSteps({
       validate: validateTicketInfo,
       content: (
         <div className="space-y-4">
-          <InputField label="희망 관람일자" name="preferredDate" type="date" required />
+          {/* Date Selection - Show options if available_dates exist, otherwise show date input */}
+          {availableDates && availableDates.length > 0 ? (
+            <div>
+              <label className="block space-y-2 text-sm text-[#2D2A26]">
+                <span className="font-medium">
+                  희망 관람일자
+                  <span className="ml-1 text-[#D97B7B]">*</span>
+                </span>
+                <select
+                  name="preferredDate"
+                  required
+                  className="w-full rounded-xl border-2 border-[#E8E3DC] px-4 py-3 text-[#2D2A26] focus:border-[#8B7BA8] focus:outline-none focus:ring-2 focus:ring-[#8B7BA8]/20 transition-all"
+                >
+                  <option value="">선택해주세요</option>
+                  {availableDates.map((date) => (
+                    <option key={date} value={date}>
+                      {formatDateDisplay(date)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="mt-2 text-xs text-[#6B6560]">
+                공연 단체가 제공하는 날짜 중에서 선택해주세요.
+              </p>
+            </div>
+          ) : (
+            <InputField
+              label="희망 관람일자"
+              name="preferredDate"
+              type="date"
+              required
+            />
+          )}
+
           <div>
-            <label className="block space-y-2 text-sm text-slate-700">
-              <span>
+            <label className="block space-y-2 text-sm text-[#2D2A26]">
+              <span className="font-medium">
                 매수
-                <span className="ml-1 text-rose-500">*</span>
+                <span className="ml-1 text-[#D97B7B]">*</span>
               </span>
               <select
                 name="ticketCount"
                 required
-                className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 focus:border-coral focus:outline-none focus:ring-2 focus:ring-coral/20"
+                className="w-full rounded-xl border-2 border-[#E8E3DC] px-4 py-3 text-[#2D2A26] focus:border-[#8B7BA8] focus:outline-none focus:ring-2 focus:ring-[#8B7BA8]/20 transition-all"
               >
                 <option value="">선택하세요</option>
                 <option value="1">1매</option>
                 <option value="2">2매</option>
               </select>
             </label>
-            <p className="mt-1 text-xs text-slate-500">최대 2매까지 신청 가능합니다.</p>
+            <p className="mt-1 text-xs text-[#6B6560]">최대 2매까지 신청 가능합니다.</p>
           </div>
 
           {/* 기대평 (선택 사항) */}
@@ -196,72 +244,140 @@ export function TicketEntryFormSteps({
       ),
     },
 
-    // Step 4: 약관 동의
+    // Step 4: 약관 동의 - Redesigned
     {
       title: "약관 동의",
       description: "이용 규칙을 확인하고 동의해주세요",
-      icon: "📝",
+      icon: "✅",
       validate: validateTerms,
       content: (
-        <div className="space-y-5">
-          {/* 이용 규칙 동의 (필수) */}
-          <div className="rounded-2xl border-2 border-rose-200 bg-rose-50 p-6">
-            <label className="flex cursor-pointer items-start gap-4">
+        <div className="space-y-4">
+          {/* 전체 동의 */}
+          <div className="rounded-2xl border-2 border-[#8B7BA8] bg-[#8B7BA8]/5 p-5">
+            <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
-                name="rulesAgreed"
-                required
-                className="mt-1 h-6 w-6 cursor-pointer rounded border-2 border-rose-400 accent-rose-600"
+                className="h-6 w-6 cursor-pointer rounded-lg border-2 border-[#8B7BA8] accent-[#8B7BA8]"
+                onChange={(e) => {
+                  const checkboxes = document.querySelectorAll<HTMLInputElement>('input[type="checkbox"][name^="consent"]');
+                  checkboxes.forEach(cb => {
+                    if (cb.name !== 'consentMarketing') {
+                      cb.checked = e.target.checked;
+                    }
+                  });
+                  const rulesCheckbox = document.querySelector<HTMLInputElement>('input[name="rulesAgreed"]');
+                  if (rulesCheckbox) rulesCheckbox.checked = e.target.checked;
+                }}
               />
-              <div className="flex-1">
-                <span className="text-base font-bold text-rose-900">
-                  이용 규칙에 동의합니다. (필수)
-                  <span className="ml-2 text-rose-600">*</span>
-                </span>
-                <div className="mt-3 space-y-2 text-sm text-rose-800">
-                  <p className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-600" />
-                    <span>노쇼 발생 시 신뢰도 점수 차감 및 향후 응모 제한</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-600" />
-                    <span>공연 3일 전부터 취소 불가</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-600" />
-                    <span>규칙 위반 시 패널티 부과</span>
-                  </p>
-                </div>
-                <a
-                  href="/rules"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-rose-700 underline hover:text-rose-900"
-                >
-                  📋 전체 이용 규칙 자세히 보기 →
-                </a>
-              </div>
+              <span className="text-lg font-bold text-[#2D2A26]">
+                전체 동의
+              </span>
             </label>
           </div>
 
-          {/* 마케팅 수신 동의 (선택) */}
-          <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-4">
-              <input
-                type="checkbox"
-                name="consentMarketing"
-                className="mt-1 h-5 w-5 cursor-pointer rounded accent-slate-600"
-              />
-              <div className="flex-1">
-                <span className="text-sm font-semibold text-slate-900">
-                  선정 결과 및 향후 이벤트 안내 이메일 수신 동의 (선택)
-                </span>
-                <p className="mt-1 text-xs text-slate-600">
-                  제공하신 정보는 이벤트 운영 외 다른 목적으로 사용하지 않으며, 언제든 수신
-                  거부하실 수 있습니다.
-                </p>
-              </div>
-            </label>
+          <div className="h-px bg-[#E8E3DC]" />
+
+          {/* 필수 약관 */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-[#2D2A26]">필수 약관</h3>
+
+            {/* 이용 규칙 동의 */}
+            <div className="rounded-xl border-2 border-[#D97B7B]/30 bg-[#D97B7B]/5 p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  name="rulesAgreed"
+                  required
+                  className="mt-0.5 h-5 w-5 cursor-pointer rounded border-2 border-[#D97B7B] accent-[#D97B7B]"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-[#2D2A26]">
+                      이용 규칙 동의
+                      <span className="ml-1 text-[#D97B7B]">*</span>
+                    </span>
+                    <Link
+                      href="/rules"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-[#8B7BA8] hover:text-[#8B7BA8]/80 underline"
+                    >
+                      전문보기 →
+                    </Link>
+                  </div>
+                  <ul className="mt-2 space-y-1 text-xs text-[#6B6560]">
+                    <li className="flex gap-1.5">
+                      <span className="text-[#D97B7B]">•</span>
+                      <span>노쇼 발생 시 신뢰도 점수 차감 및 향후 응모 제한</span>
+                    </li>
+                    <li className="flex gap-1.5">
+                      <span className="text-[#D97B7B]">•</span>
+                      <span>공연 3일 전부터 취소 불가</span>
+                    </li>
+                    <li className="flex gap-1.5">
+                      <span className="text-[#D97B7B]">•</span>
+                      <span>규칙 위반 시 패널티 부과</span>
+                    </li>
+                  </ul>
+                </div>
+              </label>
+            </div>
+
+            {/* 개인정보 수집 및 이용 동의 */}
+            <div className="rounded-xl border-2 border-[#E8E3DC] bg-white p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  name="consentPrivacy"
+                  required
+                  className="mt-0.5 h-5 w-5 cursor-pointer rounded border-2 border-[#8B7BA8] accent-[#8B7BA8]"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-[#2D2A26]">
+                      개인정보 수집 및 이용 동의
+                      <span className="ml-1 text-[#D97B7B]">*</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-[#8B7BA8] hover:text-[#8B7BA8]/80 underline"
+                      onClick={() => alert('수집 항목: 이름, 이메일, 전화번호, SNS 정보\n이용 목적: 초대권 이벤트 운영 및 당첨자 안내\n보유 기간: 이벤트 종료 후 3개월')}
+                    >
+                      상세보기 →
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-[#6B6560]">
+                    초대권 이벤트 운영 목적으로만 사용되며, 종료 후 3개월 내 파기됩니다.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div className="h-px bg-[#E8E3DC]" />
+
+          {/* 선택 약관 */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-[#2D2A26]">선택 약관</h3>
+
+            {/* 마케팅 수신 동의 */}
+            <div className="rounded-xl border-2 border-[#E8E3DC] bg-[#F5EFE7] p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  name="consentMarketing"
+                  className="mt-0.5 h-5 w-5 cursor-pointer rounded border-2 border-[#8B7BA8] accent-[#8B7BA8]"
+                />
+                <div className="flex-1">
+                  <span className="text-sm font-semibold text-[#2D2A26]">
+                    마케팅 정보 수신 동의 (선택)
+                  </span>
+                  <p className="mt-1 text-xs text-[#6B6560]">
+                    신규 이벤트, 당첨 결과 등의 이메일을 받습니다. 언제든 수신 거부 가능합니다.
+                  </p>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
       ),
@@ -289,7 +405,7 @@ export function TicketEntryFormSteps({
 }
 
 /**
- * 재사용 가능한 입력 필드 컴포넌트
+ * 재사용 가능한 입력 필드 컴포넌트 - v0 style
  */
 function InputField({
   label,
@@ -305,17 +421,17 @@ function InputField({
   required?: boolean;
 }) {
   return (
-    <label className="block space-y-2 text-sm text-slate-700">
-      <span>
+    <label className="block space-y-2 text-sm text-[#2D2A26]">
+      <span className="font-medium">
         {label}
-        {required ? <span className="ml-1 text-rose-500">*</span> : null}
+        {required ? <span className="ml-1 text-[#D97B7B]">*</span> : null}
       </span>
       <input
         type={type}
         name={name}
         placeholder={placeholder}
         required={required}
-        className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 transition-all focus:border-coral focus:outline-none focus:ring-2 focus:ring-coral/20"
+        className="w-full rounded-xl border-2 border-[#E8E3DC] px-4 py-3 text-[#2D2A26] transition-all focus:border-[#8B7BA8] focus:outline-none focus:ring-2 focus:ring-[#8B7BA8]/20"
         aria-required={required}
       />
     </label>
@@ -323,7 +439,7 @@ function InputField({
 }
 
 /**
- * 재사용 가능한 텍스트 영역 컴포넌트
+ * 재사용 가능한 텍스트 영역 컴포넌트 - v0 style
  */
 function TextareaField({
   label,
@@ -339,17 +455,17 @@ function TextareaField({
   required?: boolean;
 }) {
   return (
-    <label className="block space-y-2 text-sm text-slate-700">
-      <span>
+    <label className="block space-y-2 text-sm text-[#2D2A26]">
+      <span className="font-medium">
         {label}
-        {required ? <span className="ml-1 text-rose-500">*</span> : null}
+        {required ? <span className="ml-1 text-[#D97B7B]">*</span> : null}
       </span>
       <textarea
         name={name}
         placeholder={placeholder}
         rows={rows}
         required={required}
-        className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 transition-all focus:border-coral focus:outline-none focus:ring-2 focus:ring-coral/20"
+        className="w-full rounded-xl border-2 border-[#E8E3DC] px-4 py-3 text-[#2D2A26] transition-all focus:border-[#8B7BA8] focus:outline-none focus:ring-2 focus:ring-[#8B7BA8]/20"
         aria-required={required}
       />
     </label>

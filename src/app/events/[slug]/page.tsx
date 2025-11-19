@@ -150,6 +150,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             slug={campaign.slug ?? campaign.id}
             campaignTitle={campaign.title}
             performanceTitle={performance?.title}
+            availableDates={"available_dates" in campaign && Array.isArray(campaign.available_dates) ? campaign.available_dates : undefined}
           />
         </div>
       </div>
