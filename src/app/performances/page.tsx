@@ -5,15 +5,15 @@
  *
  * 주요 기능:
  * - 모든 공연 목록 표시 (포스터 이미지 포함)
- * - 장르별 필터링
- * - 지역별 필터링
+ * - 장르별 필터링 (뮤지컬, 연극, 클래식, 무용, 전시)
+ * - 검색 기능 (제목, 지역)
  *
  * 데이터 소스:
  * - Supabase: performances 테이블
  * - Supabase 미설정 시 목업 데이터 사용
  */
 import { getFeaturedPerformances } from "@/lib/supabase/queries";
-import { PerformanceList } from "@/components/performances/PerformanceList";
+import { PerformanceExplorer } from "@/components/performances/PerformanceExplorer";
 
 /**
  * 타입 정의
@@ -44,14 +44,19 @@ export default async function PerformancesPage() {
   const validPerformances = performances.filter(isPerformance);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">공연 목록</h1>
-        <p className="mt-2 text-base text-slate-600">
+    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-8 sm:space-y-10">
+      {/* Hero Section: 페이지 소개 */}
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl md:text-4xl">
+          공연 목록
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm text-slate-600 sm:text-base">
           진행 중인 모든 공연을 확인하고 상세 정보를 살펴보세요
         </p>
-      </div>
-      <PerformanceList performances={validPerformances} />
+      </section>
+
+      {/* Performance Explorer: 검색 및 필터링 기능이 있는 공연 목록 */}
+      <PerformanceExplorer performances={validPerformances} />
     </div>
   );
 }

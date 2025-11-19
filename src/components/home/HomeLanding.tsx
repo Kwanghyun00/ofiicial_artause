@@ -78,13 +78,15 @@ type Props = {
  * 데이터를 받아서 각 섹션에 전달
  */
 export function HomeLanding({ featuredShows, campaigns, organizations }: Props) {
-  const activeCampaigns = campaigns.slice(0, 12);
+  const activeCampaigns = campaigns.slice(0, 8);
+  const recommendedShows = featuredShows.slice(0, 6);
 
   return (
-    <div className="space-y-8 md:space-y-12">
+    <div className="space-y-8 md:space-y-10">
       <Hero />
       <CategoryNav />
       <CampaignSection campaigns={activeCampaigns} />
+      <RecommendedShows shows={recommendedShows} />
     </div>
   );
 }
@@ -177,16 +179,16 @@ function Hero() {
 /**
  * 카테고리 네비게이션
  *
- * 공연 장르별 빠른 필터링
+ * 공연 장르별 빠른 필터링 (한국적 색상 적용)
  */
 function CategoryNav() {
   const categories = [
-    { id: "all", name: "전체" },
-    { id: "musical", name: "뮤지컬" },
-    { id: "play", name: "연극" },
-    { id: "classic", name: "클래식" },
-    { id: "dance", name: "무용" },
-    { id: "exhibition", name: "전시" },
+    { id: "all", name: "전체", color: "bg-slate-100 text-slate-800 border-slate-200" },
+    { id: "musical", name: "뮤지컬", color: "bg-purple-50 text-purple-700 border-purple-200" },
+    { id: "play", name: "연극", color: "bg-blue-50 text-blue-700 border-blue-200" },
+    { id: "classic", name: "클래식", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+    { id: "dance", name: "무용", color: "bg-pink-50 text-pink-700 border-pink-200" },
+    { id: "exhibition", name: "전시", color: "bg-amber-50 text-amber-700 border-amber-200" },
   ];
 
   return (
@@ -196,7 +198,7 @@ function CategoryNav() {
           <Link
             key={category.id}
             href={`/events?category=${category.id}`}
-            className="shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
+            className={`shrink-0 rounded-lg border px-4 py-2 text-sm font-semibold transition-all hover:shadow-sm ${category.color}`}
           >
             {category.name}
           </Link>
@@ -370,6 +372,122 @@ function PartnerCTA() {
       </div>
     </section>
   );
+}
+
+/**
+ * 추천 공연 섹션
+ */
+function RecommendedShows({ shows }: { shows: Show[] }) {
+  const { ref, isVisible } = useScrollAnimation();
+
+  return (
+    <section
+      ref={ref}
+      className={`transition-all duration-700 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">이번 주 추천 공연</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            놓치면 안 될 인기 공연을 만나보세요
+          </p>
+        </div>
+        <Link
+          href="/performances"
+          className="shrink-0 text-sm font-medium text-slate-700 hover:text-slate-900"
+        >
+          전체 →
+        </Link>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {shows.length ? (
+          shows.map((show, index) => <ShowCard key={show.id} show={show} index={index} />)
+        ) : (
+          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center">
+            <p className="text-base font-medium text-slate-400">등록된 공연이 없습니다</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * 공연 카드 (정보 밀도 높게)
+ */
+function ShowCard({ show, index }: { show: Show; index: number }) {
+  const period = formatPeriod(show.period_start, show.period_end);
+  const genreColor = getGenreColor(show.tags?.[0]);
+
+  return (
+    <Link href={`/performances/${show.slug}`}>
+      <article
+        className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"
+        style={{ animationDelay: `${index * 50}ms` }}
+      >
+        {/* 장르 태그 */}
+        {show.tags && show.tags[0] && (
+          <div className="absolute left-3 top-3 z-10">
+            <span className={`rounded px-2 py-1 text-xs font-bold ${genreColor}`}>
+              {show.tags[0]}
+            </span>
+          </div>
+        )}
+
+        {/* 포스터 */}
+        <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+          {show.poster_url ? (
+            <Image
+              src={show.poster_url}
+              alt={`${show.title} 포스터`}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-4xl">🎭</div>
+          )}
+        </div>
+
+        {/* 정보 (밀도 높게) */}
+        <div className="p-3">
+          <h3 className="font-bold text-slate-900 line-clamp-2 text-base leading-tight">{show.title}</h3>
+          <div className="mt-2 space-y-1 text-xs text-slate-600">
+            {show.region && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">📍</span>
+                <span>{show.region}</span>
+              </div>
+            )}
+            {period && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">📅</span>
+                <span>{period}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+/**
+ * 장르별 색상 매핑
+ */
+function getGenreColor(genre?: string | null): string {
+  if (!genre) return "bg-slate-100 text-slate-700";
+
+  const lowerGenre = genre.toLowerCase();
+  if (lowerGenre.includes("뮤지컬")) return "bg-purple-100 text-purple-700";
+  if (lowerGenre.includes("연극")) return "bg-blue-100 text-blue-700";
+  if (lowerGenre.includes("클래식") || lowerGenre.includes("음악")) return "bg-indigo-100 text-indigo-700";
+  if (lowerGenre.includes("무용") || lowerGenre.includes("댄스")) return "bg-pink-100 text-pink-700";
+  if (lowerGenre.includes("전시") || lowerGenre.includes("미술")) return "bg-amber-100 text-amber-700";
+
+  return "bg-slate-100 text-slate-700";
 }
 
 function formatPeriod(start?: string | null, end?: string | null) {

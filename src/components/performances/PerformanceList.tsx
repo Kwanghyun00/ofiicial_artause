@@ -54,6 +54,7 @@ export function PerformanceList({ performances }: Props) {
 
 function PerformanceCard({ performance, index }: { performance: Performance; index: number }) {
   const period = formatPeriod(performance.period_start, performance.period_end);
+  const genreColor = getGenreColor(performance.tags?.[0]);
 
   return (
     <Link href={`/performances/${performance.slug}`}>
@@ -61,8 +62,17 @@ function PerformanceCard({ performance, index }: { performance: Performance; ind
         className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"
         style={{ animationDelay: `${index * 50}ms` }}
       >
+        {/* 장르 태그 */}
+        {performance.tags && performance.tags[0] && (
+          <div className="absolute left-2 top-2 z-10">
+            <span className={`rounded px-2 py-0.5 text-xs font-bold ${genreColor}`}>
+              {performance.tags[0]}
+            </span>
+          </div>
+        )}
+
         {/* Poster Image */}
-        <div className="relative h-40 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 sm:h-48">
+        <div className="relative h-40 w-full overflow-hidden bg-slate-100 sm:h-48">
           {performance.poster_url ? (
             <Image
               src={performance.poster_url}
@@ -76,16 +86,43 @@ function PerformanceCard({ performance, index }: { performance: Performance; ind
           )}
         </div>
 
-        {/* Content */}
+        {/* Content - 정보 밀도 높게 */}
         <div className="p-3">
-          <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{performance.title}</h3>
-          <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500">
-            <span>{performance.region ?? "미정"}</span>
+          <h3 className="line-clamp-2 text-sm font-bold text-slate-900 leading-tight">{performance.title}</h3>
+          <div className="mt-2 space-y-0.5 text-xs text-slate-600">
+            {performance.region && (
+              <div className="flex items-center gap-1">
+                <span>📍</span>
+                <span className="truncate">{performance.region}</span>
+              </div>
+            )}
+            {period && (
+              <div className="flex items-center gap-1">
+                <span>📅</span>
+                <span className="truncate">{period}</span>
+              </div>
+            )}
           </div>
         </div>
       </article>
     </Link>
   );
+}
+
+/**
+ * 장르별 색상 매핑
+ */
+function getGenreColor(genre?: string | null): string {
+  if (!genre) return "bg-slate-100 text-slate-700";
+
+  const lowerGenre = genre.toLowerCase();
+  if (lowerGenre.includes("뮤지컬")) return "bg-purple-100 text-purple-700";
+  if (lowerGenre.includes("연극")) return "bg-blue-100 text-blue-700";
+  if (lowerGenre.includes("클래식") || lowerGenre.includes("음악")) return "bg-indigo-100 text-indigo-700";
+  if (lowerGenre.includes("무용") || lowerGenre.includes("댄스")) return "bg-pink-100 text-pink-700";
+  if (lowerGenre.includes("전시") || lowerGenre.includes("미술")) return "bg-amber-100 text-amber-700";
+
+  return "bg-slate-100 text-slate-700";
 }
 
 function formatPeriod(start?: string | null, end?: string | null) {
