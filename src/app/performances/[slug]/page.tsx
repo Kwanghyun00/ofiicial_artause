@@ -111,61 +111,54 @@ export default async function PerformancePage({ params }: Props): Promise<React.
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16">
-      {/* Hero Section: 공연 제목, 기획사, 장소/날짜 정보를 그라디언트 배경과 함께 표시 */}
-      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-gradient-violet via-gradient-electric to-gradient-magenta p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
-
-        <div className="relative z-10">
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>홈으로</span>
-            </Link>
-            {performance.category && (
-              <>
-                <span className="text-white/40">/</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                  {performance.category}
-                </span>
-              </>
-            )}
-          </div>
-
-          <h1 className="mt-4 text-3xl font-bold leading-tight sm:mt-6 sm:text-4xl md:text-5xl lg:text-6xl">
-            {performance.title}
-          </h1>
-
-          {performance.organization && (
-            <p className="mt-3 text-lg text-white/90 sm:mt-4 sm:text-xl">
-              기획·제작: {performance.organization}
-            </p>
+      {/* Hero Section: 공연 제목, 기획사, 장소/날짜 정보 */}
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <Link
+            href="/performances"
+            className="inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>목록으로</span>
+          </Link>
+          {performance.category && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="rounded bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                {performance.category}
+              </span>
+            </>
           )}
+        </div>
 
-          <div className="mt-6 flex flex-wrap gap-4 sm:mt-8">
-            {performance.region && (
-              <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-                <span className="text-xl">📍</span>
-                <span className="font-medium">{performance.region}</span>
-              </div>
-            )}
-            {period && (
-              <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-                <span className="text-xl">📅</span>
-                <span className="font-medium">{period}</span>
-              </div>
-            )}
-            {performance.venue && (
-              <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-                <span className="text-xl">🎪</span>
-                <span className="font-medium">{performance.venue}</span>
-              </div>
-            )}
-          </div>
+        <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
+          {performance.title}
+        </h1>
+
+        {performance.organization && (
+          <p className="mt-3 text-base text-slate-600 sm:text-lg">
+            기획·제작: {performance.organization}
+          </p>
+        )}
+
+        <div className="mt-4 flex flex-wrap gap-3">
+          {performance.region && (
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm">
+              <span className="font-medium text-slate-700">{performance.region}</span>
+            </div>
+          )}
+          {period && (
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm">
+              <span className="font-medium text-slate-700">{period}</span>
+            </div>
+          )}
+          {performance.venue && (
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm">
+              <span className="font-medium text-slate-700">{performance.venue}</span>
+            </div>
+          )}
         </div>
       </section>
 

@@ -22,8 +22,8 @@ type TicketCampaignCardProps = {
 };
 
 const STATUS_MAP: Record<CampaignStatus, { label: string; tone: string; dotColor: string }> = {
-  active: { label: "모집 중", tone: "bg-coral/10 text-coral-dark", dotColor: "bg-coral" },
-  upcoming: { label: "오픈 예정", tone: "bg-deepPurple/10 text-deepPurple", dotColor: "bg-deepPurple" },
+  active: { label: "모집 중", tone: "bg-slate-900 text-white", dotColor: "bg-white" },
+  upcoming: { label: "오픈 예정", tone: "bg-slate-100 text-slate-700", dotColor: "bg-slate-700" },
   closed: { label: "마감", tone: "bg-slate-200 text-slate-600", dotColor: "bg-slate-500" },
 };
 
@@ -36,39 +36,36 @@ export function TicketCampaignCard({ campaign, status = "active" }: TicketCampai
   const entryCount = campaign.entry_count ?? 0;
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
       {/* Thumbnail Image */}
-      <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className="relative h-40 w-full overflow-hidden bg-slate-100 sm:h-48">
         {posterUrl ? (
           <Image
             src={posterUrl}
             alt={`${performanceTitle ?? campaign.title} 포스터`}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <span className="text-5xl">🎫</span>
-              <p className="mt-2 text-xs text-slate-400">이벤트 이미지</p>
-            </div>
+          <div className="flex h-full items-center justify-center text-3xl">
+            🎫
           </div>
         )}
         {/* Status Badge - Absolute positioned */}
         <div className="absolute left-3 top-3">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-lg backdrop-blur-sm ${statusMeta.tone}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${statusMeta.dotColor} animate-pulse`}></span>
+          <span className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold ${statusMeta.tone}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${statusMeta.dotColor}`}></span>
             {statusMeta.label}
           </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className="flex flex-1 flex-col gap-2 p-4">
         {/* Title & Description */}
-        <header className="space-y-2">
-          <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight">
+        <header className="space-y-1">
+          <h3 className="text-base font-bold text-slate-900 line-clamp-2 leading-tight">
             {campaign.title}
           </h3>
           <p className="text-sm text-slate-600 line-clamp-2">
@@ -77,53 +74,31 @@ export function TicketCampaignCard({ campaign, status = "active" }: TicketCampai
         </header>
 
         {/* Meta Information */}
-        <dl className="space-y-2 text-sm">
+        <dl className="space-y-1.5 text-xs text-slate-600">
           {performanceTitle && (
-            <div className="flex items-center gap-2">
-              <dt className="text-slate-500">🎭</dt>
-              <dd className="font-medium text-slate-900 truncate">{performanceTitle}</dd>
-            </div>
-          )}
-          {region && (
-            <div className="flex items-center gap-2">
-              <dt className="text-slate-500">📍</dt>
-              <dd className="text-slate-700">{region}</dd>
+            <div className="flex items-center gap-2 truncate">
+              <dd className="font-medium text-slate-900">{performanceTitle}</dd>
             </div>
           )}
           {campaign.reward && (
-            <div className="flex items-center gap-2 rounded-lg bg-coral/5 px-3 py-2 border border-coral/20">
-              <dt className="text-coral">🎁</dt>
-              <dd className="font-semibold text-coral-dark">{campaign.reward}</dd>
+            <div className="flex items-center gap-1">
+              <dd className="font-medium text-slate-700">{campaign.reward}</dd>
+            </div>
+          )}
+          {closesAt && (
+            <div className="flex items-center gap-1">
+              <dd className="text-slate-600">{closesAt} 마감</dd>
             </div>
           )}
         </dl>
 
-        {/* Social Proof & Deadline */}
-        <div className="mt-auto space-y-3 pt-3 border-t border-slate-100">
-          <div className="flex items-center justify-between text-xs text-slate-600">
-            {entryCount > 0 && (
-              <div className="flex items-center gap-1">
-                <span>👥</span>
-                <span className="font-semibold text-slate-900">{entryCount.toLocaleString()}명</span>
-                <span>참여 중</span>
-              </div>
-            )}
-            {closesAt && (
-              <div className="flex items-center gap-1 ml-auto">
-                <span>⏰</span>
-                <span className="font-medium text-slate-900">{closesAt}</span>
-                <span>마감</span>
-              </div>
-            )}
-          </div>
-
-          {/* CTA Button */}
+        {/* CTA Button */}
+        <div className="mt-auto pt-2">
           <Link
             href={`/events/${campaign.slug ?? campaign.id}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 font-bold text-white shadow-md transition-all hover:bg-coral-dark hover:shadow-lg hover:scale-[1.02] active:scale-95"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800"
           >
-            <span>이벤트 상세보기</span>
-            <span className="transition-transform group-hover:translate-x-1">→</span>
+            상세보기
           </Link>
         </div>
       </div>

@@ -32,21 +32,21 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { href: "/", label: "홈" },
   { href: "/events", label: "이벤트" },
-  { href: "/event-center", label: "운영 허브" },
+  { href: "/performances", label: "공연" },
 ];
 
 export function SiteHeader() {
   const pathname = usePathname() ?? "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const headerClass = "sticky top-0 z-50 border-b border-slate-200/60 bg-gradient-to-r from-neutral-offwhite via-white to-neutral-offwhite backdrop-blur-xl shadow-sm";
+  const headerClass = "sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm";
 
   return (
     <header className={headerClass}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-6">
         <Link
           href="/"
-          className="group flex items-center gap-3 transition-transform hover:scale-105"
+          className="flex items-center gap-3"
           aria-label="Artause 홈"
         >
           <Image
@@ -55,9 +55,9 @@ export function SiteHeader() {
             width={120}
             height={120}
             priority
-            className="h-20 w-20 object-contain transition-transform group-hover:rotate-6 drop-shadow-md"
+            className="h-16 w-16 object-contain"
           />
-          <span className="hidden sm:block text-2xl font-bold bg-gradient-to-r from-deepPurple to-deepPurple-dark bg-clip-text text-transparent">
+          <span className="hidden sm:block text-xl font-bold text-slate-900">
             Artause
           </span>
         </Link>
@@ -73,13 +73,13 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative px-3 py-2 transition-all duration-200 hover:text-coral ${
-                  isActive ? "text-deepPurple font-bold" : "text-slate-700"
+                className={`relative px-3 py-2 transition-all ${
+                  isActive ? "text-slate-900 font-semibold" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {item.label}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-coral to-coral-dark rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900" />
                 )}
               </Link>
             );
@@ -89,22 +89,22 @@ export function SiteHeader() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex flex-col items-center justify-center gap-1.5 rounded-xl p-2.5 transition-colors hover:bg-deepPurple/5 md:hidden focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
+          className="flex flex-col items-center justify-center gap-1.5 rounded-lg p-2.5 transition-colors hover:bg-slate-100 md:hidden focus:outline-none focus:ring-2 focus:ring-slate-300"
           aria-label="메뉴 열기"
           aria-expanded={mobileMenuOpen}
         >
           <span
-            className={`h-0.5 w-6 bg-deepPurple transition-all duration-300 ${
+            className={`h-0.5 w-6 bg-slate-900 transition-all duration-300 ${
               mobileMenuOpen ? "translate-y-2 rotate-45" : ""
             }`}
           />
           <span
-            className={`h-0.5 w-6 bg-deepPurple transition-all duration-300 ${
+            className={`h-0.5 w-6 bg-slate-900 transition-all duration-300 ${
               mobileMenuOpen ? "opacity-0" : ""
             }`}
           />
           <span
-            className={`h-0.5 w-6 bg-deepPurple transition-all duration-300 ${
+            className={`h-0.5 w-6 bg-slate-900 transition-all duration-300 ${
               mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
             }`}
           />
@@ -122,7 +122,7 @@ export function SiteHeader() {
           />
 
           {/* Mobile Menu Panel */}
-          <nav className="fixed right-0 top-[73px] z-50 h-[calc(100vh-73px)] w-64 animate-slide-in-right border-l border-slate-200/60 bg-gradient-to-b from-neutral-offwhite to-white/95 backdrop-blur-xl shadow-2xl md:hidden">
+          <nav className="fixed right-0 top-[65px] z-50 h-[calc(100vh-65px)] w-64 border-l border-slate-200 bg-white shadow-lg md:hidden">
             <div className="flex flex-col gap-2 p-6">
               {navItems.map((item) => {
                 const isActive =
@@ -134,16 +134,13 @@ export function SiteHeader() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`group relative overflow-hidden rounded-2xl px-5 py-4 text-base font-medium transition-all duration-200 hover:bg-coral/5 ${
+                    className={`rounded-lg px-4 py-3 text-base font-medium transition-all ${
                       isActive
-                        ? "bg-gradient-to-r from-coral to-coral-dark text-white shadow-lg"
-                        : "text-slate-700"
+                        ? "bg-slate-900 text-white"
+                        : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
-                    <span className="relative z-10">{item.label}</span>
-                    {!isActive && (
-                      <span className="absolute inset-0 translate-x-full bg-gradient-to-r from-coral/5 to-coral/10 transition-transform duration-300 group-hover:translate-x-0" />
-                    )}
+                    {item.label}
                   </Link>
                 );
               })}

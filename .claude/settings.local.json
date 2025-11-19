@@ -34,7 +34,9 @@
       "Bash(python:*)",
       "Bash(taskkill:*)",
       "Bash(git reset:*)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout /t 3)"
     ],
     "deny": [],
     "ask": []

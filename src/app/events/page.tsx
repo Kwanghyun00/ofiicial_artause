@@ -53,32 +53,15 @@ export default async function EventsPage() {
   const campaigns = (await getTicketCampaigns()).filter(isCampaign);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-10 sm:space-y-12">
-      {/* Hero Section: 페이지 소개 및 이벤트 개설 CTA */}
-      <section className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-gradient-violet via-gradient-electric to-gradient-magenta p-8 text-white shadow-2xl sm:p-10 md:rounded-[40px] md:p-12 lg:p-16">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNGgxMnYxMkgzNnptMjQgMGgxMnYxMkg2MHpNMTIgMTEwaDEydjEySDE2em0yNCAwaDEydjEySDM2em0yNCAwaDEydjEySDYwem0yNCAwaDEydjEySDg0em0wIDI0aDEydjEySDg0em0wIDI0aDEydjEySDg0eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
-        <div className="relative">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-            <span className="h-2 w-2 rounded-full bg-yellow-300 animate-pulse"></span>
-            <p className="text-xs font-medium uppercase tracking-wider">Live Events</p>
-          </div>
-          <h1 className="mt-4 text-3xl font-bold sm:mt-6 sm:text-4xl md:text-5xl lg:text-6xl">
-            지금 응모 가능한 초대권
-          </h1>
-          <p className="mt-3 max-w-2xl text-base text-white/90 sm:mt-4 sm:text-lg md:text-xl">
-            공연 단체가 직접 등록한 초대권 이벤트에 지금 바로 응모하세요.
-            선정 결과는 이메일로 안내드립니다.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
-            <Link
-              href="/event-center#event-create"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/50 bg-white/15 px-5 py-3 font-semibold backdrop-blur-sm transition-all hover:border-white/70 hover:bg-white/25 active:scale-95 sm:px-6"
-            >
-              <span>이벤트 개설하기</span>
-              <span>+</span>
-            </Link>
-          </div>
-        </div>
+    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-8 sm:space-y-10">
+      {/* Hero Section: 페이지 소개 */}
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl md:text-4xl">
+          초대권 이벤트
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm text-slate-600 sm:text-base">
+          공연 단체가 직접 등록한 초대권 이벤트에 지금 바로 응모하세요.
+        </p>
       </section>
 
       {/* Events Explorer: 검색 및 필터링 기능이 있는 이벤트 목록 */}
