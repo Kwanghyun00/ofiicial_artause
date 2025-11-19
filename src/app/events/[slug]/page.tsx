@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { TicketEntryFormSteps } from "@/components/forms/TicketEntryFormSteps";
 import { getTicketCampaignBySlug } from "@/lib/supabase/queries";
 
@@ -29,53 +30,129 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const closesAt = campaign.ends_at ? formatDateTime(campaign.ends_at) : null;
 
   return (
-    <article className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12 md:px-6 md:py-16">
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+    <article className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16">
+      {/* Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2 text-sm">
+        <Link href="/events" className="text-[#6B6560] hover:text-[#2D2A26] transition-colors">
+          이벤트 목록
+        </Link>
+        <span className="text-[#E8E3DC]">/</span>
+        <span className="text-[#2D2A26] font-medium">{campaign.title}</span>
+      </div>
+
+      {/* Header Section - v0 style */}
+      <section className="rounded-3xl border border-[#E8E3DC] bg-white p-6 sm:p-8 md:p-10 shadow-lg mb-8">
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className={`rounded px-3 py-1 text-xs font-semibold ${statusBadge(status)}`}>{statusLabel(status)}</span>
-          {closesAt && <span className="text-sm text-slate-600">{closesAt} 마감</span>}
+          <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold ${statusBadge(status)}`}>
+            {statusLabel(status)}
+          </span>
+          {closesAt && (
+            <span className="text-sm text-[#6B6560]">
+              <span className="mr-1">⏰</span>
+              {closesAt} 마감
+            </span>
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">{campaign.title}</h1>
-        <p className="mt-3 text-sm text-slate-600 md:text-base">{campaign.description ?? "SNS 홍보와 연동된 초대권 이벤트입니다."}</p>
+
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D2A26] mb-4">
+          {campaign.title}
+        </h1>
+
+        <p className="text-base sm:text-lg text-[#6B6560] leading-relaxed">
+          {campaign.description ?? "SNS 홍보와 연동된 초대권 이벤트입니다."}
+        </p>
+
         {campaign.reward && (
-          <div className="mt-4 text-sm text-slate-700">
-            <span className="font-semibold">제공:</span> {campaign.reward}
+          <div className="mt-6 flex items-center gap-2 rounded-xl border-2 border-[#8B7BA8]/20 bg-[#8B7BA8]/5 px-5 py-3">
+            <span className="text-xl">🎁</span>
+            <div>
+              <span className="text-sm font-medium text-[#6B6560]">제공 내용</span>
+              <p className="text-base font-bold text-[#2D2A26]">{campaign.reward}</p>
+            </div>
           </div>
         )}
+
         {performance && (
-          <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm">
-            <p className="font-semibold text-slate-900">{performance.title}</p>
+          <div className="mt-6 rounded-2xl border border-[#E8E3DC] bg-[#F5EFE7] p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">🎭</span>
+              <span className="text-sm font-medium text-[#6B6560]">연결된 공연</span>
+            </div>
+            <Link
+              href={`/performances/${performance.slug}`}
+              className="text-lg font-bold text-[#8B7BA8] hover:text-[#8B7BA8]/80 transition-colors"
+            >
+              {performance.title} →
+            </Link>
           </div>
         )}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-        <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900">진행 안내</h2>
-            <ol className="mt-3 space-y-2 text-sm text-slate-600">
-              <li>1. 공연 단체가 등록한 정보에 따라 이벤트가 자동으로 열립니다.</li>
-              <li>2. 관객은 아래 폼에서 응모하며, 필요한 최소 정보만 입력합니다.</li>
-              <li>3. 선정된 관객 명단은 Event Hub에서 단체가 직접 확인하고 관람 여부를 체크합니다.</li>
+      {/* Content Grid */}
+      <div className="grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
+        {/* Left Column: Guidelines */}
+        <div className="space-y-6">
+          {/* How it Works */}
+          <section className="rounded-2xl border border-[#E8E3DC] bg-white p-6 sm:p-8 shadow-md">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+              <span className="text-2xl">📝</span>
+              진행 안내
+            </h2>
+            <ol className="space-y-3 text-sm sm:text-base text-[#2D2A26]">
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#8B7BA8] text-white text-xs font-bold">
+                  1
+                </span>
+                <span>공연 단체가 등록한 정보에 따라 이벤트가 자동으로 열립니다.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#8B7BA8] text-white text-xs font-bold">
+                  2
+                </span>
+                <span>관객은 오른쪽 폼에서 응모하며, 필요한 최소 정보만 입력합니다.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#8B7BA8] text-white text-xs font-bold">
+                  3
+                </span>
+                <span>선정된 관객 명단은 Event Hub에서 단체가 직접 확인하고 관람 여부를 체크합니다.</span>
+              </li>
             </ol>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
-            <h3 className="text-base font-bold text-slate-900">유의 사항</h3>
-            <ul className="mt-3 list-disc space-y-2 pl-5">
-              <li>중복 응모·허위 정보 입력 시 선정 대상에서 제외됩니다.</li>
-              <li>선정자는 이메일로 개별 안내드리며, 공지 없이 양도할 수 없습니다.</li>
-              <li>관람이 어려울 경우 최소 1일 전까지 회신해 주세요.</li>
+          </section>
+
+          {/* Important Notes */}
+          <section className="rounded-2xl border-2 border-[#D97B7B]/30 bg-[#D97B7B]/5 p-6 sm:p-8">
+            <h3 className="text-lg sm:text-xl font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
+              <span className="text-2xl">⚠️</span>
+              유의 사항
+            </h3>
+            <ul className="space-y-2 text-sm sm:text-base text-[#2D2A26]">
+              <li className="flex gap-2">
+                <span className="text-[#D97B7B] flex-shrink-0">•</span>
+                <span>중복 응모·허위 정보 입력 시 선정 대상에서 제외됩니다.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-[#D97B7B] flex-shrink-0">•</span>
+                <span>선정자는 이메일로 개별 안내드리며, 공지 없이 양도할 수 없습니다.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-[#D97B7B] flex-shrink-0">•</span>
+                <span>관람이 어려울 경우 최소 1일 전까지 회신해 주세요.</span>
+              </li>
             </ul>
-          </div>
+          </section>
         </div>
 
-        <TicketEntryFormSteps
-          campaignId={campaign.id}
-          slug={campaign.slug ?? campaign.id}
-          campaignTitle={campaign.title}
-          performanceTitle={performance?.title}
-        />
-      </section>
+        {/* Right Column: Application Form */}
+        <div className="lg:sticky lg:top-8 lg:self-start">
+          <TicketEntryFormSteps
+            campaignId={campaign.id}
+            slug={campaign.slug ?? campaign.id}
+            campaignTitle={campaign.title}
+            performanceTitle={performance?.title}
+          />
+        </div>
+      </div>
     </article>
   );
 }
@@ -100,11 +177,11 @@ function getStatus(campaign: Exclude<CampaignRecord, null> & { id: string }): Ca
 function statusBadge(status: CampaignStatus) {
   switch (status) {
     case "active":
-      return "bg-slate-900 text-white";
+      return "bg-[#8B7BA8] text-white shadow-md";
     case "upcoming":
-      return "bg-slate-100 text-slate-700";
+      return "bg-[#F5EFE7] text-[#6B6560] border border-[#E8E3DC]";
     case "closed":
-      return "bg-slate-200 text-slate-600";
+      return "bg-[#E8E3DC] text-[#6B6560]";
   }
 }
 
