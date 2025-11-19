@@ -82,7 +82,7 @@ export function HomeLanding({ featuredShows, campaigns, organizations }: Props) 
   const recommendedShows = featuredShows.slice(0, 6);
 
   return (
-    <div className="space-y-8 md:space-y-10">
+    <div className="space-y-6 sm:space-y-8 md:space-y-10">
       <Hero />
       <CategoryNav />
       <CampaignSection campaigns={activeCampaigns} />
@@ -152,21 +152,21 @@ function Hero() {
   return (
     <section
       ref={ref}
-      className={`overflow-hidden rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm transition-all duration-700 sm:px-8 sm:py-10 ${
+      className={`overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl border border-slate-200 bg-white px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 shadow-sm transition-all duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
       <div className="text-center">
-        <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
+        <h1 className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl md:text-3xl lg:text-4xl">
           공연 초대권 이벤트 한눈에
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+        <p className="mt-2 sm:mt-3 text-xs leading-relaxed text-slate-600 sm:text-sm md:text-base">
           지금 응모 가능한 초대권을 확인하고 무료로 공연을 관람하세요
         </p>
-        <div className="mt-5 flex justify-center">
+        <div className="mt-4 sm:mt-5 flex justify-center">
           <Link
             href="/events"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-6 py-3 font-semibold text-white transition-all hover:bg-slate-800 sm:px-8"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 text-sm sm:text-base font-semibold text-white transition-all hover:bg-slate-800"
           >
             전체 이벤트 보기
           </Link>
@@ -180,6 +180,7 @@ function Hero() {
  * 카테고리 네비게이션
  *
  * 공연 장르별 빠른 필터링 (한국적 색상 적용)
+ * 모바일: 가로 스크롤 가능한 탭
  */
 function CategoryNav() {
   const categories = [
@@ -192,13 +193,13 @@ function CategoryNav() {
   ];
 
   return (
-    <nav className="overflow-x-auto">
-      <div className="flex gap-2 pb-2">
+    <nav className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+      <div className="flex gap-2 pb-2 min-w-max sm:min-w-0 sm:flex-wrap">
         {categories.map((category) => (
           <Link
             key={category.id}
             href={`/events?category=${category.id}`}
-            className={`shrink-0 rounded-lg border px-4 py-2 text-sm font-semibold transition-all hover:shadow-sm ${category.color}`}
+            className={`shrink-0 rounded-lg border px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition-all hover:shadow-sm ${category.color}`}
           >
             {category.name}
           </Link>
@@ -250,26 +251,26 @@ function CampaignSection({ campaigns }: { campaigns: Campaign[] }) {
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 sm:mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">진행 중인 초대권 이벤트</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-lg font-bold text-slate-900 sm:text-xl md:text-2xl">진행 중인 초대권 이벤트</h2>
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-600">
             지금 바로 응모 가능
           </p>
         </div>
         <Link
           href="/events"
-          className="shrink-0 text-sm font-medium text-slate-700 hover:text-slate-900"
+          className="shrink-0 text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900"
         >
           전체 →
         </Link>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {campaigns.length ? (
           campaigns.map((campaign, index) => <CampaignCard key={campaign.id} campaign={campaign} index={index} />)
         ) : (
-          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center">
-            <p className="text-base font-medium text-slate-400">진행 중인 이벤트가 없습니다</p>
+          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-6 sm:p-8 text-center">
+            <p className="text-sm sm:text-base font-medium text-slate-400">진행 중인 이벤트가 없습니다</p>
           </div>
         )}
       </div>
@@ -320,21 +321,21 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
   return (
     <Link href={`/events/${campaign.slug ?? campaign.id}`}>
       <article
-        className="group overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:shadow-md"
+        className="group overflow-hidden rounded-lg sm:rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition-all hover:shadow-md"
         style={{ animationDelay: `${index * 50}ms` }}
       >
-        <div className="space-y-2">
+        <div className="space-y-1.5 sm:space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-base font-bold text-slate-900 line-clamp-2">{campaign.title}</h3>
-            <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">진행중</span>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 line-clamp-2 leading-tight">{campaign.title}</h3>
+            <span className="shrink-0 rounded bg-slate-100 px-1.5 sm:px-2 py-0.5 text-xs font-medium text-slate-700">진행중</span>
           </div>
-          <p className="text-sm text-slate-600 line-clamp-2">{campaign.description ?? "지금 바로 응모 가능한 초대권"}</p>
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-600 line-clamp-2">{campaign.description ?? "지금 바로 응모 가능한 초대권"}</p>
+          <div className="flex items-center justify-between text-xs text-slate-500 gap-2">
             {campaign.reward && <span className="truncate">{campaign.reward}</span>}
             {closesAt && <span className="shrink-0">{closesAt}</span>}
           </div>
-          <div className="pt-2">
-            <div className="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-all group-hover:bg-slate-800">
+          <div className="pt-1 sm:pt-2">
+            <div className="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white transition-all group-hover:bg-slate-800">
               응모하기
             </div>
           </div>
@@ -387,26 +388,26 @@ function RecommendedShows({ shows }: { shows: Show[] }) {
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 sm:mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">이번 주 추천 공연</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-lg font-bold text-slate-900 sm:text-xl md:text-2xl">이번 주 추천 공연</h2>
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-600">
             놓치면 안 될 인기 공연을 만나보세요
           </p>
         </div>
         <Link
           href="/performances"
-          className="shrink-0 text-sm font-medium text-slate-700 hover:text-slate-900"
+          className="shrink-0 text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900"
         >
           전체 →
         </Link>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {shows.length ? (
           shows.map((show, index) => <ShowCard key={show.id} show={show} index={index} />)
         ) : (
-          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-8 text-center">
-            <p className="text-base font-medium text-slate-400">등록된 공연이 없습니다</p>
+          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-6 sm:p-8 text-center">
+            <p className="text-sm sm:text-base font-medium text-slate-400">등록된 공연이 없습니다</p>
           </div>
         )}
       </div>
@@ -415,7 +416,7 @@ function RecommendedShows({ shows }: { shows: Show[] }) {
 }
 
 /**
- * 공연 카드 (정보 밀도 높게)
+ * 공연 카드 (정보 밀도 높게, 모바일 최적화)
  */
 function ShowCard({ show, index }: { show: Show; index: number }) {
   const period = formatPeriod(show.period_start, show.period_end);
@@ -424,47 +425,47 @@ function ShowCard({ show, index }: { show: Show; index: number }) {
   return (
     <Link href={`/performances/${show.slug}`}>
       <article
-        className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"
+        className="group relative overflow-hidden rounded-lg sm:rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"
         style={{ animationDelay: `${index * 50}ms` }}
       >
         {/* 장르 태그 */}
         {show.tags && show.tags[0] && (
-          <div className="absolute left-3 top-3 z-10">
-            <span className={`rounded px-2 py-1 text-xs font-bold ${genreColor}`}>
+          <div className="absolute left-2 top-2 z-10">
+            <span className={`rounded px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-bold ${genreColor}`}>
               {show.tags[0]}
             </span>
           </div>
         )}
 
         {/* 포스터 */}
-        <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+        <div className="relative h-40 sm:h-48 w-full overflow-hidden bg-slate-100">
           {show.poster_url ? (
             <Image
               src={show.poster_url}
               alt={`${show.title} 포스터`}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-4xl">🎭</div>
+            <div className="flex h-full items-center justify-center text-3xl sm:text-4xl">🎭</div>
           )}
         </div>
 
         {/* 정보 (밀도 높게) */}
-        <div className="p-3">
-          <h3 className="font-bold text-slate-900 line-clamp-2 text-base leading-tight">{show.title}</h3>
-          <div className="mt-2 space-y-1 text-xs text-slate-600">
+        <div className="p-2.5 sm:p-3">
+          <h3 className="font-bold text-slate-900 line-clamp-2 text-sm sm:text-base leading-tight">{show.title}</h3>
+          <div className="mt-1.5 sm:mt-2 space-y-0.5 sm:space-y-1 text-xs text-slate-600">
             {show.region && (
               <div className="flex items-center gap-1">
-                <span className="font-medium">📍</span>
-                <span>{show.region}</span>
+                <span className="text-xs">📍</span>
+                <span className="truncate">{show.region}</span>
               </div>
             )}
             {period && (
               <div className="flex items-center gap-1">
-                <span className="font-medium">📅</span>
-                <span>{period}</span>
+                <span className="text-xs">📅</span>
+                <span className="truncate">{period}</span>
               </div>
             )}
           </div>

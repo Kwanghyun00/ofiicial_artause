@@ -53,13 +53,13 @@ export default async function EventsPage() {
   const campaigns = (await getTicketCampaigns()).filter(isCampaign);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 space-y-8 sm:space-y-10">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-12 lg:px-6 lg:py-16 space-y-6 sm:space-y-8 md:space-y-10">
       {/* Hero Section: 페이지 소개 */}
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl md:text-4xl">
+      <section className="rounded-lg sm:rounded-xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 shadow-sm">
+        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl md:text-3xl lg:text-4xl">
           초대권 이벤트
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-slate-600 sm:text-base">
+        <p className="mt-2 sm:mt-3 max-w-2xl text-xs sm:text-sm md:text-base text-slate-600">
           공연 단체가 직접 등록한 초대권 이벤트에 지금 바로 응모하세요.
         </p>
       </section>

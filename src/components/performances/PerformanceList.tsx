@@ -38,14 +38,14 @@ type Props = {
 
 export function PerformanceList({ performances }: Props) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
       {performances.length ? (
         performances.map((performance, index) => (
           <PerformanceCard key={performance.id} performance={performance} index={index} />
         ))
       ) : (
-        <div className="col-span-full rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-          <p className="text-base font-medium text-slate-400">등록된 공연이 없습니다</p>
+        <div className="col-span-full rounded-lg sm:rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 sm:p-12 text-center">
+          <p className="text-sm sm:text-base font-medium text-slate-400">등록된 공연이 없습니다</p>
         </div>
       )}
     </div>
@@ -59,13 +59,13 @@ function PerformanceCard({ performance, index }: { performance: Performance; ind
   return (
     <Link href={`/performances/${performance.slug}`}>
       <article
-        className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"
+        className="group relative overflow-hidden rounded-lg sm:rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"
         style={{ animationDelay: `${index * 50}ms` }}
       >
         {/* 장르 태그 */}
         {performance.tags && performance.tags[0] && (
           <div className="absolute left-2 top-2 z-10">
-            <span className={`rounded px-2 py-0.5 text-xs font-bold ${genreColor}`}>
+            <span className={`rounded px-1.5 sm:px-2 py-0.5 text-xs font-bold ${genreColor}`}>
               {performance.tags[0]}
             </span>
           </div>
@@ -79,26 +79,26 @@ function PerformanceCard({ performance, index }: { performance: Performance; ind
               alt={`${performance.title} 포스터`}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-3xl">🎭</div>
+            <div className="flex h-full items-center justify-center text-3xl sm:text-4xl">🎭</div>
           )}
         </div>
 
         {/* Content - 정보 밀도 높게 */}
-        <div className="p-3">
+        <div className="p-2.5 sm:p-3">
           <h3 className="line-clamp-2 text-sm font-bold text-slate-900 leading-tight">{performance.title}</h3>
-          <div className="mt-2 space-y-0.5 text-xs text-slate-600">
+          <div className="mt-1.5 sm:mt-2 space-y-0.5 text-xs text-slate-600">
             {performance.region && (
               <div className="flex items-center gap-1">
-                <span>📍</span>
+                <span className="text-xs">📍</span>
                 <span className="truncate">{performance.region}</span>
               </div>
             )}
             {period && (
               <div className="flex items-center gap-1">
-                <span>📅</span>
+                <span className="text-xs">📅</span>
                 <span className="truncate">{period}</span>
               </div>
             )}

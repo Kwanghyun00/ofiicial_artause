@@ -84,7 +84,7 @@ export default async function HomePage() {
   const trustedOrganizations = organizations.filter(isOrganization);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-12 md:px-6 md:py-16 lg:py-20">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-12 lg:px-6 lg:py-16 xl:py-20">
       {/* HomeLanding 컴포넌트에 필터링된 데이터 전달 */}
       <HomeLanding featuredShows={featuredShows} campaigns={ticketCampaigns} organizations={trustedOrganizations} />
     </div>
