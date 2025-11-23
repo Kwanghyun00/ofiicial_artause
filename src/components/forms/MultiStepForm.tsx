@@ -5,48 +5,47 @@ import { useState, ReactNode } from "react";
 /**
  * MultiStepForm 컴포넌트
  *
- * 긴 폼을 여러 단계로 나누어 사용자 경험을 개선하는 래퍼 컴포넌트
- *
- * 주요 기능:
- * - 진행 상황 표시 (Progress Indicator)
- * - 단계별 검증
- * - 다음/이전 네비게이션
- * - 마지막 단계에서 제출
+ * 한국 관객을 위한 세련된 멀티스텝 폼
+ * - 딥 네이비 (#293380) 기반 색상
+ * - 마젠타 (#953D60~#D36AD9) 포인트
+ * - 파스텔 배경 (#F0EFF7, #DDBFE4)
+ * - 일관된 16px/20px 여백
  */
 
 export type FormStep = {
-  /** 단계 제목 (예: "기본 정보") */
   title: string;
-  /** 단계 설명 (예: "성명, 이메일, 전화번호를 입력해주세요") */
   description: string;
-  /** 단계에 표시될 아이콘 이모지 */
-  icon: string;
-  /** 단계별 폼 필드 컴포넌트 */
+  icon: ReactNode;
   content: ReactNode;
-  /**
-   * 다음 단계로 이동하기 전 실행할 검증 함수 (선택)
-   * @returns true면 다음 단계로 이동, false면 현재 단계에 머뭄
-   */
   validate?: () => boolean;
 };
 
 type MultiStepFormProps = {
-  /** 폼 단계 배열 */
   steps: FormStep[];
-  /** 폼 제출 액션 */
   action: string | ((formData: FormData) => void | Promise<void>);
-  /** 폼 제목 */
   title: string;
-  /** 폼 부제목 */
   subtitle?: string;
-  /** 제출 버튼 텍스트 (기본값: "제출하기") */
   submitLabel?: string;
-  /** 제출 중 상태 */
   isPending?: boolean;
-  /** 제출 성공 여부 */
   isSuccess?: boolean;
-  /** 에러/성공 메시지 */
   message?: string;
+};
+
+// 디자인 토큰
+const colors = {
+  navy: "#293380",
+  navyLight: "#3d4a9e",
+  magenta: "#953D60",
+  magentaLight: "#D36AD9",
+  background: "#F8F6F3",
+  cardBg: "#FFFFFF",
+  pastelPurple: "#F0EFF7",
+  pastelPink: "#DDBFE4",
+  text: "#1a1a2e",
+  textMuted: "#6B6560",
+  border: "#E8E3DC",
+  success: "#059669",
+  error: "#DC2626",
 };
 
 export function MultiStepForm({
@@ -65,10 +64,6 @@ export function MultiStepForm({
   const isLastStep = currentStep === totalSteps - 1;
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
-  /**
-   * 다음 단계로 이동
-   * 현재 단계의 검증 함수가 있으면 실행 후 통과 시에만 이동
-   */
   const handleNext = () => {
     const currentStepData = steps[currentStep];
     if (currentStepData.validate && !currentStepData.validate()) {
@@ -76,14 +71,10 @@ export function MultiStepForm({
     }
     if (!isLastStep) {
       setCurrentStep((prev) => prev + 1);
-      // 페이지 최상단으로 스크롤
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  /**
-   * 이전 단계로 이동
-   */
   const handlePrevious = () => {
     if (!isFirstStep) {
       setCurrentStep((prev) => prev - 1);
@@ -94,141 +85,195 @@ export function MultiStepForm({
   const currentStepData = steps[currentStep];
 
   return (
-    <div className="space-y-6">
-      {/* Form Header */}
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        {subtitle && <p className="text-sm text-slate-600">{subtitle}</p>}
+    <div className="space-y-5">
+      {/* Form Header - 컴팩트 */}
+      <div className="space-y-1">
+        <h2 className="text-xl font-bold" style={{ color: colors.navy }}>
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-sm" style={{ color: colors.textMuted }}>
+            {subtitle}
+          </p>
+        )}
       </div>
 
-      {/* Progress Indicator */}
+      {/* Progress Section - 컴팩트 */}
       <div className="space-y-3">
         {/* Progress Bar */}
-        <div className="relative h-2 overflow-hidden rounded-full bg-slate-100">
+        <div
+          className="relative h-1.5 overflow-hidden rounded-full"
+          style={{ backgroundColor: colors.pastelPurple }}
+        >
           <div
-            className="h-full bg-gradient-to-r from-gradient-violet via-gradient-electric to-gradient-magenta transition-all duration-500 ease-out"
-            style={{ width: `${progress}%` }}
+            className="h-full transition-all duration-500 ease-out"
+            style={{
+              width: `${progress}%`,
+              background: `linear-gradient(90deg, ${colors.navy}, ${colors.magenta})`
+            }}
             role="progressbar"
             aria-valuenow={progress}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`진행률 ${Math.round(progress)}%`}
           />
         </div>
 
-        {/* Step Counter */}
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold text-slate-900">
-            {currentStep + 1} / {totalSteps} 단계
-          </span>
-          <span className="text-slate-500">
-            {Math.round(progress)}% 완료
-          </span>
-        </div>
-
-        {/* Step Indicators (dots) */}
-        <div className="flex items-center justify-center gap-2">
-          {steps.map((step, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setCurrentStep(index)}
-              className={`group relative h-3 transition-all duration-300 ${
-                index === currentStep
-                  ? "w-8 rounded-full bg-gradient-to-r from-gradient-violet to-gradient-magenta"
-                  : index < currentStep
-                  ? "w-3 rounded-full bg-emerald-500"
-                  : "w-3 rounded-full bg-slate-200 hover:bg-slate-300"
-              }`}
-              aria-label={`${step.title} ${index < currentStep ? '(완료)' : index === currentStep ? '(현재)' : '(대기 중)'}`}
-              aria-current={index === currentStep ? "step" : undefined}
-            >
-              {/* Tooltip */}
-              <span className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs text-white shadow-lg group-hover:block">
-                {step.icon} {step.title}
-                <span className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></span>
-              </span>
-            </button>
-          ))}
+        {/* Step Indicators - 숫자형 */}
+        <div className="flex items-center justify-between">
+          {steps.map((step, index) => {
+            const isCompleted = index < currentStep;
+            const isCurrent = index === currentStep;
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => index <= currentStep && setCurrentStep(index)}
+                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  index <= currentStep ? "cursor-pointer" : "cursor-default"
+                }`}
+                style={{
+                  backgroundColor: isCurrent ? colors.navy : isCompleted ? colors.pastelPurple : "transparent",
+                  color: isCurrent ? "#fff" : isCompleted ? colors.navy : colors.textMuted,
+                }}
+                disabled={index > currentStep}
+              >
+                <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  isCurrent ? "bg-white/20" : isCompleted ? "bg-white" : "border"
+                }`}
+                style={{
+                  borderColor: !isCurrent && !isCompleted ? colors.border : undefined,
+                  color: isCurrent ? "#fff" : isCompleted ? colors.navy : colors.textMuted,
+                }}>
+                  {isCompleted ? (
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                <span className="hidden sm:block">{step.title}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Form Content */}
       <form
         action={action}
-        className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg"
+        className="overflow-hidden rounded-2xl border shadow-sm"
+        style={{
+          borderColor: colors.border,
+          backgroundColor: colors.cardBg,
+        }}
       >
-        {/* Current Step Header */}
-        <div className="flex items-start gap-4 rounded-2xl border-2 border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5">
-          <span className="text-4xl" aria-hidden="true">{currentStepData.icon}</span>
+        {/* Current Step Header - 컴팩트 */}
+        <div
+          className="flex items-center gap-3 px-5 py-4"
+          style={{ backgroundColor: colors.pastelPurple }}
+        >
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-xl"
+            style={{ backgroundColor: colors.navy, color: "#fff" }}
+          >
+            {currentStepData.icon}
+          </span>
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-slate-900">
+            <h3
+              className="text-base font-bold"
+              style={{ color: colors.navy }}
+            >
               {currentStepData.title}
             </h3>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="text-xs" style={{ color: colors.textMuted }}>
               {currentStepData.description}
             </p>
           </div>
+          <span
+            className="rounded-full px-2.5 py-1 text-xs font-medium"
+            style={{ backgroundColor: colors.navy, color: "#fff" }}
+          >
+            {currentStep + 1}/{totalSteps}
+          </span>
         </div>
 
-        {/* Step Content */}
-        <div className="space-y-6">
+        {/* Step Content - 일관된 여백 */}
+        <div className="space-y-4 p-5">
           {currentStepData.content}
         </div>
 
         {/* Status Messages */}
         {message && (
           <div
-            className={`rounded-2xl p-4 ${
-              isSuccess
-                ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
-                : "border border-rose-200 bg-rose-50 text-rose-800"
-            }`}
+            className="mx-5 mb-4 rounded-xl px-4 py-3 text-sm font-medium"
+            style={{
+              backgroundColor: isSuccess ? "#ecfdf5" : "#fef2f2",
+              color: isSuccess ? colors.success : colors.error,
+              border: `1px solid ${isSuccess ? "#a7f3d0" : "#fecaca"}`,
+            }}
             role="alert"
           >
-            <p className="text-sm font-medium">{message}</p>
+            {message}
           </div>
         )}
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-          {/* Previous Button */}
+        {/* Navigation Buttons - 딥 네이비 */}
+        <div
+          className="flex items-center justify-between gap-3 px-5 py-4"
+          style={{ backgroundColor: colors.pastelPurple }}
+        >
           <button
             type="button"
             onClick={handlePrevious}
             disabled={isFirstStep}
-            className={`order-2 rounded-2xl border-2 px-6 py-3 font-semibold transition-all sm:order-1 ${
-              isFirstStep
-                ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 active:scale-95"
-            }`}
-            aria-label="이전 단계로 이동"
+            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all"
+            style={{
+              backgroundColor: isFirstStep ? colors.border : "#fff",
+              color: isFirstStep ? colors.textMuted : colors.navy,
+              border: `1px solid ${colors.border}`,
+              opacity: isFirstStep ? 0.6 : 1,
+              cursor: isFirstStep ? "not-allowed" : "pointer",
+            }}
           >
-            ← 이전
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            이전
           </button>
 
-          {/* Next / Submit Button */}
           {isLastStep ? (
             <button
               type="submit"
               disabled={isPending || isSuccess}
-              className={`order-1 rounded-2xl px-8 py-3 font-bold text-white transition-all sm:order-2 ${
-                isPending || isSuccess
-                  ? "cursor-not-allowed bg-slate-400"
-                  : "bg-gradient-to-r from-coral to-coral-dark shadow-lg hover:shadow-xl active:scale-95"
-              }`}
-              aria-label={submitLabel}
+              className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-[0.98]"
+              style={{
+                background: isPending || isSuccess
+                  ? colors.textMuted
+                  : `linear-gradient(135deg, ${colors.magenta}, ${colors.magentaLight})`,
+                cursor: isPending || isSuccess ? "not-allowed" : "pointer",
+              }}
             >
-              {isPending ? "제출 중..." : isSuccess ? "제출 완료 ✓" : submitLabel}
+              {isPending ? "제출 중..." : isSuccess ? "완료" : submitLabel}
+              {!isPending && !isSuccess && (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </button>
           ) : (
             <button
               type="button"
               onClick={handleNext}
-              className="order-1 rounded-2xl bg-gradient-to-r from-gradient-violet to-gradient-magenta px-8 py-3 font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95 sm:order-2"
-              aria-label="다음 단계로 이동"
+              className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-[0.98]"
+              style={{
+                background: `linear-gradient(135deg, ${colors.navy}, ${colors.navyLight})`,
+              }}
             >
-              다음 →
+              다음
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           )}
         </div>

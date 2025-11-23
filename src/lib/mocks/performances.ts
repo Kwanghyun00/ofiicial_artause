@@ -3,7 +3,7 @@ import type { Database } from "@/lib/supabase/types";
 type PerformanceRow = Database["public"]["Tables"]["performances"]["Row"];
 type CampaignRow = Database["public"]["Tables"]["ticket_campaigns"]["Row"] & {
   slug: string;
-  performances?: Pick<PerformanceRow, "slug" | "title" | "poster_url" | "region" | "organization_id"> | null;
+  performances?: Pick<PerformanceRow, "slug" | "title" | "poster_url" | "region" | "organization_id" | "period_start" | "period_end"> | null;
 };
 type OrganizationRow = Database["public"]["Tables"]["organizations"]["Row"];
 type CommunityPostRow = Database["public"]["Tables"]["community_posts"]["Row"] & {
@@ -530,12 +530,17 @@ export const mockCampaigns: CampaignRow[] = [
     partner_phone: null,
     approved_at: now,
     approved_by: null,
+    available_dates: ["2025-12-01", "2025-12-02", "2025-12-03"],
+    performance_period_start: "2025-12-01",
+    performance_period_end: "2025-12-03",
     performances: {
       slug: mockPerformances[0].slug,
       title: mockPerformances[0].title,
       poster_url: mockPerformances[0].poster_url,
       region: mockPerformances[0].region,
       organization_id: mockPerformances[0].organization_id,
+      period_start: mockPerformances[0].period_start,
+      period_end: mockPerformances[0].period_end,
     },
   },
   {
@@ -562,12 +567,17 @@ export const mockCampaigns: CampaignRow[] = [
     partner_phone: null,
     approved_at: now,
     approved_by: null,
+    available_dates: ["2025-11-28", "2025-11-29", "2025-11-30"],
+    performance_period_start: "2025-11-28",
+    performance_period_end: "2025-11-30",
     performances: {
       slug: mockPerformances[3].slug,
       title: mockPerformances[3].title,
       poster_url: mockPerformances[3].poster_url,
       region: mockPerformances[3].region,
       organization_id: mockPerformances[3].organization_id,
+      period_start: mockPerformances[3].period_start,
+      period_end: mockPerformances[3].period_end,
     },
   },
   {
@@ -594,12 +604,17 @@ export const mockCampaigns: CampaignRow[] = [
     partner_phone: null,
     approved_at: now,
     approved_by: null,
+    available_dates: ["2025-12-05", "2025-12-06", "2025-12-07", "2025-12-12", "2025-12-13"],
+    performance_period_start: "2025-12-05",
+    performance_period_end: "2025-12-13",
     performances: {
       slug: mockPerformances[4].slug,
       title: mockPerformances[4].title,
       poster_url: mockPerformances[4].poster_url,
       region: mockPerformances[4].region,
       organization_id: mockPerformances[4].organization_id,
+      period_start: mockPerformances[4].period_start,
+      period_end: mockPerformances[4].period_end,
     },
   },
   {
@@ -626,12 +641,17 @@ export const mockCampaigns: CampaignRow[] = [
     partner_phone: null,
     approved_at: now,
     approved_by: null,
+    available_dates: ["2025-11-25", "2025-11-26", "2025-11-27"],
+    performance_period_start: "2025-11-25",
+    performance_period_end: "2025-11-27",
     performances: {
       slug: mockPerformances[5].slug,
       title: mockPerformances[5].title,
       poster_url: mockPerformances[5].poster_url,
       region: mockPerformances[5].region,
       organization_id: mockPerformances[5].organization_id,
+      period_start: mockPerformances[5].period_start,
+      period_end: mockPerformances[5].period_end,
     },
   },
 ];

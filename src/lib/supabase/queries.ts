@@ -99,13 +99,18 @@ const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   partner_phone,
   approved_at,
   approved_by,
+  available_dates,
+  performance_period_start,
+  performance_period_end,
   performances (
     id,
     slug,
     title,
     poster_url,
     region,
-    organization_id
+    organization_id,
+    period_start,
+    period_end
   )
 `;
 

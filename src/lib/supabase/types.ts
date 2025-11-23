@@ -363,6 +363,9 @@ export interface Database {
           partner_phone: string | null;
           approved_at: string | null;
           approved_by: string | null;
+          available_dates: string[] | null;
+          performance_period_start: string | null;
+          performance_period_end: string | null;
         };
         Insert: {
           id?: string;

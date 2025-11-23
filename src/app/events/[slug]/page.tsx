@@ -19,6 +19,29 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
   };
 }
 
+/**
+ * 공연 기간에서 날짜 배열 생성 (최대 14일)
+ */
+function generateDatesFromPeriod(startDate: string | null, endDate: string | null): string[] {
+  if (!startDate) return [];
+
+  const start = new Date(startDate);
+  const end = endDate ? new Date(endDate) : start;
+  const dates: string[] = [];
+  const maxDays = 14; // 최대 14일까지만 생성
+
+  const current = new Date(start);
+  let count = 0;
+
+  while (current <= end && count < maxDays) {
+    dates.push(current.toISOString().split('T')[0]);
+    current.setDate(current.getDate() + 1);
+    count++;
+  }
+
+  return dates;
+}
+
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const campaign = await getTicketCampaignBySlug(params.slug);
   if (!isCampaign(campaign)) {
@@ -28,6 +51,23 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const performance = campaign.performances;
   const status = getStatus(campaign);
   const closesAt = campaign.ends_at ? formatDateTime(campaign.ends_at) : null;
+
+  // available_dates 결정: 캠페인에 설정된 값 > 캠페인 공연 기간 > 공연 기간
+  let availableDates: string[] = [];
+
+  if ("available_dates" in campaign && Array.isArray(campaign.available_dates) && campaign.available_dates.length > 0) {
+    availableDates = campaign.available_dates;
+  } else if ("performance_period_start" in campaign && campaign.performance_period_start) {
+    availableDates = generateDatesFromPeriod(
+      campaign.performance_period_start as string,
+      ("performance_period_end" in campaign ? campaign.performance_period_end : null) as string | null
+    );
+  } else if (performance && "period_start" in performance) {
+    availableDates = generateDatesFromPeriod(
+      performance.period_start as string,
+      "period_end" in performance ? performance.period_end as string : null
+    );
+  }
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16">
@@ -150,7 +190,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             slug={campaign.slug ?? campaign.id}
             campaignTitle={campaign.title}
             performanceTitle={performance?.title}
-            availableDates={"available_dates" in campaign && Array.isArray(campaign.available_dates) ? campaign.available_dates : undefined}
+            availableDates={availableDates.length > 0 ? availableDates : undefined}
           />
         </div>
       </div>

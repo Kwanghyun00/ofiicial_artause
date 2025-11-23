@@ -1,22 +1,11 @@
 /**
  * SiteHeader 컴포넌트
  *
- * 전체 사이트의 상단 헤더 (네비게이션 바)
- *
- * 주요 기능:
- * - 로고: 홈으로 이동, 호버 시 회전 효과
- * - 데스크톱 네비게이션: 활성 페이지 표시 (하단 인디케이터)
- * - 모바일 메뉴: 햄버거 아이콘, 슬라이드 패널
- * - Sticky 헤더: 스크롤 시에도 상단 고정
- *
- * 반응형:
- * - 모바일 (< 768px): 햄버거 메뉴
- * - 데스크톱 (>= 768px): 가로 네비게이션
- *
- * 접근성:
- * - ARIA 라벨 (메뉴 버튼, 로고)
- * - 키보드 포커스 스타일
- * - 활성 상태 명시적 표시
+ * 한국적 미감의 상단 헤더 네비게이션
+ * - 로고 아이콘만 표시 (텍스트 제거)
+ * - 딥 네이비 (#293380) 기반 메뉴 스타일
+ * - 활성 메뉴는 밑줄 + 볼드로 표시
+ * - 균일한 메뉴 간격
  */
 "use client";
 
@@ -25,10 +14,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/**
- * 네비게이션 메뉴 아이템 설정
- * 새 페이지 추가 시 이 배열에 추가
- */
+// 디자인 토큰
+const colors = {
+  navy: "#293380",
+  navyLight: "#3d4a9e",
+  text: "#1a1a2e",
+  textMuted: "#6B6560",
+  border: "#E8E3DC",
+  background: "#FFFFFF",
+};
+
 const navItems = [
   { href: "/", label: "홈" },
   { href: "/events", label: "이벤트" },
@@ -39,31 +34,30 @@ export function SiteHeader() {
   const pathname = usePathname() ?? "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const headerClass = "sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm";
-
   return (
-    <header className={headerClass}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-6">
+    <header
+      className="sticky top-0 z-50 border-b shadow-sm"
+      style={{ borderColor: colors.border, backgroundColor: colors.background }}
+    >
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
+        {/* 로고 - 아이콘만 */}
         <Link
           href="/"
-          className="flex items-center gap-3"
+          className="flex items-center transition-opacity hover:opacity-80"
           aria-label="Artause 홈"
         >
           <Image
             src="/images/brand/artause-symbol.png"
-            alt="Artause logo"
-            width={120}
-            height={120}
+            alt="Artause"
+            width={100}
+            height={100}
             priority
-            className="h-16 w-16 object-contain"
+            className="h-12 w-12 object-contain"
           />
-          <span className="hidden sm:block text-xl font-bold text-slate-900">
-            Artause
-          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+        {/* Desktop Navigation - 균일한 간격 */}
+        <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => {
             const isActive =
               item.href === "/"
@@ -73,13 +67,18 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative px-3 py-2 transition-all ${
-                  isActive ? "text-slate-900 font-semibold" : "text-slate-600 hover:text-slate-900"
-                }`}
+                className="relative px-1 py-2 text-sm transition-all"
+                style={{
+                  color: isActive ? colors.navy : colors.textMuted,
+                  fontWeight: isActive ? 700 : 500,
+                }}
               >
                 {item.label}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900" />
+                  <span
+                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                    style={{ backgroundColor: colors.navy }}
+                  />
                 )}
               </Link>
             );
@@ -89,41 +88,55 @@ export function SiteHeader() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex flex-col items-center justify-center gap-1.5 rounded-lg p-2.5 transition-colors hover:bg-slate-100 md:hidden focus:outline-none focus:ring-2 focus:ring-slate-300"
-          aria-label="메뉴 열기"
+          className="flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors md:hidden"
+          style={{ backgroundColor: mobileMenuOpen ? "#f3f4f6" : "transparent" }}
+          aria-label={mobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
           aria-expanded={mobileMenuOpen}
         >
           <span
-            className={`h-0.5 w-6 bg-slate-900 transition-all duration-300 ${
-              mobileMenuOpen ? "translate-y-2 rotate-45" : ""
-            }`}
+            className="h-0.5 w-5 transition-all duration-200"
+            style={{
+              backgroundColor: colors.navy,
+              transform: mobileMenuOpen ? "translateY(6px) rotate(45deg)" : "none",
+            }}
           />
           <span
-            className={`h-0.5 w-6 bg-slate-900 transition-all duration-300 ${
-              mobileMenuOpen ? "opacity-0" : ""
-            }`}
+            className="h-0.5 w-5 transition-all duration-200"
+            style={{
+              backgroundColor: colors.navy,
+              opacity: mobileMenuOpen ? 0 : 1,
+            }}
           />
           <span
-            className={`h-0.5 w-6 bg-slate-900 transition-all duration-300 ${
-              mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
-            }`}
+            className="h-0.5 w-5 transition-all duration-200"
+            style={{
+              backgroundColor: colors.navy,
+              transform: mobileMenuOpen ? "translateY(-6px) rotate(-45deg)" : "none",
+            }}
           />
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm md:hidden"
+            style={{ top: "57px" }}
             onClick={() => setMobileMenuOpen(false)}
-            aria-hidden="true"
           />
 
-          {/* Mobile Menu Panel */}
-          <nav className="fixed right-0 top-[65px] z-50 h-[calc(100vh-65px)] w-64 border-l border-slate-200 bg-white shadow-lg md:hidden">
-            <div className="flex flex-col gap-2 p-6">
+          {/* Menu Panel */}
+          <nav
+            className="fixed right-0 z-50 h-[calc(100vh-57px)] w-56 border-l shadow-lg md:hidden"
+            style={{
+              top: "57px",
+              borderColor: colors.border,
+              backgroundColor: colors.background,
+            }}
+          >
+            <div className="flex flex-col gap-1 p-4">
               {navItems.map((item) => {
                 const isActive =
                   item.href === "/"
@@ -134,11 +147,12 @@ export function SiteHeader() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`rounded-lg px-4 py-3 text-base font-medium transition-all ${
-                      isActive
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-700 hover:bg-slate-100"
-                    }`}
+                    className="rounded-xl px-4 py-3 text-sm transition-all"
+                    style={{
+                      backgroundColor: isActive ? colors.navy : "transparent",
+                      color: isActive ? "#fff" : colors.text,
+                      fontWeight: isActive ? 700 : 500,
+                    }}
                   >
                     {item.label}
                   </Link>

@@ -6,27 +6,53 @@ import { FeedbackModal } from "./FeedbackModal";
 /**
  * 플로팅 피드백 버튼
  *
- * 화면 우측 하단에 고정되어 있는 피드백 버튼
- * 클릭 시 FeedbackModal 열림
+ * - 정적인 딥 네이비 배경
+ * - hover 시에만 약간 밝아지고 그림자 추가
+ * - 과도한 반짝임/애니메이션 없음
  */
+
+const colors = {
+  navy: "#293380",
+  navyLight: "#3d4a9e",
+};
 
 export function FeedbackButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - 정적 스타일 */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl active:scale-95 sm:h-16 sm:w-16"
+        className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-md transition-all duration-200 hover:shadow-lg sm:h-14 sm:w-14"
+        style={{
+          backgroundColor: colors.navy,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = colors.navyLight;
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = colors.navy;
+          e.currentTarget.style.transform = "scale(1)";
+        }}
         aria-label="피드백 보내기"
         title="피드백 보내기"
       >
-        <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        {/* 정적 메시지 아이콘 */}
+        <svg
+          className="h-5 w-5 sm:h-6 sm:w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          />
         </svg>
-        {/* Pulse Animation */}
-        <span className="absolute inset-0 rounded-full bg-indigo-600 opacity-75 animate-ping"></span>
       </button>
 
       {/* Modal */}
