@@ -1,220 +1,308 @@
-/**
- * PerformanceExplorer 컴포넌트
- *
- * 공연 검색 및 필터링 기능을 제공하는 클라이언트 컴포넌트
- *
- * 주요 기능:
- * - 텍스트 검색 (제목, 지역)
- * - 장르 필터 (전체, 뮤지컬, 연극, 클래식, 무용, 전시)
- * - 결과 카운트 표시
- * - 실시간 필터링
- */
-"use client";
+"use client"
 
-import { useState, useMemo } from "react";
-import { PerformanceList } from "./PerformanceList";
+import Image from "next/image"
+import Link from "next/link"
+import { Calendar, MapPin, Search, Ticket } from "lucide-react"
+import { useMemo, useState } from "react"
 
 type Performance = {
-  id: string;
-  slug: string;
-  title: string;
-  region?: string | null;
-  tags?: string[] | null;
-  period_start?: string | null;
-  period_end?: string | null;
-  poster_url?: string | null;
-};
-
-type GenreFilter = "all" | "musical" | "play" | "classic" | "dance" | "exhibition";
+  id: string
+  slug: string
+  title: string
+  organization?: string | null
+  region?: string | null
+  category?: string | null
+  tags?: string[] | null
+  period_start?: string | null
+  period_end?: string | null
+  poster_url?: string | null
+}
 
 type Props = {
-  performances: Performance[];
-};
+  performances: Performance[]
+}
 
-/**
- * 장르 필터링 함수
- */
-function matchesGenre(performance: Performance, genre: GenreFilter): boolean {
-  if (genre === "all") return true;
-  if (!performance.tags || performance.tags.length === 0) return false;
+type StatusFilter = "all" | "ongoing" | "upcoming" | "closed"
 
-  const tag = performance.tags[0].toLowerCase();
-
-  switch (genre) {
-    case "musical":
-      return tag.includes("뮤지컬");
-    case "play":
-      return tag.includes("연극");
-    case "classic":
-      return tag.includes("클래식") || tag.includes("음악");
-    case "dance":
-      return tag.includes("무용") || tag.includes("댄스");
-    case "exhibition":
-      return tag.includes("전시") || tag.includes("미술");
-    default:
-      return true;
-  }
+const STATUS_META: Record<Exclude<StatusFilter, "all">, { label: string; tone: string }> = {
+  ongoing: { label: "진행 중", tone: "bg-emerald-500 text-white" },
+  upcoming: { label: "모집 예정", tone: "bg-amber-500 text-white" },
+  closed: { label: "마감", tone: "bg-muted text-foreground/80" },
 }
 
 export function PerformanceExplorer({ performances }: Props) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [genreFilter, setGenreFilter] = useState<GenreFilter>("all");
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [regionFilter, setRegionFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
 
-  /**
-   * 필터링된 공연 목록
-   * 검색어와 장르 필터를 동시에 적용
-   */
+  const regionOptions = useMemo(() => {
+    const set = new Set<string>()
+    performances.forEach((performance) => {
+      if (performance.region) set.add(performance.region)
+    })
+    return Array.from(set)
+  }, [performances])
+
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>()
+    performances.forEach((performance) => {
+      if (performance.category) set.add(performance.category)
+      performance.tags?.forEach((tag) => set.add(tag))
+    })
+    return Array.from(set)
+  }, [performances])
+
   const filteredPerformances = useMemo(() => {
     return performances.filter((performance) => {
-      // 검색어 필터
-      const matchesSearch = searchQuery === "" ||
-        performance.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (performance.region?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+      const matchesSearch =
+        searchTerm.trim() === "" ||
+        performance.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (performance.organization?.toLowerCase() ?? "").includes(searchTerm.toLowerCase())
 
-      // 장르 필터
-      const matchesGenreFilter = matchesGenre(performance, genreFilter);
+      const status = getStatus(performance)
+      const matchesStatus = statusFilter === "all" || status === statusFilter
 
-      return matchesSearch && matchesGenreFilter;
-    });
-  }, [performances, searchQuery, genreFilter]);
+      const matchesRegion = regionFilter === "all" || performance.region === regionFilter
 
-  // 장르별 카운트
-  const counts = useMemo(() => ({
-    all: performances.length,
-    musical: performances.filter(p => matchesGenre(p, "musical")).length,
-    play: performances.filter(p => matchesGenre(p, "play")).length,
-    classic: performances.filter(p => matchesGenre(p, "classic")).length,
-    dance: performances.filter(p => matchesGenre(p, "dance")).length,
-    exhibition: performances.filter(p => matchesGenre(p, "exhibition")).length,
-  }), [performances]);
+      const matchesCategory =
+        categoryFilter === "all" ||
+        performance.category === categoryFilter ||
+        performance.tags?.some((tag) => tag === categoryFilter)
+
+      return matchesSearch && matchesStatus && matchesRegion && matchesCategory
+    })
+  }, [categoryFilter, performances, regionFilter, searchTerm, statusFilter])
+
+  const statusCounts = useMemo(
+    () => ({
+      ongoing: performances.filter((performance) => getStatus(performance) === "ongoing").length,
+      upcoming: performances.filter((performance) => getStatus(performance) === "upcoming").length,
+      closed: performances.filter((performance) => getStatus(performance) === "closed").length,
+    }),
+    [performances],
+  )
+
+  const hasActiveFilter =
+    searchTerm.trim() !== "" || statusFilter !== "all" || regionFilter !== "all" || categoryFilter !== "all"
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Search and Filter Bar */}
-      <div className="rounded-lg sm:rounded-xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-        {/* Search Input */}
-        <div className="mb-3 sm:mb-4">
-          <label htmlFor="search" className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">
-            공연 검색
-          </label>
-          <input
-            id="search"
-            type="text"
-            placeholder="공연 제목이나 지역으로 검색하세요..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 sm:px-4 py-2.5 sm:py-3 text-sm outline-none transition-all focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-          />
-        </div>
+    <div className="space-y-6">
+      <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="flex-1 space-y-3">
+            <p className="text-sm font-semibold text-primary">라이브 공연 탐색기</p>
+            <h3 className="text-2xl font-bold text-foreground">관심 있는 공연/전시를 조건별로 찾아보세요</h3>
+            <p className="text-sm text-muted-foreground">
+              기간 · 지역 · 장르 필터를 활용하면 지금 모집 중인 초대 프로그램을 빠르게 찾을 수 있습니다.
+            </p>
+          </div>
 
-        {/* Genre Filter Tabs - 모바일에서 스크롤 가능 */}
-        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex gap-2 min-w-max sm:min-w-0 sm:flex-wrap pb-2 sm:pb-0">
-            <FilterTab
-              active={genreFilter === "all"}
-              onClick={() => setGenreFilter("all")}
-              label="전체"
-              count={counts.all}
-              color="bg-slate-900"
-            />
-            <FilterTab
-              active={genreFilter === "musical"}
-              onClick={() => setGenreFilter("musical")}
-              label="뮤지컬"
-              count={counts.musical}
-              color="bg-purple-600"
-            />
-            <FilterTab
-              active={genreFilter === "play"}
-              onClick={() => setGenreFilter("play")}
-              label="연극"
-              count={counts.play}
-              color="bg-blue-600"
-            />
-            <FilterTab
-              active={genreFilter === "classic"}
-              onClick={() => setGenreFilter("classic")}
-              label="클래식"
-              count={counts.classic}
-              color="bg-indigo-600"
-            />
-            <FilterTab
-              active={genreFilter === "dance"}
-              onClick={() => setGenreFilter("dance")}
-              label="무용"
-              count={counts.dance}
-              color="bg-pink-600"
-            />
-            <FilterTab
-              active={genreFilter === "exhibition"}
-              onClick={() => setGenreFilter("exhibition")}
-              label="전시"
-              count={counts.exhibition}
-              color="bg-amber-600"
-            />
+          <div className="flex flex-1 flex-col gap-4">
+            <label className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">검색</label>
+            <div className="flex items-center gap-2 rounded-2xl border border-border bg-background px-4 py-2.5">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="제목, 단체명, 키워드 등을 입력하세요"
+                className="flex-1 bg-transparent text-sm outline-none"
+                aria-label="공연 검색어 입력"
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground">지역</label>
+                <select
+                  value={regionFilter}
+                  onChange={(event) => setRegionFilter(event.target.value)}
+                  className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
+                >
+                  <option value="all">전체 지역</option>
+                  {regionOptions.map((region) => (
+                    <option key={region} value={region}>
+                      {region}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground">장르/태그</label>
+                <select
+                  value={categoryFilter}
+                  onChange={(event) => setCategoryFilter(event.target.value)}
+                  className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
+                >
+                  <option value="all">전체 장르</option>
+                  {categoryOptions.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Results */}
-      <div>
-        <div className="mb-3 sm:mb-4 flex items-center justify-between gap-2">
-          <p className="text-xs sm:text-sm text-slate-600">
-            <span className="font-bold text-slate-900">{filteredPerformances.length}개</span>의 공연
-            {searchQuery && <span className="hidden sm:inline"> (검색: "{searchQuery}")</span>}
-          </p>
-          {searchQuery && (
+        <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="상태 필터">
+          {(["all", "ongoing", "upcoming", "closed"] as StatusFilter[]).map((filter) => (
             <button
-              onClick={() => setSearchQuery("")}
-              className="text-xs sm:text-sm text-slate-700 hover:text-slate-900 transition-colors font-medium shrink-0"
+              key={filter}
+              type="button"
+              onClick={() => setStatusFilter(filter)}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                statusFilter === filter
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-white text-muted-foreground hover:border-primary/40"
+              }`}
             >
-              초기화 ×
+              <span>
+                {filter === "all"
+                  ? "전체"
+                  : filter === "ongoing"
+                    ? "진행 중"
+                    : filter === "upcoming"
+                      ? "모집 예정"
+                      : "종료"}
+              </span>
+              {filter !== "all" && (
+                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
+                  {statusCounts[filter as Exclude<StatusFilter, "all">]}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div>
+        <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
+          <p>
+            총 <span className="font-semibold text-primary">{filteredPerformances.length}</span>개의 공연을 찾았어요.
+          </p>
+          {hasActiveFilter && (
+            <button
+              type="button"
+              className="text-xs font-semibold text-primary hover:underline"
+              onClick={() => {
+                setSearchTerm("")
+                setStatusFilter("all")
+                setRegionFilter("all")
+                setCategoryFilter("all")
+              }}
+            >
+              필터 초기화
             </button>
           )}
         </div>
 
         {filteredPerformances.length > 0 ? (
-          <PerformanceList performances={filteredPerformances} />
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {filteredPerformances.map((performance) => (
+              <PerformanceCard key={performance.id} performance={performance} />
+            ))}
+          </div>
         ) : (
-          <div className="rounded-lg sm:rounded-xl border border-slate-200 bg-white p-8 sm:p-12 text-center">
-            <p className="text-sm sm:text-base font-medium text-slate-400">검색 결과가 없습니다</p>
-            <p className="mt-2 text-xs sm:text-sm text-slate-500">
-              다른 검색어나 필터를 사용해보세요
-            </p>
+          <div className="rounded-3xl border-2 border-dashed border-border bg-background/60 px-8 py-12 text-center text-sm text-muted-foreground">
+            조건에 맞는 공연이 없습니다.
+            <br />
+            다른 검색어나 필터를 선택해 주세요.
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }
 
-/**
- * 필터 탭 컴포넌트
- */
-type FilterTabProps = {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  count: number;
-  color: string;
-};
+function PerformanceCard({ performance }: { performance: Performance }) {
+  const status = getStatus(performance)
+  const badge = status === "all" ? null : STATUS_META[status]
 
-function FilterTab({ active, onClick, label, count, color }: FilterTabProps) {
   return (
-    <button
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all shrink-0 ${
-        active
-          ? `${color} text-white`
-          : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-      }`}
-    >
-      <span>{label}</span>
-      <span className={`rounded px-1.5 sm:px-2 py-0.5 text-xs font-semibold ${
-        active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
-      }`}>
-        {count}
-      </span>
-    </button>
-  );
+    <article className="flex h-full flex-col rounded-3xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="relative h-52 w-full overflow-hidden rounded-2xl bg-muted/60">
+        {performance.poster_url ? (
+          <Image
+            src={performance.poster_url}
+            alt={`${performance.title} 포스터`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-xs text-muted-foreground">포스터 준비 중</div>
+        )}
+        {badge && (
+          <span className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-semibold ${badge.tone}`}>
+            {badge.label}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 flex flex-1 flex-col gap-4">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">{performance.organization ?? "주최 미정"}</p>
+          <h3 className="text-lg font-bold text-foreground">{performance.title}</h3>
+          <div className="space-y-1 text-sm text-muted-foreground">
+            {performance.region && (
+              <p className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {performance.region}
+              </p>
+            )}
+            <p className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {formatPeriod(performance.period_start, performance.period_end)}
+            </p>
+          </div>
+          {performance.tags && performance.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {performance.tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Link
+          href={`/performances/${performance.slug}`}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
+        >
+          <Ticket className="h-4 w-4" />
+          상세 페이지
+        </Link>
+      </div>
+    </article>
+  )
+}
+
+function getStatus(performance: Performance): Exclude<StatusFilter, "all"> {
+  const now = Date.now()
+  const start = performance.period_start ? new Date(performance.period_start).getTime() : null
+  const end = performance.period_end ? new Date(performance.period_end).getTime() : null
+
+  if (start && start > now) return "upcoming"
+  if (end && end < now) return "closed"
+  return "ongoing"
+}
+
+function formatPeriod(start?: string | null, end?: string | null) {
+  if (!start && !end) return "상시 진행"
+  const startText = start ? formatDate(start) : "미정"
+  const endText = end ? formatDate(end) : "미정"
+  if (startText === endText) return startText
+  return `${startText} ~ ${endText}`
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "미정"
+  return new Date(value).toLocaleDateString("ko-KR", {
+    month: "short",
+    day: "numeric",
+  })
 }

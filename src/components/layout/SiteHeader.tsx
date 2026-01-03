@@ -1,167 +1,95 @@
-/**
- * SiteHeader 컴포넌트
- *
- * 한국적 미감의 상단 헤더 네비게이션
- * - 로고 아이콘만 표시 (텍스트 제거)
- * - 딥 네이비 (#293380) 기반 메뉴 스타일
- * - 활성 메뉴는 밑줄 + 볼드로 표시
- * - 균일한 메뉴 간격
- */
-"use client";
+"use client"
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-// 디자인 토큰
-const colors = {
-  navy: "#293380",
-  navyLight: "#3d4a9e",
-  text: "#1a1a2e",
-  textMuted: "#6B6560",
-  border: "#E8E3DC",
-  background: "#FFFFFF",
-};
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Menu, Search } from "lucide-react"
+import { useState } from "react"
 
 const navItems = [
   { href: "/", label: "홈" },
-  { href: "/events", label: "이벤트" },
-  { href: "/performances", label: "공연" },
-];
+  { href: "/performances", label: "공연·전시" },
+  { href: "/events", label: "초대 캘린더" },
+  { href: "/event-center", label: "이벤트 허브" },
+  { href: "/rules", label: "이용 안내" },
+]
 
 export function SiteHeader() {
-  const pathname = usePathname() ?? "/";
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <header
-      className="sticky top-0 z-50 border-b shadow-sm"
-      style={{ borderColor: colors.border, backgroundColor: colors.background }}
-    >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-        {/* 로고 - 아이콘만 */}
-        <Link
-          href="/"
-          className="flex items-center transition-opacity hover:opacity-80"
-          aria-label="Artause 홈"
-        >
-          <Image
-            src="/images/brand/artause-symbol.png"
-            alt="Artause"
-            width={100}
-            height={100}
-            priority
-            className="h-12 w-12 object-contain"
-          />
+    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
+            A
+          </span>
+          <div>
+            <p className="text-base font-semibold text-foreground">Artause</p>
+            <p className="text-xs text-muted-foreground">프리미엄 문화 초청 플랫폼</p>
+          </div>
         </Link>
 
-        {/* Desktop Navigation - 균일한 간격 */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex" aria-label="Primary">
           {navItems.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative px-1 py-2 text-sm transition-all"
-                style={{
-                  color: isActive ? colors.navy : colors.textMuted,
-                  fontWeight: isActive ? 700 : 500,
-                }}
+                className={`transition hover:text-primary ${isActive ? "text-foreground" : ""}`}
+                aria-current={isActive ? "page" : undefined}
               >
                 {item.label}
-                {isActive && (
-                  <span
-                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                    style={{ backgroundColor: colors.navy }}
-                  />
-                )}
               </Link>
-            );
+            )
           })}
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors md:hidden"
-          style={{ backgroundColor: mobileMenuOpen ? "#f3f4f6" : "transparent" }}
-          aria-label={mobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
-          aria-expanded={mobileMenuOpen}
-        >
-          <span
-            className="h-0.5 w-5 transition-all duration-200"
-            style={{
-              backgroundColor: colors.navy,
-              transform: mobileMenuOpen ? "translateY(6px) rotate(45deg)" : "none",
-            }}
-          />
-          <span
-            className="h-0.5 w-5 transition-all duration-200"
-            style={{
-              backgroundColor: colors.navy,
-              opacity: mobileMenuOpen ? 0 : 1,
-            }}
-          />
-          <span
-            className="h-0.5 w-5 transition-all duration-200"
-            style={{
-              backgroundColor: colors.navy,
-              transform: mobileMenuOpen ? "translateY(-6px) rotate(-45deg)" : "none",
-            }}
-          />
-        </button>
+        <div className="flex items-center gap-3">
+          <button className="hidden rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/5 md:inline-flex">
+            로그인
+          </button>
+          <button className="hidden rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 md:inline-flex">
+            무료 가입
+          </button>
+          <button className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary md:hidden">
+            <Search className="h-5 w-5" />
+          </button>
+          <button
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary md:hidden"
+            aria-label="모바일 메뉴 열기"
+            onClick={() => setMobileOpen((open) => !open)}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm md:hidden"
-            style={{ top: "57px" }}
-            onClick={() => setMobileMenuOpen(false)}
-          />
-
-          {/* Menu Panel */}
-          <nav
-            className="fixed right-0 z-50 h-[calc(100vh-57px)] w-56 border-l shadow-lg md:hidden"
-            style={{
-              top: "57px",
-              borderColor: colors.border,
-              backgroundColor: colors.background,
-            }}
-          >
-            <div className="flex flex-col gap-1 p-4">
-              {navItems.map((item) => {
-                const isActive =
-                  item.href === "/"
-                    ? pathname === "/"
-                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-xl px-4 py-3 text-sm transition-all"
-                    style={{
-                      backgroundColor: isActive ? colors.navy : "transparent",
-                      color: isActive ? "#fff" : colors.text,
-                      fontWeight: isActive ? 700 : 500,
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+      {mobileOpen && (
+        <div className="border-t border-border bg-background/95 px-4 py-4 md:hidden">
+          <nav className="flex flex-col gap-3 text-sm font-medium text-muted-foreground" aria-label="Mobile">
+            {navItems.map((item) => {
+              const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`rounded-xl px-3 py-2 transition ${isActive ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+            <div className="mt-2 flex gap-2">
+              <button className="flex-1 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground">로그인</button>
+              <button className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">무료 가입</button>
             </div>
           </nav>
-        </>
+        </div>
       )}
     </header>
-  );
+  )
 }

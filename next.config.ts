@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**',
       },
+      {
+        protocol: 'http',
+        hostname: 'www.kopis.or.kr',
+        pathname: '/upload/**',
+      },
     ],
   },
   experimental: {

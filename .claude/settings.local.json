@@ -38,7 +38,17 @@
       "Bash(npm run dev:*)",
       "Bash(timeout /t 3)",
       "Bash(timeout /t 15)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "WebFetch(domain:nol.interpark.com)",
+      "Bash(node test-kopis.js:*)",
+      "Bash(if exist test-kopis.js del /f test-kopis.js)",
+      "Bash(npx vercel env ls)",
+      "Bash(npx vercel env add:*)",
+      "Bash(npx vercel:*)",
+      "WebFetch(domain:artauseweb.vercel.app)",
+      "Bash(node -e:*)",
+      "Bash(curl:*)",
+      "Bash(printf:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,9 +1,10 @@
 ﻿"use client";
 
 import { ReactNode } from "react";
-import { SiteHeader } from "./SiteHeader";
-import { SiteFooter } from "./SiteFooter";
-import { FeedbackButton } from "@/components/common/FeedbackButton";
+import { SiteHeader } from "./SiteHeader"
+import { SiteFooter } from "./SiteFooter"
+import { FeedbackButton } from "@/components/common/FeedbackButton"
+import { AnnouncementBar } from "./AnnouncementBar"
 
 interface SiteShellProps {
   children: ReactNode;
@@ -11,11 +12,12 @@ interface SiteShellProps {
 
 export function SiteShell({ children }: SiteShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f7fb] text-slate-900">
+    <div className="flex min-h-screen flex-col bg-[var(--background)] text-slate-900">
+      <AnnouncementBar />
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <FeedbackButton />
     </div>
-  );
+  )
 }

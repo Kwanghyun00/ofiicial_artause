@@ -1,247 +1,94 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { TicketEntryFormSteps } from "@/components/forms/TicketEntryFormSteps";
-import { getTicketCampaignBySlug } from "@/lib/supabase/queries";
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowLeft, Calendar, MapPin, Users } from "lucide-react"
+import { EventApplicationForm } from "@/components/event-application-form"
+import { SiteHeader } from "@/components/layout/SiteHeader"
+import { SiteFooter } from "@/components/layout/SiteFooter"
+import { Badge } from "@/components/ui/badge"
 
-interface EventDetailPageProps {
-  params: { slug: string };
+const mockEvent = {
+  id: "1",
+  title: "프리미엄 미술 초대",
+  genre: "전시",
+  location: "서울 성수 갤러리",
+  period: "2025.02.01 - 2025.04.30",
+  time: "10:00 - 18:00 (월요일 휴관)",
+  applicants: "1,247명 / 2,000명",
+  deadline: "D-5",
+  image: "/art-exhibition.png",
+  description:
+    "몰입형 미디어아트와 큐레이터 해설이 결합된 특별 초대 프로그램입니다. 오프닝 리셉션과 아티스트 토크 세션이 함께 제공됩니다.",
+  benefits: ["1인 2매 초대권", "오디오 가이드 & 리셉션 초대", "카페 10% 할인권"],
 }
 
-export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
-  const campaign = await getTicketCampaignBySlug(params.slug);
-  if (!isCampaign(campaign)) {
-    return { title: "이벤트를 찾을 수 없어요" };
-  }
-  return {
-    title: `${campaign.title} · 초대권 이벤트`,
-    description: campaign.description ?? "공연 단체가 직접 운영하는 초대권 이벤트입니다.",
-  };
-}
-
-/**
- * 공연 기간에서 날짜 배열 생성 (최대 14일)
- */
-function generateDatesFromPeriod(startDate: string | null, endDate: string | null): string[] {
-  if (!startDate) return [];
-
-  const start = new Date(startDate);
-  const end = endDate ? new Date(endDate) : start;
-  const dates: string[] = [];
-  const maxDays = 14; // 최대 14일까지만 생성
-
-  const current = new Date(start);
-  let count = 0;
-
-  while (current <= end && count < maxDays) {
-    dates.push(current.toISOString().split('T')[0]);
-    current.setDate(current.getDate() + 1);
-    count++;
-  }
-
-  return dates;
-}
-
-export default async function EventDetailPage({ params }: EventDetailPageProps) {
-  const campaign = await getTicketCampaignBySlug(params.slug);
-  if (!isCampaign(campaign)) {
-    notFound();
-  }
-
-  const performance = campaign.performances;
-  const status = getStatus(campaign);
-  const closesAt = campaign.ends_at ? formatDateTime(campaign.ends_at) : null;
-
-  // available_dates 결정: 캠페인에 설정된 값 > 캠페인 공연 기간 > 공연 기간
-  let availableDates: string[] = [];
-
-  if ("available_dates" in campaign && Array.isArray(campaign.available_dates) && campaign.available_dates.length > 0) {
-    availableDates = campaign.available_dates;
-  } else if ("performance_period_start" in campaign && campaign.performance_period_start) {
-    availableDates = generateDatesFromPeriod(
-      campaign.performance_period_start as string,
-      ("performance_period_end" in campaign ? campaign.performance_period_end : null) as string | null
-    );
-  } else if (performance && "period_start" in performance) {
-    availableDates = generateDatesFromPeriod(
-      performance.period_start as string,
-      "period_end" in performance ? performance.period_end as string : null
-    );
-  }
-
+export default function EventApplyPage() {
   return (
-    <article className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16">
-      {/* Breadcrumb */}
-      <div className="mb-6 flex items-center gap-2 text-sm">
-        <Link href="/events" className="text-[#6B6560] hover:text-[#2D2A26] transition-colors">
-          이벤트 목록
-        </Link>
-        <span className="text-[#E8E3DC]">/</span>
-        <span className="text-[#2D2A26] font-medium">{campaign.title}</span>
-      </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
 
-      {/* Header Section - v0 style */}
-      <section className="rounded-3xl border border-[#E8E3DC] bg-white p-6 sm:p-8 md:p-10 shadow-lg mb-8">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold ${statusBadge(status)}`}>
-            {statusLabel(status)}
-          </span>
-          {closesAt && (
-            <span className="text-sm text-[#6B6560]">
-              <span className="mr-1">⏰</span>
-              {closesAt} 마감
-            </span>
-          )}
-        </div>
+      <main className="flex-1">
+        <div className="container mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+          <Link href="/events" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-primary">
+            <ArrowLeft className="h-4 w-4" />
+            초대 목록으로 돌아가기
+          </Link>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#2D2A26] mb-4">
-          {campaign.title}
-        </h1>
+          <div className="grid gap-10 lg:grid-cols-[1.1fr,0.9fr]">
+            <section className="space-y-6 rounded-[32px] border border-border bg-card p-6 shadow-sm sm:p-8">
+              <div className="space-y-3">
+                <Badge className="bg-primary/10 text-primary">{mockEvent.genre}</Badge>
+                <h1 className="text-3xl font-bold text-foreground sm:text-4xl">{mockEvent.title}</h1>
+                <p className="text-sm text-muted-foreground">{mockEvent.description}</p>
+              </div>
 
-        <p className="text-base sm:text-lg text-[#6B6560] leading-relaxed">
-          {campaign.description ?? "SNS 홍보와 연동된 초대권 이벤트입니다."}
-        </p>
+              <div className="relative aspect-[3/2] overflow-hidden rounded-3xl">
+                <Image src={mockEvent.image} alt={mockEvent.title} fill className="object-cover" priority />
+              </div>
 
-        {campaign.reward && (
-          <div className="mt-6 flex items-center gap-2 rounded-xl border-2 border-[#8B7BA8]/20 bg-[#8B7BA8]/5 px-5 py-3">
-            <span className="text-xl">🎁</span>
-            <div>
-              <span className="text-sm font-medium text-[#6B6560]">제공 내용</span>
-              <p className="text-base font-bold text-[#2D2A26]">{campaign.reward}</p>
-            </div>
+              <div className="rounded-3xl border border-border bg-white px-6 py-5 text-sm text-muted-foreground">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    {mockEvent.location}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    {mockEvent.period}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    관람 시간: {mockEvent.time}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    {mockEvent.applicants}
+                  </div>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-primary">마감 {mockEvent.deadline}</p>
+              </div>
+
+              <div className="rounded-3xl border border-border bg-secondary/40 px-6 py-5">
+                <h3 className="text-base font-bold text-foreground">초대 혜택</h3>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  {mockEvent.benefits.map((benefit) => (
+                    <li key={benefit}>· {benefit}</li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+
+            <section className="rounded-[32px] border border-border bg-card p-6 shadow-lg sm:p-8">
+              <h2 className="text-xl font-semibold text-foreground">신청 폼</h2>
+              <p className="mt-1 text-sm text-muted-foreground">로그인 없이 기본 정보만 입력하면 신청이 완료됩니다.</p>
+              <div className="mt-6">
+                <EventApplicationForm />
+              </div>
+            </section>
           </div>
-        )}
-
-        {performance && (
-          <div className="mt-6 rounded-2xl border border-[#E8E3DC] bg-[#F5EFE7] p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🎭</span>
-              <span className="text-sm font-medium text-[#6B6560]">연결된 공연</span>
-            </div>
-            <Link
-              href={`/performances/${performance.slug}`}
-              className="text-lg font-bold text-[#8B7BA8] hover:text-[#8B7BA8]/80 transition-colors"
-            >
-              {performance.title} →
-            </Link>
-          </div>
-        )}
-      </section>
-
-      {/* Content Grid */}
-      <div className="grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
-        {/* Left Column: Guidelines */}
-        <div className="space-y-6">
-          {/* How it Works */}
-          <section className="rounded-2xl border border-[#E8E3DC] bg-white p-6 sm:p-8 shadow-md">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
-              <span className="text-2xl">📝</span>
-              진행 안내
-            </h2>
-            <ol className="space-y-3 text-sm sm:text-base text-[#2D2A26]">
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#8B7BA8] text-white text-xs font-bold">
-                  1
-                </span>
-                <span>공연 단체가 등록한 정보에 따라 이벤트가 자동으로 열립니다.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#8B7BA8] text-white text-xs font-bold">
-                  2
-                </span>
-                <span>관객은 오른쪽 폼에서 응모하며, 필요한 최소 정보만 입력합니다.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#8B7BA8] text-white text-xs font-bold">
-                  3
-                </span>
-                <span>선정된 관객 명단은 Event Hub에서 단체가 직접 확인하고 관람 여부를 체크합니다.</span>
-              </li>
-            </ol>
-          </section>
-
-          {/* Important Notes */}
-          <section className="rounded-2xl border-2 border-[#D97B7B]/30 bg-[#D97B7B]/5 p-6 sm:p-8">
-            <h3 className="text-lg sm:text-xl font-bold text-[#2D2A26] mb-4 flex items-center gap-2">
-              <span className="text-2xl">⚠️</span>
-              유의 사항
-            </h3>
-            <ul className="space-y-2 text-sm sm:text-base text-[#2D2A26]">
-              <li className="flex gap-2">
-                <span className="text-[#D97B7B] flex-shrink-0">•</span>
-                <span>중복 응모·허위 정보 입력 시 선정 대상에서 제외됩니다.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-[#D97B7B] flex-shrink-0">•</span>
-                <span>선정자는 이메일로 개별 안내드리며, 공지 없이 양도할 수 없습니다.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-[#D97B7B] flex-shrink-0">•</span>
-                <span>관람이 어려울 경우 최소 1일 전까지 회신해 주세요.</span>
-              </li>
-            </ul>
-          </section>
         </div>
+      </main>
 
-        {/* Right Column: Application Form */}
-        <div className="lg:sticky lg:top-8 lg:self-start">
-          <TicketEntryFormSteps
-            campaignId={campaign.id}
-            slug={campaign.slug ?? campaign.id}
-            campaignTitle={campaign.title}
-            performanceTitle={performance?.title}
-            availableDates={availableDates.length > 0 ? availableDates : undefined}
-          />
-        </div>
-      </div>
-    </article>
-  );
-}
-
-type CampaignRecord = Awaited<ReturnType<typeof getTicketCampaignBySlug>>;
-
-function isCampaign(record: CampaignRecord): record is Exclude<CampaignRecord, null> & { id: string } {
-  return Boolean(record && typeof record === "object" && "id" in record);
-}
-
-type CampaignStatus = "active" | "closed" | "upcoming";
-
-function getStatus(campaign: Exclude<CampaignRecord, null> & { id: string }): CampaignStatus {
-  const now = Date.now();
-  const starts = campaign.starts_at ? new Date(campaign.starts_at).getTime() : null;
-  const ends = campaign.ends_at ? new Date(campaign.ends_at).getTime() : null;
-  if (starts && starts > now) return "upcoming";
-  if (ends && ends < now) return "closed";
-  return "active";
-}
-
-function statusBadge(status: CampaignStatus) {
-  switch (status) {
-    case "active":
-      return "bg-[#8B7BA8] text-white shadow-md";
-    case "upcoming":
-      return "bg-[#F5EFE7] text-[#6B6560] border border-[#E8E3DC]";
-    case "closed":
-      return "bg-[#E8E3DC] text-[#6B6560]";
-  }
-}
-
-function statusLabel(status: CampaignStatus) {
-  switch (status) {
-    case "active":
-      return "진행 중";
-    case "upcoming":
-      return "오픈 예정";
-    case "closed":
-      return "마감";
-  }
-}
-
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString("ko-KR", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+      <SiteFooter />
+    </div>
+  )
 }

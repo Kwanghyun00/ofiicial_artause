@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { Noto_Sans_KR } from 'next/font/google';
 import './globals.css';
 import { SiteShell } from '@/components/layout/SiteShell';
@@ -11,11 +11,10 @@ const notoSans = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Artause | 공연 홍보와 관객 경험을 연결합니다',
+    default: 'Artause | 프리미엄 문화 초대 플랫폼',
     template: '%s | Artause',
   },
-  description:
-    'Artause는 공연 전문 마케팅 랩입니다. 공연 홍보 전략부터 초대권 이벤트까지 한 곳에서 운영해 보세요.',
+  description: '뮤지컬, 전시, 클래식 공연까지 멤버 전용 초청과 맞춤 큐레이션을 제공하는 Artause입니다.',
   metadataBase: new URL('https://artause-web.vercel.app'),
   icons: {
     icon: '/favicon.ico',
