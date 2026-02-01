@@ -1,5 +1,5 @@
-﻿import { Badge } from "@/v0/components/ui/badge"
-import { Button } from "@/v0/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
 const categories = [
@@ -66,3 +66,4 @@ export function CategoryShowcase() {
     </section>
   )
 }
+

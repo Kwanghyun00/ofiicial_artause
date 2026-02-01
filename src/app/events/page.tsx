@@ -5,6 +5,7 @@ import { getTicketCampaigns } from "@/lib/supabase/queries"
 
 type CampaignResult = Awaited<ReturnType<typeof getTicketCampaigns>>[number]
 type ValidCampaign = Extract<CampaignResult, { id: string }>
+type CampaignWithEntries = ValidCampaign & { entry_count?: number | null }
 
 const isCampaign = (record: CampaignResult): record is ValidCampaign =>
   Boolean(record && typeof record === "object" && "id" in record)
@@ -15,7 +16,12 @@ export const metadata = {
 }
 
 export default async function EventsPage() {
-  const campaigns = (await getTicketCampaigns()).filter(isCampaign)
+  const campaigns = (await getTicketCampaigns())
+    .filter(isCampaign)
+    .map((campaign) => ({
+      ...campaign,
+      entry_count: (campaign as { entry_count?: number | null }).entry_count ?? null,
+    })) as CampaignWithEntries[]
   const activeCampaigns = campaigns.filter((campaign) => getStatus(campaign) === "active")
   const closingSoonCount = countClosingSoon(campaigns)
   const totalApplicants = campaigns.reduce((total, campaign) => total + (campaign.entry_count ?? 0), 0)
@@ -64,7 +70,7 @@ export default async function EventsPage() {
 
 type CampaignStatus = "active" | "upcoming" | "closed"
 
-function getStatus(campaign: ValidCampaign): CampaignStatus {
+function getStatus(campaign: CampaignWithEntries): CampaignStatus {
   const now = Date.now()
   const starts = campaign.starts_at ? new Date(campaign.starts_at).getTime() : null
   const ends = campaign.ends_at ? new Date(campaign.ends_at).getTime() : null
@@ -73,7 +79,7 @@ function getStatus(campaign: ValidCampaign): CampaignStatus {
   return "active"
 }
 
-function countClosingSoon(campaigns: ValidCampaign[]) {
+function countClosingSoon(campaigns: CampaignWithEntries[]) {
   const now = Date.now()
   return campaigns.filter((campaign) => {
     if (!campaign.ends_at) return false
