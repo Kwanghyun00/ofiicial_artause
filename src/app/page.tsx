@@ -151,7 +151,7 @@ function createHeroStats(campaigns: Campaign[]) {
 
   const upcomingDeadline = campaigns
     .map((campaign) => (campaign.ends_at ? new Date(campaign.ends_at).getTime() : null))
-    .filter((timestamp): timestamp is number => Boolean(timestamp) && timestamp > now)
+    .filter((timestamp): timestamp is number => timestamp !== null && Number.isFinite(timestamp) && timestamp > now)
     .sort((a, b) => a - b)[0]
 
   return {
