@@ -135,7 +135,6 @@ function normalizeShow(record: RawPerformance): Show {
   const performance = record as RawPerformance & {
     slug?: string | null
     region?: string | null
-    tags?: string[] | null
     period_start?: string | null
     period_end?: string | null
     poster_url?: string | null
@@ -146,7 +145,7 @@ function normalizeShow(record: RawPerformance): Show {
     slug: performance.slug ?? performance.id,
     title: performance.title,
     region: performance.region ?? null,
-    tags: performance.tags ?? null,
+    tags: null,
     period_start: performance.period_start ?? null,
     period_end: performance.period_end ?? null,
     poster_url: performance.poster_url ?? null,

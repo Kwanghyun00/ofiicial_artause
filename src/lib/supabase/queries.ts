@@ -25,7 +25,6 @@ const PERFORMANCE_SELECT = `
   period_end,
   venue,
   synopsis,
-  tags,
   tasks,
   poster_url,
   hero_headline,
