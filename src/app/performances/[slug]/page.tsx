@@ -25,8 +25,10 @@ export default async function PerformanceDetailPage({ params }: { params: { slug
     typeof performance === "object" && "openrun" in performance && performance.openrun === "Y"
       ? "오픈런"
       : null
+  const category =
+    typeof performance === "object" && "category" in performance ? performance.category : null
   const tags = [
-    performance.category,
+    category,
     ...(Array.isArray(performance.tags) ? performance.tags : []),
     status,
     openrunLabel,
