@@ -17,7 +17,10 @@ export default async function PerformanceDetailPage({ params }: { params: { slug
     notFound()
   }
 
-  const status = performance.status ?? performance.state
+  const status =
+    typeof performance === "object" && "status" in performance
+      ? performance.status
+      : performance.state
   const openrunLabel = performance.openrun === "Y" ? "오픈런" : null
   const tags = [
     performance.category,
@@ -26,7 +29,10 @@ export default async function PerformanceDetailPage({ params }: { params: { slug
     openrunLabel,
   ].filter(Boolean)
   const posterUrl = performance.poster_url ?? getPosterFallback(0)
-  const synopsis = performance.description ?? performance.synopsis ?? "공연 정보는 추후 업데이트 예정입니다."
+  const synopsis =
+    performance.description ??
+    performance.synopsis ??
+    "공연 소개가 곧 업데이트될 예정입니다."
   const images = Array.isArray(performance.images) ? performance.images : []
 
   return (
@@ -69,8 +75,8 @@ export default async function PerformanceDetailPage({ params }: { params: { slug
                   <span>{performance.venue}</span>
                 </div>
               )}
-              {performance.schedule && <div>공연 시간: {performance.schedule}</div>}
-              {performance.runtime && <div>런닝타임: {performance.runtime}</div>}
+              {performance.schedule && <div>공연 일정: {performance.schedule}</div>}
+              {performance.runtime && <div>러닝타임: {performance.runtime}</div>}
               {performance.age_limit && <div>관람 연령: {performance.age_limit}</div>}
               {performance.price && <div>가격: {performance.price}</div>}
             </div>
@@ -81,7 +87,7 @@ export default async function PerformanceDetailPage({ params }: { params: { slug
                   href={performance.ticket_link}
                   className="inline-flex items-center justify-center rounded-full bg-black px-5 py-2 text-sm font-semibold text-[#f6f4ee]"
                 >
-                  예매 링크
+                  예매/문의
                 </Link>
               ) : (
                 <span className="inline-flex items-center justify-center rounded-full border border-black/20 px-5 py-2 text-sm font-semibold text-foreground/70">
@@ -109,25 +115,25 @@ export default async function PerformanceDetailPage({ params }: { params: { slug
         <div id="people" className="space-y-4 border-t border-border/60 pt-10">
           <h2 className="text-2xl font-semibold">제작/출연</h2>
           <div className="grid gap-3 rounded-2xl border border-black/10 bg-white p-4 text-sm text-muted-foreground">
-            <p>제작 단체: {performance.organization ?? "정보 준비 중"}</p>
+            <p>제작: {performance.organization ?? "정보 준비 중"}</p>
             <p>출연: {performance.cast ?? "정보 준비 중"}</p>
-            <p>스탭: {performance.crew ?? "정보 준비 중"}</p>
+            <p>스태프: {performance.crew ?? "정보 준비 중"}</p>
           </div>
         </div>
 
         <div className="space-y-4 border-t border-border/60 pt-10">
-          <h2 className="text-2xl font-semibold">관람 후기</h2>
+          <h2 className="text-2xl font-semibold">이벤트 안내</h2>
           <div className="rounded-2xl border border-dashed border-black/20 bg-white p-6 text-sm text-muted-foreground">
-            첫 후기를 남겨주세요. 관객의 목소리가 공연을 더 크게 만듭니다.
+            이벤트 관련 안내는 추후 업데이트됩니다. 자세한 내용은 초대권 이벤트 페이지를 확인해 주세요.
           </div>
         </div>
 
         <div className="space-y-4 border-t border-border/60 pt-10">
           <h2 className="text-2xl font-semibold">유의사항</h2>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>예매/환불 규정은 공연별 안내를 따릅니다.</li>
-            <li>공연 정보는 주관사 사정에 따라 변경될 수 있습니다.</li>
-            <li>공식 안내 미숙지로 인한 불이익은 책임지지 않습니다.</li>
+            <li>공연 및 예매 정보는 주최 측 사정에 따라 변경될 수 있습니다.</li>
+            <li>공연 소개 이미지는 참고용이며 실제와 다를 수 있습니다.</li>
+            <li>공연 관련 문의는 주최 측 공식 채널을 이용해 주세요.</li>
           </ul>
         </div>
       </section>
@@ -144,7 +150,7 @@ function formatShortDate(value?: string | null) {
 }
 
 function formatPeriod(start?: string | null, end?: string | null) {
-  if (!start && !end) return "상시 진행"
+  if (!start && !end) return "일정 미정"
   const startText = formatShortDate(start)
   const endText = formatShortDate(end)
   if (startText === endText) return startText
