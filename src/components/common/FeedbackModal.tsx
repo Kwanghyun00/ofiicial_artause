@@ -1,42 +1,41 @@
-"use client";
+"use client"
 
-import { useState, useTransition } from "react";
-import { submitFeedback } from "./feedback-actions";
+import { useState, useTransition } from "react"
+import { Bug, Ellipsis, HelpCircle, Sparkles, Wand2, X } from "lucide-react"
+import { submitFeedback } from "./feedback-actions"
 
-/**
- * 피드백 모달 컴포넌트
- *
- * 사용자가 언제든지 피드백이나 문의사항을 남길 수 있는 모달
- * - 버그 리포트
- * - 기능 제안
- * - 개선 요청
- * - 일반 문의
- */
-
-type FeedbackType = "bug" | "feature" | "improvement" | "question" | "other";
+type FeedbackType = "bug" | "feature" | "improvement" | "question" | "other"
 
 type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-};
+  isOpen: boolean
+  onClose: () => void
+}
+
+const feedbackOptions = [
+  { value: "bug", label: "버그 신고", icon: Bug },
+  { value: "feature", label: "기능 제안", icon: Sparkles },
+  { value: "improvement", label: "개선 요청", icon: Wand2 },
+  { value: "question", label: "문의/질문", icon: HelpCircle },
+  { value: "other", label: "기타", icon: Ellipsis },
+] as const
 
 export function FeedbackModal({ isOpen, onClose }: Props) {
-  const [type, setType] = useState<FeedbackType>("improvement");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [type, setType] = useState<FeedbackType>("improvement")
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
 
     if (!title.trim() || !description.trim()) {
-      setError("제목과 내용을 입력해주세요.");
-      return;
+      setError("제목과 내용을 입력해 주세요.")
+      return
     }
 
     startTransition(async () => {
@@ -46,94 +45,83 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
         description: description.trim(),
         authorName: name.trim() || null,
         authorEmail: email.trim() || null,
-      });
+      })
 
       if (result.success) {
-        setSuccess(true);
+        setSuccess(true)
         setTimeout(() => {
-          onClose();
-          // 폼 초기화
-          setTitle("");
-          setDescription("");
-          setName("");
-          setEmail("");
-          setSuccess(false);
-        }, 2000);
+          onClose()
+          setTitle("")
+          setDescription("")
+          setName("")
+          setEmail("")
+          setSuccess(false)
+        }, 2000)
       } else {
-        setError(result.error || "피드백 제출에 실패했습니다.");
+        setError(result.error || "제출에 실패했습니다. 다시 시도해 주세요.")
       }
-    });
-  };
+    })
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl rounded-3xl border border-slate-200 bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 px-6 py-5 text-white rounded-t-3xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">피드백 보내기</h2>
-              <p className="mt-1 text-sm text-white/90">
-                여러분의 의견으로 Artause가 더 나아집니다
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border/60 bg-white shadow-2xl">
+        <div className="bg-gradient-to-r from-[#F7F4EC] via-white to-white px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary">Feedback</p>
+              <h2 className="text-2xl font-bold text-foreground">피드백 보내기</h2>
+              <p className="text-sm text-muted-foreground">
+                여러분의 의견을 바탕으로 서비스를 개선합니다.
               </p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-full p-2 transition-colors hover:bg-white/20"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-muted-foreground transition hover:border-primary hover:text-primary"
               aria-label="닫기"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 p-6">
           {success ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-              <div className="text-4xl mb-3">✓</div>
-              <p className="text-lg font-semibold text-emerald-900">피드백이 전송되었습니다!</p>
+              <p className="text-lg font-semibold text-emerald-900">피드백이 전송되었습니다</p>
               <p className="mt-2 text-sm text-emerald-700">소중한 의견 감사합니다.</p>
             </div>
           ) : (
             <>
-              {/* Feedback Type */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-900">
-                  피드백 유형
-                </label>
+                <label className="text-sm font-semibold text-foreground">피드백 유형</label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {[
-                    { value: "bug", label: "버그 신고", icon: "🐛" },
-                    { value: "feature", label: "기능 제안", icon: "💡" },
-                    { value: "improvement", label: "개선 요청", icon: "⚡" },
-                    { value: "question", label: "문의사항", icon: "❓" },
-                    { value: "other", label: "기타", icon: "💬" },
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setType(option.value as FeedbackType)}
-                      className={`rounded-2xl border-2 px-4 py-3 text-sm font-semibold transition-all ${
-                        type === option.value
-                          ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                      }`}
-                    >
-                      <span className="mr-2">{option.icon}</span>
-                      {option.label}
-                    </button>
-                  ))}
+                  {feedbackOptions.map((option) => {
+                    const Icon = option.icon
+                    const isActive = type === option.value
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setType(option.value)}
+                        className={`flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+                          isActive
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-white text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {option.label}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
-              {/* Title */}
               <div className="space-y-2">
-                <label htmlFor="feedback-title" className="text-sm font-semibold text-slate-900">
+                <label htmlFor="feedback-title" className="text-sm font-semibold text-foreground">
                   제목 <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -141,41 +129,35 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="간단히 요약해주세요"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="간단히 요약해 주세요"
+                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
                   disabled={isPending}
                   maxLength={100}
                 />
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
-                <label htmlFor="feedback-description" className="text-sm font-semibold text-slate-900">
+                <label htmlFor="feedback-description" className="text-sm font-semibold text-foreground">
                   상세 내용 <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   id="feedback-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="자세히 설명해주세요"
+                  placeholder="자세한 내용을 알려 주세요"
                   rows={5}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
                   disabled={isPending}
                   maxLength={2000}
                 />
-                <p className="text-xs text-slate-500">
-                  {description.length} / 2000
-                </p>
+                <p className="text-xs text-muted-foreground">{description.length} / 2000</p>
               </div>
 
-              {/* Contact Info (Optional) */}
-              <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-semibold text-slate-700">
-                  연락처 (선택사항)
-                </p>
+              <div className="space-y-4 rounded-2xl border border-border bg-white/70 p-4">
+                <p className="text-sm font-semibold text-foreground">연락처 (선택)</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label htmlFor="feedback-name" className="text-xs font-medium text-slate-600">
+                    <label htmlFor="feedback-name" className="text-xs font-medium text-muted-foreground">
                       이름
                     </label>
                     <input
@@ -184,12 +166,12 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="홍길동"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
                       disabled={isPending}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="feedback-email" className="text-xs font-medium text-slate-600">
+                    <label htmlFor="feedback-email" className="text-xs font-medium text-muted-foreground">
                       이메일
                     </label>
                     <input
@@ -198,29 +180,27 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="example@email.com"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
                       disabled={isPending}
                     />
                   </div>
                 </div>
-                <p className="text-xs text-slate-500">
-                  답변이 필요한 경우 연락처를 남겨주세요
+                <p className="text-xs text-muted-foreground">
+                  답변이 필요한 경우 연락처를 입력해 주세요.
                 </p>
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
                   {error}
                 </div>
               )}
 
-              {/* Submit Button */}
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 rounded-2xl border-2 border-slate-200 bg-white px-6 py-3 font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-95"
+                  className="flex-1 rounded-2xl border border-border bg-white px-6 py-3 font-semibold text-foreground transition hover:border-primary hover:text-primary"
                   disabled={isPending}
                 >
                   취소
@@ -228,7 +208,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                 <button
                   type="submit"
                   disabled={isPending || !title.trim() || !description.trim()}
-                  className="flex-1 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 rounded-2xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isPending ? "전송 중..." : "피드백 보내기"}
                 </button>
@@ -238,5 +218,5 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
         </form>
       </div>
     </div>
-  );
+  )
 }

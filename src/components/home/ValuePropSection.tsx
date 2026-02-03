@@ -1,33 +1,33 @@
-﻿import { BellRing, ChartArea, Gift } from "lucide-react"
+import { BellRing, ChartArea, Database } from "lucide-react"
 
 const pillars = [
   {
-    icon: ChartArea,
-    title: "데이터 기반 큐레이션",
-    description: "관람 이력과 선호도를 분석해 추천 초대를 구성하고 당첨 확률까지 안내합니다.",
-    details: ["실시간 좌석/대기 데이터", "멤버 취향 그래프", "예측 당첨률"]
+    icon: Database,
+    title: "관객 관리",
+    description: "관객 리스트, 참여 이력, 태그 관리를 한 번에.",
+    details: ["관객 히스토리", "맞춤 분류", "간편 내보내기"],
   },
   {
-    icon: Gift,
-    title: "프리미엄 파트너십",
-    description: "대표 공연·전시 파트너와 협업해 프리뷰, 리허설, 아티스트 토크를 엽니다.",
-    details: ["리허설 & 백스테이지", "큐레이터 동행 투어", "브랜디드 컬처 클래스"]
+    icon: ChartArea,
+    title: "이벤트 파이프라인",
+    description: "신청부터 선정, 공지까지 운영 흐름을 정리합니다.",
+    details: ["신청 폼 연동", "선정 프로세스", "자동 공지"],
   },
   {
     icon: BellRing,
-    title: "원스톱 신청 경험",
-    description: "앱·웹 어디서나 간편하게 신청하고 모바일 초대권으로 입장까지 연결됩니다.",
-    details: ["평균 3시간 이내 티켓 발송", "동반인 초대 관리", "신청 이력 보관"]
+    title: "성과 추적",
+    description: "UTM 기반으로 홍보 성과를 추적할 수 있게 준비 중입니다.",
+    details: ["UTM 템플릿", "채널별 전환", "리포트 정리"],
   },
 ]
 
 export function ValuePropSection() {
   return (
-    <section className="rounded-[32px] bg-gradient-to-br from-[#FBF9F6] via-[#F0EFF7] to-[#FBF9F6] p-8 md:p-12">
+    <section className="border-t border-border/60 bg-gradient-to-br from-[#FBF9F6] via-[#F0EFF7] to-[#FBF9F6] py-16">
       <div className="space-y-4 text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary">왜 아트하우스인가</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground">문화 초대를 위한 새로운 표준</h2>
-        <p className="text-base text-muted-foreground md:text-lg">원하는 순간에 원하는 초대를 연결해 주는 운영 시스템으로 아트하우스만의 경험을 완성했습니다.</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary">Web Service (준비 중)</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground">공연 운영을 위한 디지털 전환</h2>
+        <p className="text-base text-muted-foreground md:text-lg">관객 관리와 전환 추적을 더 쉽게 만들기 위한 웹서비스를 준비하고 있습니다.</p>
       </div>
 
       <div className="mt-10 grid gap-6 md:grid-cols-3">

@@ -1,14 +1,14 @@
-﻿type Partner = {
+type Partner = {
   name: string
   label: string
 }
 
 const defaultPartners: Partner[] = [
-  { name: "국립극장", label: "공연예술" },
-  { name: "국립현대미술관", label: "전시·미술" },
-  { name: "롯데콘서트홀", label: "라이브 음악" },
-  { name: "CJ ENM", label: "뮤지컬 파트너" },
-  { name: "서울문화재단", label: "문화 네트워크" },
+  { name: "@artause_official", label: "큐레이션 · 이벤트" },
+  { name: "@spotlight_performance", label: "공연 홍보 포트폴리오" },
+  { name: "공연 제작사", label: "홍보 협업" },
+  { name: "지역 극장", label: "운영 파트너" },
+  { name: "프로젝트 단체", label: "콘텐츠 협업" },
 ]
 
 type TrustMarqueeProps = {
@@ -21,7 +21,7 @@ export function TrustMarquee({ partners = defaultPartners }: TrustMarqueeProps) 
   return (
     <section className="border-b border-border bg-card/80 py-10">
       <div className="mx-auto max-w-6xl px-4 md:px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">파트너 & 미디어</p>
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">SNS & 파트너</p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
           {partners.map((partner) => (
             <div key={partner.name} className="text-center text-sm font-semibold text-foreground/80">

@@ -1,22 +1,23 @@
 import {
   CallToAction,
   CategoryShowcase,
+  CompanySnapshot,
   ExperienceMetrics,
   FeaturedInvitations,
   HomeHero,
   HowItWorks,
-  InvitationGallery,
   MembershipSection,
   PerformanceShowcase,
   TestimonialsSection,
   TrustMarquee,
   ValuePropSection,
 } from "@/components/home/sections"
+import { Reveal } from "@/components/motion/Reveal"
 import type { Campaign, Organization as OrganizationSummary, Show } from "@/components/home/types"
-import { getFeaturedPerformances, getOrganizations, getTicketCampaigns } from "@/lib/supabase/queries"
+import { getOrganizations, getRecentPerformances, getTicketCampaigns } from "@/lib/supabase/queries"
 
 type RawCampaign = Awaited<ReturnType<typeof getTicketCampaigns>>[number]
-type RawPerformance = Awaited<ReturnType<typeof getFeaturedPerformances>>[number]
+type RawPerformance = Awaited<ReturnType<typeof getRecentPerformances>>[number]
 type RawOrganization = Awaited<ReturnType<typeof getOrganizations>>[number]
 
 const isCampaignRecord = (record: RawCampaign): record is RawCampaign & { id: string; title: string } =>
@@ -31,7 +32,7 @@ const isOrganizationRecord = (record: RawOrganization): record is RawOrganizatio
 export default async function HomePage() {
   const [campaignRecords, performanceRecords, organizationRecords] = await Promise.all([
     getTicketCampaigns(),
-    getFeaturedPerformances(),
+    getRecentPerformances(),
     getOrganizations(),
   ])
 
@@ -40,41 +41,68 @@ export default async function HomePage() {
   const organizations = organizationRecords.filter(isOrganizationRecord).map(normalizeOrganization)
 
   const heroStats = createHeroStats(campaigns)
-  const partnerBadges = organizations.slice(0, 6).map((org) => ({
-    name: org.name,
-    label: org.region ? `${org.region} 기반` : "전국 문화 파트너",
-  }))
+  const partnerBadges = organizations.length
+    ? organizations.slice(0, 6).map((org) => ({
+        name: org.name,
+        label: org.region ? `${org.region} 지역` : "파트너",
+      }))
+    : undefined
 
   const featuredCampaigns = campaigns.slice(0, 2)
-  const galleryCampaigns = campaigns.slice(0, 8)
 
   return (
-    <div className="space-y-16 bg-[#F7F4EC] pb-20 pt-10">
-      <section>
-        <div className="mx-auto max-w-6xl space-y-10 px-4 sm:px-6 lg:px-8">
-          <HomeHero
-            totalCampaigns={heroStats.totalCampaigns}
-            activeCampaigns={heroStats.activeCampaigns}
-            liveApplicants={heroStats.liveApplicants}
-            nextDeadline={heroStats.nextDeadline}
-          />
-        </div>
-      </section>
+    <div className="space-y-20 bg-gradient-to-b from-[#F7F4EC] via-[#FAF7F0] to-white pb-24 pt-10">
+      <Reveal>
+        <section>
+          <div className="mx-auto max-w-6xl space-y-10 px-4 sm:px-6 lg:px-8">
+            <HomeHero
+              totalCampaigns={heroStats.totalCampaigns}
+              activeCampaigns={heroStats.activeCampaigns}
+              liveApplicants={heroStats.liveApplicants}
+              nextDeadline={heroStats.nextDeadline}
+            />
+          </div>
+        </section>
+      </Reveal>
 
-      <TrustMarquee partners={partnerBadges} />
+      <Reveal>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <TrustMarquee partners={partnerBadges} />
+        </div>
+      </Reveal>
 
       <section>
         <div className="mx-auto max-w-6xl space-y-12 px-4 sm:px-6 lg:px-8">
-          <ExperienceMetrics />
-          <FeaturedInvitations campaigns={featuredCampaigns} />
-          <InvitationGallery campaigns={galleryCampaigns} />
-          <CategoryShowcase />
-          <PerformanceShowcase shows={shows} />
-          <HowItWorks />
-          <MembershipSection />
-          <TestimonialsSection />
-          <ValuePropSection />
-          <CallToAction />
+          <Reveal>
+            <FeaturedInvitations campaigns={featuredCampaigns} />
+          </Reveal>
+          <Reveal delay={0.05}>
+            <ExperienceMetrics />
+          </Reveal>
+          <Reveal delay={0.1}>
+            <CategoryShowcase />
+          </Reveal>
+          <Reveal delay={0.15}>
+            <PerformanceShowcase shows={shows} />
+          </Reveal>
+          <Reveal delay={0.2}>
+            <HowItWorks />
+          </Reveal>
+          <Reveal delay={0.25}>
+            <MembershipSection />
+          </Reveal>
+          <Reveal delay={0.3}>
+            <TestimonialsSection />
+          </Reveal>
+          <Reveal delay={0.35}>
+            <ValuePropSection />
+          </Reveal>
+          <Reveal delay={0.4}>
+            <CompanySnapshot />
+          </Reveal>
+          <Reveal delay={0.45}>
+            <CallToAction />
+          </Reveal>
         </div>
       </section>
     </div>

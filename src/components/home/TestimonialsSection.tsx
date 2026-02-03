@@ -1,32 +1,32 @@
-﻿import { Quote, Star } from "lucide-react"
+import { Quote, Star } from "lucide-react"
 
 const testimonials = [
   {
-    name: "김민아",
-    role: "직장인",
-    content: "매주 공연 초대에 신청하고 있어요. 벌써 세 번 당첨돼서 친구와 멋진 시간을 보냈습니다.",
-    event: "뮤지컬 <드림라이크> 관람",
+    name: "정민서",
+    role: "제작사 대표",
+    content: "관람 포인트 정리가 확실해져서 홍보 메시지가 훨씬 명확해졌습니다.",
+    event: "연극 홍보 캠페인",
   },
   {
-    name: "이주원",
-    role: "대학생",
-    content: "문화생활 비용이 걱정이었는데 아트하우스 덕분에 다양한 전시와 공연을 경험하고 있어요.",
-    event: "몰입형 전시 관람",
+    name: "한지훈",
+    role: "공연 기획자",
+    content: "이벤트 운영 덕분에 관객과의 접점이 눈에 띄게 늘어났어요.",
+    event: "초대권 이벤트 운영",
   },
   {
-    name: "박서윤",
-    role: "프리랜서",
-    content: "알림 덕분에 마감 임박 초대를 놓치지 않아요. 프리뷰 행사 참여도 정말 특별했어요.",
-    event: "프리뷰 토크 참석",
+    name: "서은정",
+    role: "마케팅 담당",
+    content: "콘텐츠 제작과 업로드가 빠르게 진행되어 일정 운영이 편해졌습니다.",
+    event: "SNS 콘텐츠 제작",
   },
 ]
 
 export function TestimonialsSection() {
   return (
-    <section className="rounded-[32px] bg-gradient-to-br from-primary/5 to-secondary/40 p-8 md:p-12">
+    <section className="border-t border-border/60 bg-gradient-to-br from-primary/5 to-secondary/40 py-16">
       <div className="space-y-4 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground">멤버들이 들려주는 경험</h2>
-        <p className="text-base text-muted-foreground md:text-lg">아트하우스와 함께 문화생활을 확장한 멤버들의 생생한 후기입니다.</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground">협업 파트너의 후기</h2>
+        <p className="text-base text-muted-foreground md:text-lg">알터즈와 함께한 제작사의 목소리입니다.</p>
       </div>
 
       <div className="mt-10 grid gap-6 md:grid-cols-3">

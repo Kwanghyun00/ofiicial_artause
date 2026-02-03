@@ -1,65 +1,99 @@
 import Link from "next/link"
+import { companyMeta } from "@/constants/company"
 
-const footerLinks = [
+const footerSections = [
   {
-    title: "서비스",
+    title: "바로가기",
     items: [
-      { href: "/events", label: "초대 캘린더" },
-      { href: "/performances", label: "공연·전시 아카이브" },
-      { href: "/event-center", label: "이벤트 허브" },
+      { href: "/", label: "홈" },
+      { href: "/events", label: "초대권 응모" },
+      { href: "/shows", label: "진행 중 공연/이벤트" },
+      { href: "/works", label: "포트폴리오" },
+      { href: "/about", label: "회사 소개" },
     ],
   },
   {
-    title: "고객 지원",
+    title: "서비스",
     items: [
-      { href: "/rules", label: "이용 안내" },
-      { href: "/faq", label: "자주 묻는 질문" },
-      { href: "/support", label: "고객센터" },
+      { href: "/services", label: "서비스 소개" },
+      { href: "/contact", label: "문의하기" },
+      { href: companyMeta.promoForm, label: "무료 홍보 신청" },
+    ],
+  },
+  {
+    title: "SNS",
+    items: [
+      { href: companyMeta.instagramMain, label: "@artause_official" },
+      { href: companyMeta.instagramSpotlight, label: "@spotlight_performance" },
+    ],
+  },
+  {
+    title: "문의 신청",
+    items: [
+      { href: `mailto:${companyMeta.email}`, label: companyMeta.email },
+      { href: companyMeta.promoForm, label: "프로모션 신청" },
+      { href: "/contact", label: "문의 신청 바로가기" },
     ],
   },
 ]
 
 export function SiteFooter() {
   return (
-    <footer className="bg-primary text-primary-foreground">
-      <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <div className="grid gap-10 md:grid-cols-[1.2fr,1fr,1fr]">
-          <div className="space-y-4">
+    <footer className="border-t border-border/60 bg-white text-foreground">
+      <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-sm space-y-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-lg font-bold text-primary">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
                 A
               </span>
               <div>
                 <p className="text-xl font-semibold">Artause</p>
-                <p className="text-sm text-primary-foreground/70">프리미엄 문화 초청 플랫폼</p>
+                <p className="text-sm text-muted-foreground">공연 홍보 · 이벤트 운영 · 디지털 전환</p>
               </div>
             </div>
-            <p className="text-sm text-primary-foreground/80">
-              문화생활을 사랑하는 모든 분들을 위한 초청 큐레이션. 아트하우스와 함께 새로운 공연과 전시를 경험하세요.
+            <p className="text-sm text-muted-foreground">
+              공연의 매력을 더 많은 관객에게 전달하기 위해, 초대권 이벤트와 콘텐츠 제작을 함께
+              운영합니다. 관객 참여 데이터를 기반으로 공연의 성장을 돕습니다.
             </p>
-            <p className="text-xs text-primary-foreground/50">사업자등록 123-45-67890 · 통신판매업 2024-서울-0001</p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/events"
+                className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90"
+              >
+                초대권 이벤트 보기
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
+              >
+                문의하기
+              </Link>
+            </div>
           </div>
 
-          {footerLinks.map((section) => (
-            <div key={section.title} className="space-y-3 text-sm">
-              <p className="text-base font-semibold">{section.title}</p>
-              <ul className="space-y-2 text-primary-foreground/80">
-                {section.items.map((item) => (
-                  <li key={item.href}>
-                    <Link href={item.href} className="transition hover:text-white">
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="flex flex-1 flex-wrap justify-start gap-6 text-sm lg:justify-end">
+            {footerSections.map((section) => (
+              <div key={section.title} className="min-w-[140px] space-y-2">
+                <p className="text-base font-semibold">{section.title}</p>
+                <ul className="flex flex-wrap gap-x-4 gap-y-2 text-muted-foreground">
+                  {section.items.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} className="transition hover:text-foreground">
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-12 border-t border-white/20 pt-6 text-xs text-primary-foreground/70">
+        <div className="mt-8 border-t border-border/60 pt-4 text-xs text-muted-foreground">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <p>© {new Date().getFullYear()} Artause Inc. 모든 권리 보유.</p>
-            <p>문의 · help@artause.com / biz@artause.com · 1544-0000 (평일 10:00-18:00)</p>
+            <p>© {new Date().getFullYear()} Artause. All rights reserved.</p>
+            <p>문의: {companyMeta.email}</p>
           </div>
         </div>
       </div>

@@ -1,134 +1,141 @@
-import type { Metadata } from "next"
-import { notFound } from "next/navigation"
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { CalendarDays, MapPin, Ticket } from "lucide-react"
 import { getPerformanceBySlug } from "@/lib/supabase/queries"
+import { getPosterFallback } from "@/constants/posters"
+import { DetailImageGallery } from "@/components/performances/DetailImageGallery"
 
-type Props = {
-  params: Promise<{ slug: string }>
-}
+type RawPerformance = Awaited<ReturnType<typeof getPerformanceBySlug>>
 
-const FALLBACK_DESCRIPTION =
-  "아르타우스 큐레이터가 직접 선별한 프로그램으로, 캐스트 라인업부터 조명과 공간 연출까지 높은 완성도를 자랑합니다."
+const isPerformanceRecord = (record: RawPerformance): record is NonNullable<RawPerformance> =>
+  Boolean(record && typeof record === "object" && "id" in record && "title" in record)
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
-  const performance = await getPerformanceBySlug(slug)
-
-  if (!isPerformance(performance)) {
-    return { title: "공연을 찾을 수 없습니다" }
-  }
-
-  return {
-    title: `${performance.title} · 공연 소개`,
-    description: performance.description ?? "아르타우스가 선별한 공연 정보를 확인하세요.",
-  }
-}
-
-export default async function PerformanceDetailPage({ params }: Props) {
-  const { slug } = await params
-  const performance = await getPerformanceBySlug(slug)
-
-  if (!isPerformance(performance)) {
+export default async function PerformanceDetailPage({ params }: { params: { slug: string } }) {
+  const performance = await getPerformanceBySlug(params.slug)
+  if (!isPerformanceRecord(performance)) {
     notFound()
   }
 
-  const galleryImages = performance.gallery_images ?? []
-  const tags = performance.tags ?? []
-  const description = performance.description ?? FALLBACK_DESCRIPTION
-
-  const infoRows = [
-    { label: "공연 기간", value: formatPeriod(performance.period_start ?? null, performance.period_end ?? null) },
-    { label: "관람 시간", value: performance.running_time ?? "문의" },
-    { label: "주최", value: performance.organization ?? performance.organization_id ?? "미정" },
-  ]
+  const status = performance.status ?? performance.state
+  const openrunLabel = performance.openrun === "Y" ? "오픈런" : null
+  const tags = [
+    performance.category,
+    ...(Array.isArray(performance.tags) ? performance.tags : []),
+    status,
+    openrunLabel,
+  ].filter(Boolean)
+  const posterUrl = performance.poster_url ?? getPosterFallback(0)
+  const synopsis = performance.description ?? performance.synopsis ?? "공연 정보는 추후 업데이트 예정입니다."
+  const images = Array.isArray(performance.images) ? performance.images : []
 
   return (
-    <article className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
-        <Link href="/performances" className="transition hover:text-primary">
-          공연·전시
-        </Link>
-        <span>/</span>
-        <span className="font-semibold text-foreground">{performance.title}</span>
-      </nav>
+    <div className="bg-[#f6f4ee] pb-24 pt-10 text-foreground">
+      <section className="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-[1.1fr,1fr] lg:items-start">
+          <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white shadow">
+            <div className="relative h-[420px] w-full">
+              <Image src={posterUrl} alt={performance.title} fill className="object-cover" />
+            </div>
+          </div>
 
-      <section className="grid gap-10 lg:grid-cols-[1.2fr,0.8fr]">
-        <div className="space-y-8">
-          <div className="rounded-[32px] border border-border bg-card p-6 shadow-sm sm:p-8">
-            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              {tags.slice(0, 4).map((tag) => (
-                <span key={tag} className="rounded-full bg-primary/10 px-3 py-1 text-primary">
-                  #{tag}
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                {tags.slice(0, 6).map((tag) => (
+                  <span key={tag} className="rounded-full bg-[#f2efe7] px-3 py-1 text-foreground/80">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <h1 className="text-3xl font-semibold sm:text-4xl">{performance.title}</h1>
+              <p className="text-base text-muted-foreground">{performance.hero_subtitle ?? synopsis}</p>
+            </div>
+
+            <div className="grid gap-3 rounded-2xl border border-black/10 bg-white p-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-primary" />
+                <span>{formatPeriod(performance.period_start, performance.period_end)}</span>
+              </div>
+              {performance.region && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span>{performance.region}</span>
+                </div>
+              )}
+              {performance.venue && (
+                <div className="flex items-center gap-2">
+                  <Ticket className="h-4 w-4 text-primary" />
+                  <span>{performance.venue}</span>
+                </div>
+              )}
+              {performance.schedule && <div>공연 시간: {performance.schedule}</div>}
+              {performance.runtime && <div>런닝타임: {performance.runtime}</div>}
+              {performance.age_limit && <div>관람 연령: {performance.age_limit}</div>}
+              {performance.price && <div>가격: {performance.price}</div>}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {performance.ticket_link ? (
+                <Link
+                  href={performance.ticket_link}
+                  className="inline-flex items-center justify-center rounded-full bg-black px-5 py-2 text-sm font-semibold text-[#f6f4ee]"
+                >
+                  예매 링크
+                </Link>
+              ) : (
+                <span className="inline-flex items-center justify-center rounded-full border border-black/20 px-5 py-2 text-sm font-semibold text-foreground/70">
+                  예매 정보 준비 중
                 </span>
-              ))}
+              )}
             </div>
-            <h1 className="mt-4 text-3xl font-bold text-foreground sm:text-4xl">{performance.title}</h1>
-            <p className="mt-3 text-sm text-muted-foreground">{performance.region ?? performance.venue ?? "장소 미정"}</p>
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground">{description}</p>
-          </div>
-
-          {galleryImages.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {galleryImages.map((src) => (
-                <div key={src} className="overflow-hidden rounded-2xl border border-border">
-                  <Image src={src} alt={`${performance.title} 스틸컷`} width={640} height={420} className="h-48 w-full object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
-
-          <section className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="text-xl font-semibold text-foreground">캐스트 & 제작진</h2>
-            <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              {(performance.cast ?? []).map((name) => (
-                <li key={name}>{name}</li>
-              ))}
-              {(!performance.cast || performance.cast.length === 0) && <li>추후 공개 예정</li>}
-            </ul>
-          </section>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground">관람 안내</h3>
-            <dl className="mt-4 space-y-3 text-sm text-muted-foreground">
-              {infoRows.map((row) => (
-                <div key={row.label} className="flex items-center justify-between gap-4">
-                  <dt className="text-foreground/80">{row.label}</dt>
-                  <dd className="text-right text-foreground font-semibold">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-            <Link
-              href="/events"
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-            >
-              초대 이벤트 확인하기
-            </Link>
-          </div>
-
-          <div className="rounded-3xl border border-green-200 bg-green-50 p-6 text-sm text-green-900">
-            <p className="font-semibold">관람 팁</p>
-            <p className="mt-2">
-              공연 시작 20분 전 도착하면 포토존과 굿즈 부스를 여유롭게 즐길 수 있고, 좌석 배정도 더욱 안정적으로 진행됩니다.
-            </p>
           </div>
         </div>
       </section>
-    </article>
+
+      <section className="mx-auto mt-14 max-w-6xl space-y-10 px-4 sm:px-6 lg:px-8">
+        <div className="space-y-4 border-t border-border/60 pt-10">
+          <h2 className="text-2xl font-semibold">작품 소개</h2>
+          <p className="text-base text-muted-foreground whitespace-pre-line">{synopsis}</p>
+        </div>
+
+        {images.length > 0 && (
+          <div className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="text-2xl font-semibold">상세 이미지</h2>
+            <DetailImageGallery title={performance.title} images={images} />
+          </div>
+        )}
+
+        <div id="people" className="space-y-4 border-t border-border/60 pt-10">
+          <h2 className="text-2xl font-semibold">제작/출연</h2>
+          <div className="grid gap-3 rounded-2xl border border-black/10 bg-white p-4 text-sm text-muted-foreground">
+            <p>제작 단체: {performance.organization ?? "정보 준비 중"}</p>
+            <p>출연: {performance.cast ?? "정보 준비 중"}</p>
+            <p>스탭: {performance.crew ?? "정보 준비 중"}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4 border-t border-border/60 pt-10">
+          <h2 className="text-2xl font-semibold">관람 후기</h2>
+          <div className="rounded-2xl border border-dashed border-black/20 bg-white p-6 text-sm text-muted-foreground">
+            첫 후기를 남겨주세요. 관객의 목소리가 공연을 더 크게 만듭니다.
+          </div>
+        </div>
+
+        <div className="space-y-4 border-t border-border/60 pt-10">
+          <h2 className="text-2xl font-semibold">유의사항</h2>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>예매/환불 규정은 공연별 안내를 따릅니다.</li>
+            <li>공연 정보는 주관사 사정에 따라 변경될 수 있습니다.</li>
+            <li>공식 안내 미숙지로 인한 불이익은 책임지지 않습니다.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
   )
 }
 
-function formatPeriod(start?: string | null, end?: string | null) {
-  if (!start && !end) return "상시 진행"
-  const startText = start ? formatDate(start) : "미정"
-  const endText = end ? formatDate(end) : "미정"
-  if (startText === endText) return startText
-  return `${startText} ~ ${endText}`
-}
-
-function formatDate(value?: string | null) {
+function formatShortDate(value?: string | null) {
   if (!value) return "미정"
   return new Date(value).toLocaleDateString("ko-KR", {
     month: "short",
@@ -136,8 +143,10 @@ function formatDate(value?: string | null) {
   })
 }
 
-type PerformanceRecord = Awaited<ReturnType<typeof getPerformanceBySlug>>
-
-function isPerformance(record: PerformanceRecord): record is Exclude<PerformanceRecord, null> & { title: string } {
-  return Boolean(record && typeof record === "object" && "title" in record)
+function formatPeriod(start?: string | null, end?: string | null) {
+  if (!start && !end) return "상시 진행"
+  const startText = formatShortDate(start)
+  const endText = formatShortDate(end)
+  if (startText === endText) return startText
+  return `${startText} ~ ${endText}`
 }

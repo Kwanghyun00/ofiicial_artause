@@ -2,15 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, Search } from "lucide-react"
+import { Menu } from "lucide-react"
 import { useState } from "react"
 
 const navItems = [
   { href: "/", label: "홈" },
-  { href: "/performances", label: "공연·전시" },
-  { href: "/events", label: "초대 캘린더" },
-  { href: "/event-center", label: "이벤트 허브" },
-  { href: "/rules", label: "이용 안내" },
+  { href: "/works", label: "포트폴리오" },
+  { href: "/shows", label: "진행 중 공연/이벤트" },
+  { href: "/events", label: "초대권 응모" },
 ]
 
 export function SiteHeader() {
@@ -26,7 +25,7 @@ export function SiteHeader() {
           </span>
           <div>
             <p className="text-base font-semibold text-foreground">Artause</p>
-            <p className="text-xs text-muted-foreground">프리미엄 문화 초청 플랫폼</p>
+            <p className="text-xs text-muted-foreground">공연 홍보 · 이벤트 운영 · 디지털 전환</p>
           </div>
         </Link>
 
@@ -46,18 +45,9 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <button className="hidden rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/5 md:inline-flex">
-            로그인
-          </button>
-          <button className="hidden rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 md:inline-flex">
-            무료 가입
-          </button>
-          <button className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary md:hidden">
-            <Search className="h-5 w-5" />
-          </button>
+        <div className="flex items-center gap-3 md:hidden">
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary"
             aria-label="모바일 메뉴 열기"
             onClick={() => setMobileOpen((open) => !open)}
           >
@@ -83,10 +73,6 @@ export function SiteHeader() {
                 </Link>
               )
             })}
-            <div className="mt-2 flex gap-2">
-              <button className="flex-1 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground">로그인</button>
-              <button className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">무료 가입</button>
-            </div>
           </nav>
         </div>
       )}

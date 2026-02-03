@@ -1,39 +1,42 @@
-﻿import Link from "next/link"
+import Link from "next/link"
 import { ArrowRight, Sparkles } from "lucide-react"
+import { companyMeta } from "@/constants/company"
 
 export function CallToAction() {
   return (
-    <section className="relative overflow-hidden rounded-[32px] bg-primary px-8 py-16 text-primary-foreground shadow-2xl md:px-12">
+    <section className="relative overflow-hidden border-t border-white/10 bg-primary py-16 text-primary-foreground">
       <div className="absolute inset-0 bg-[url('/abstract-geometric-flow.png')] opacity-10" />
-      <div className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl space-y-6 text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
           <Sparkles className="h-4 w-4" />
-          지인 추천 시 당첨률 2배
+          무료 홍보 신청 가능
         </span>
         <h2 className="text-3xl font-bold md:text-5xl">
-          특별한 문화 경험,
+          좋은 공연이,
           <br />
-          지금 바로 시작하세요
+          관객에게 닿을 수 있도록.
         </h2>
         <p className="text-lg text-primary-foreground/80">
-          무료 회원 가입만 해도 매주 12개의 초대 이벤트를 신청할 수 있어요. 카드 등록 없이 가볍게 시작해 보세요.
+          알터즈와 함께 공연을 더 잘 보이게, 관객과 더 가깝게 만들어 보세요.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
           <Link
-            href="/events"
+            href={companyMeta.promoForm}
             className="inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-lg font-semibold text-primary shadow-2xl transition hover:-translate-y-1"
           >
-            무료로 시작하기
+            무료 홍보 신청
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
           <Link
-            href="/rules"
+            href="/contact"
             className="inline-flex h-14 items-center justify-center rounded-full border-2 border-white px-8 text-lg font-semibold text-white transition hover:bg-white/10"
           >
-            이용 안내 보기
+            협업 문의
           </Link>
         </div>
-        <p className="text-sm text-primary-foreground/70">신용카드 등록 불필요 · 기본 이용 무료</p>
+        <p className="text-sm text-primary-foreground/70">콘텐츠 제작 · 이벤트 운영 · 디지털 전환</p>
+        </div>
       </div>
     </section>
   )

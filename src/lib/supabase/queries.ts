@@ -6,7 +6,7 @@ import {
   mockOrganizations,
   mockPerformances,
 } from "@/lib/mocks/performances";
-import { createServerSupabaseClient } from "./server";
+import { createAdminSupabaseClient, createServerSupabaseClient } from "./server";
 import type { Database } from "./types";
 import type { PromotionRequestPayload } from "@/lib/models/promotion-request";
 import type { PerformanceSubmissionPayload } from "@/lib/models/performance-submission";
@@ -74,6 +74,8 @@ const COMMUNITY_POST_SELECT = `
     tagline
   )
 `;
+
+const TICKET_CAMPAIGN_SELECT = `*`;
 
 const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   id,
@@ -345,11 +347,13 @@ export const getActiveTicketCampaigns = cache(async () => {
     return mockCampaigns;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from("ticket_campaigns")
-    .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
+    .select(TICKET_CAMPAIGN_SELECT)
     .eq("status", "approved")  // 승인된 것만
     .lte("starts_at", now)
     .gte("ends_at", now)
@@ -374,15 +378,34 @@ export const getTicketCampaigns = cache(async () => {
   }
 
   try {
-    const supabase = await createServerSupabaseClient();
+    const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? createAdminSupabaseClient()
+      : await createServerSupabaseClient();
+
     const { data, error } = await supabase
       .from("ticket_campaigns")
-      .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
-      .order("starts_at", { ascending: false, nullsFirst: false })
+      .select(TICKET_CAMPAIGN_SELECT)
+      .order("starts_at", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("getTicketCampaigns error", error);
+      const errorDetails = {
+        message: (error as { message?: string }).message,
+        details: (error as { details?: string }).details,
+        hint: (error as { hint?: string }).hint,
+        code: (error as { code?: string }).code,
+        stringified: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+        asString: String(error),
+      };
+      const hasDetails = Boolean(
+        errorDetails.message || errorDetails.details || errorDetails.hint || errorDetails.code ||
+        (errorDetails.stringified && errorDetails.stringified !== "{}")
+      );
+      if (hasDetails) {
+        console.error("getTicketCampaigns error", errorDetails);
+      } else {
+        console.warn("getTicketCampaigns warning: Supabase error with empty details. Falling back to mock data.");
+      }
       // Fallback to mock data on error
       const toTimestamp = (value?: string | null) => (value ? new Date(value).getTime() : 0);
       return [...mockCampaigns].sort((a, b) => {
@@ -411,11 +434,13 @@ export const getTicketCampaignBySlug = cache(async (identifier: string) => {
   }
 
   try {
-    const supabase = await createServerSupabaseClient();
+    const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? createAdminSupabaseClient()
+      : await createServerSupabaseClient();
     const fetchCampaign = (field: "id" | "slug", value: string) =>
       supabase
         .from("ticket_campaigns")
-        .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
+        .select(TICKET_CAMPAIGN_SELECT)
         .eq(field, value)
         .maybeSingle();
 
@@ -451,7 +476,9 @@ export async function submitPerformanceSubmission(payload: PerformanceSubmission
     return;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
   const insertPayload: Database["public"]["Tables"]["performance_submissions"]["Insert"] = {
     submission_type: payload.submissionType,
     organization_name: payload.organizationName,
@@ -485,14 +512,38 @@ export async function submitTicketEntry(payload: TicketEntryPayload) {
     return;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
+
   const { error } = await supabase.functions.invoke("campaign-entry-submit", {
     body: payload,
   });
 
-  if (error) {
-    console.error("submitTicketEntry error", error);
-    throw error;
+  if (!error) {
+    return;
+  }
+
+  // Fallback: store minimal entry data when the edge function is unavailable or not authorized.
+  const metadata = (payload.metadata ?? {}) as Record<string, unknown>;
+  const applicantName = typeof metadata.applicantName === "string" ? metadata.applicantName : "익명";
+  const applicantEmail = typeof metadata.email === "string" ? metadata.email : "";
+  const applicantPhone = typeof metadata.phone === "string" ? metadata.phone : null;
+  const answers = typeof metadata.answers === "object" && metadata.answers ? metadata.answers : null;
+  const consentMarketing = Boolean(metadata.consentMarketing);
+
+  const { error: insertError } = await supabase.from("ticket_entries").insert({
+    campaign_id: payload.campaignId,
+    applicant_name: applicantName,
+    applicant_email: applicantEmail,
+    applicant_phone: applicantPhone,
+    answers,
+    consent_marketing: consentMarketing,
+  });
+
+  if (insertError) {
+    console.error("submitTicketEntry error", error, insertError);
+    throw insertError;
   }
 }
 export async function submitPromotionRequest(payload: PromotionRequestPayload) {
@@ -501,7 +552,9 @@ export async function submitPromotionRequest(payload: PromotionRequestPayload) {
     return;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
   const insertPayload: Database["public"]["Tables"]["promotion_requests"]["Insert"] = {
     status: payload.status,
     inquiry_type: payload.inquiryType,

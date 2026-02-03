@@ -51,11 +51,11 @@ export function EventsGrid({ campaigns }: Props) {
           <p className="mt-1 text-sm text-muted-foreground">현재 {campaigns.length}개의 초대가 진행 중입니다.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center rounded-full border border-border/80 p-1">
+          <div className="flex items-center rounded-full border border-border/80 bg-white/70 p-1 shadow-sm">
             <ToggleButton label="카드" icon={LayoutGrid} active={viewMode === "grid"} onClick={() => setViewMode("grid")} />
             <ToggleButton label="리스트" icon={Rows} active={viewMode === "list"} onClick={() => setViewMode("list")} />
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-border/80 px-3 py-1.5">
+          <div className="flex items-center gap-2 rounded-full border border-border/80 bg-white/70 px-3 py-1.5 shadow-sm">
             <ArrowUpDown className="h-4 w-4" />
             <select
               value={sortBy}
@@ -78,11 +78,16 @@ export function EventsGrid({ campaigns }: Props) {
           return (
             <article
               key={campaign.id}
-              className={`group h-full overflow-hidden rounded-3xl border border-border bg-card shadow transition hover:border-primary/40 hover:shadow-xl ${viewMode === "list" ? "flex flex-col md:flex-row" : ""}`}
+              className={`group relative h-full overflow-hidden rounded-3xl border border-border/70 bg-white/90 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl ${
+                viewMode === "list" ? "flex flex-col md:flex-row" : ""
+              }`}
             >
-              <div className={`p-5 ${viewMode === "list" ? "md:w-2/3" : ""}`}>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,108,205,0.14),_transparent_60%)]" />
+              <div className={`relative p-5 ${viewMode === "list" ? "md:w-2/3" : ""}`}>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="rounded-full bg-secondary px-3 py-1 text-foreground/80">{campaign.reward ?? "체험형 초대"}</span>
+                  <span className="rounded-full bg-secondary px-3 py-1 text-foreground/80">
+                    {campaign.reward ?? "체험형 초대"}
+                  </span>
                   {campaign.ends_at && <span className="font-semibold text-primary">마감 {formatDate(campaign.ends_at)}</span>}
                 </div>
                 <h3 className="mt-3 text-xl font-bold text-foreground">{campaign.title}</h3>
@@ -119,10 +124,14 @@ export function EventsGrid({ campaigns }: Props) {
                   <button
                     type="button"
                     onClick={() =>
-                      setSaved((prev) => (prev.includes(campaign.id) ? prev.filter((id) => id !== campaign.id) : [...prev, campaign.id]))
+                      setSaved((prev) =>
+                        prev.includes(campaign.id) ? prev.filter((id) => id !== campaign.id) : [...prev, campaign.id],
+                      )
                     }
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border ${
-                      saved.includes(campaign.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${
+                      saved.includes(campaign.id)
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
                     }`}
                     aria-label="찜하기"
                   >
@@ -130,7 +139,7 @@ export function EventsGrid({ campaigns }: Props) {
                   </button>
                   <Link
                     href={href}
-                    className="flex-1 rounded-full bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                    className="flex-1 rounded-full bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90"
                   >
                     상세 보기
                   </Link>
@@ -159,7 +168,9 @@ function ToggleButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold transition ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary/70"}`}
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold transition ${
+        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary/70"
+      }`}
     >
       <Icon className="h-4 w-4" />
       {label}
