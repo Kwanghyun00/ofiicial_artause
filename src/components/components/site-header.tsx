@@ -1,14 +1,15 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, User, Handshake } from "lucide-react"
-import { MobileNav } from "@/components/mobile-nav"
+import { MobileNav } from "@/components/components/mobile-nav"
 
 const navItems = [
   { href: "/events", label: "초대 캘린더" },
   { href: "/venues/1", label: "공연 아카이브" },
+  { href: "/services", label: "서비스" },
   { href: "/membership", label: "멤버십" },
-  { href: "/partners", label: "파트너십" },
 ]
 
 export function SiteHeader() {
@@ -24,14 +25,15 @@ export function SiteHeader() {
       <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/80 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                A
-              </div>
-              <div>
-                <span className="text-lg font-semibold text-foreground">Artause</span>
-                <p className="text-xs text-muted-foreground">Culture Invitation Studio</p>
-              </div>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/images/brand/artause-symbol.png"
+                alt="Artause"
+                width={140}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
             <Badge variant="secondary" className="hidden md:inline-flex rounded-full bg-primary/10 text-primary">
               Beta 2025
