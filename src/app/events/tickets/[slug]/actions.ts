@@ -29,6 +29,8 @@ export async function submitTicketEntryAction(
   const preferredDate = formData.get("preferredDate");
   const ticketCount = formData.get("ticketCount");
   const expectation = formData.get("expectation");
+  // TODO: ADGATE_RESTORE — adSessionId 필드 복원 시 아래 주석 해제
+  // const adSessionId = formData.get("adSessionId");
   const consentMarketing = formData.get("consentMarketing") === "on";
   const rulesAgreed = formData.get("rulesAgreed") === "on";
 
@@ -57,6 +59,17 @@ export async function submitTicketEntryAction(
   if (typeof ticketCount !== "string" || !ticketCount.trim()) {
     return { status: "error", message: "매수를 선택해 주세요." };
   }
+  if (!["1", "2"].includes(ticketCount.trim())) {
+    return { status: "error", message: "일반 관람권 1매 또는 2매만 선택할 수 있습니다." };
+  }
+  // TODO: ADGATE_RESTORE — adSessionId 검증 비활성화 (광고 계정 준비 후 복원)
+  // if (typeof adSessionId !== "string" || !adSessionId.trim()) {
+  //   return { status: "error", message: "광고 시청 완료 후 응모할 수 있습니다." };
+  // }
+  // const normalizedAdSessionId = adSessionId.trim();
+  // if (!/^rw_[a-z0-9_-]{10,}$/i.test(normalizedAdSessionId)) {
+  //   return { status: "error", message: "광고 인증 정보가 올바르지 않습니다. 다시 시도해 주세요." };
+  // }
 
   // 규칙 동의 확인 (필수)
   if (!rulesAgreed) {
@@ -121,6 +134,7 @@ export async function submitTicketEntryAction(
   answers.reviewUrl = reviewUrl.trim();
   answers.preferredDate = preferredDate.trim();
   answers.ticketCount = ticketCount.trim();
+  answers.ticketType = "일반 관람권";
 
   // 선택 필드들
   if (typeof expectation === "string" && expectation.trim()) {
@@ -140,16 +154,19 @@ export async function submitTicketEntryAction(
   const payload: TicketEntryPayload = {
     campaignId,
     contactHash,
+    adSessionId: "", // TODO: ADGATE_RESTORE — normalizedAdSessionId 로 교체
     metadata,
   };
 
   try {
     await submitTicketEntry(payload);
+    // entry_count가 표시되는 모든 페이지 캐시 갱신
     if (typeof slug === "string" && slug) {
       revalidatePath(`/events/${slug}`);
-    } else {
-      revalidatePath("/events");
     }
+    revalidatePath("/events");
+    revalidatePath("/shows");
+    revalidatePath("/");
     return { status: "success", message: "응모가 완료되었습니다. 선정 결과는 이메일로 안내드릴게요." };
   } catch (error) {
     console.error("submitTicketEntryAction error", error);

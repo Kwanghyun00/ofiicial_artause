@@ -11,6 +11,8 @@ type CampaignWithEntries = ValidCampaign & { entry_count?: number | null }
 const isCampaign = (record: CampaignResult): record is ValidCampaign =>
   Boolean(record && typeof record === "object" && "id" in record)
 
+export const revalidate = 60 // 최대 60초마다 entry_count 갱신
+
 export const metadata = {
   title: "초대권 응모",
   description: "알터즈의 초대권 이벤트를 확인하고 응모하세요.",
@@ -19,7 +21,7 @@ export const metadata = {
 export default async function EventsPage() {
   const campaigns = (await getTicketCampaigns())
     .filter(isCampaign)
-    .map((campaign) => ({
+    .map((campaign: ValidCampaign) => ({
       ...campaign,
       entry_count: (campaign as { entry_count?: number | null }).entry_count ?? null,
     })) as CampaignWithEntries[]
@@ -35,7 +37,7 @@ export default async function EventsPage() {
   ]
 
   return (
-    <div className="space-y-12 bg-gradient-to-b from-[#F7F4EC] via-white to-white">
+    <div className="space-y-12 pb-24 pt-12">
       <Reveal>
         <section className="py-12">
           <div className="mx-auto max-w-6xl space-y-10 px-4 sm:px-6 md:px-8">
@@ -45,7 +47,7 @@ export default async function EventsPage() {
               {insights.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-border bg-card/90 p-4 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                  className="spotlight-card p-4 text-center"
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">{stat.label}</p>
                   <p className="mt-2 text-2xl font-bold text-foreground">{stat.value}</p>
