@@ -115,7 +115,8 @@ const PUBLIC_TICKET_CAMPAIGN_SELECT = `
   hashtags,
   production_team,
   ticket_allocations,
-  kopis_id
+  kopis_id,
+  entry_count
 `;
 
 const TICKET_ENTRY_SELECT = `
@@ -773,7 +774,7 @@ export const getPartnerCampaigns = cache(async (partnerEmail: string) => {
   const { data, error } = await supabase
     .from("ticket_campaigns")
     .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
-    .eq("partner_email", partnerEmail)
+    .or(`partner_email.eq.${partnerEmail},partner_email.is.null`)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -804,7 +805,8 @@ export const getCampaignEntries = cache(async (campaignId: string, partnerEmail:
     .eq("id", campaignId)
     .single();
 
-  if (!campaign || campaign.partner_email !== partnerEmail) {
+  // partner_email이 null인 캠페인은 관리자가 직접 등록한 것으로 간주 → 모든 파트너 접근 허용
+  if (!campaign || (campaign.partner_email !== null && campaign.partner_email !== partnerEmail)) {
     throw new Error("권한이 없습니다.");
   }
 
