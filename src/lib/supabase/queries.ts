@@ -5,12 +5,14 @@ import {
   mockCommunityPosts,
   mockOrganizations,
   mockPerformances,
+  mockReviews,
 } from "@/lib/mocks/performances";
 import { createAdminSupabaseClient, createServerSupabaseClient } from "./server";
 import type { Database } from "./types";
 import type { PromotionRequestPayload } from "@/lib/models/promotion-request";
 import type { PerformanceSubmissionPayload } from "@/lib/models/performance-submission";
 import type { TicketEntryPayload } from "@/lib/models/ticket-entry";
+import type { ReviewRow, ReviewSummary } from "./review-types";
 
 const PERFORMANCE_SELECT = `
   id,
@@ -25,6 +27,7 @@ const PERFORMANCE_SELECT = `
   period_end,
   venue,
   synopsis,
+  description,
   tasks,
   poster_url,
   hero_headline,
@@ -74,7 +77,61 @@ const COMMUNITY_POST_SELECT = `
   )
 `;
 
-const TICKET_CAMPAIGN_SELECT = `*`;
+const PUBLIC_TICKET_CAMPAIGN_SELECT = `
+  id,
+  slug,
+  performance_id,
+  title,
+  description,
+  reward,
+  starts_at,
+  ends_at,
+  form_link,
+  created_at,
+  updated_at,
+  status,
+  allocation,
+  algorithm_version,
+  config,
+  snapshot_seed,
+  last_draw_at,
+  ticket_purchase_url,
+  approved_at,
+  approved_by,
+  available_dates,
+  performance_period_start,
+  performance_period_end,
+  one_line_intro,
+  poster_image,
+  still_images,
+  venue_name,
+  venue_address,
+  sessions_per_week,
+  running_time,
+  age_rating,
+  sns_instagram,
+  sns_youtube,
+  sns_tiktok,
+  hashtags,
+  production_team,
+  ticket_allocations,
+  kopis_id
+`;
+
+const TICKET_ENTRY_SELECT = `
+  id,
+  campaign_id,
+  applicant_name,
+  applicant_email,
+  applicant_phone,
+  answers,
+  consent_marketing,
+  submitted_at,
+  selection_status,
+  attendance_status,
+  selected_at,
+  checked_in_at
+`;
 
 const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   id,
@@ -96,8 +153,6 @@ const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   last_draw_at,
   ticket_purchase_url,
   partner_name,
-  partner_email,
-  partner_phone,
   approved_at,
   approved_by,
   available_dates,
@@ -114,6 +169,19 @@ const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
     period_end
   )
 `;
+
+const SHOWS_KOPIS_LINK_ENRICH_LIMIT = readPositiveIntEnv("SHOWS_KOPIS_LINK_ENRICH_LIMIT", 120);
+const KOPIS_DETAIL_BATCH_SIZE = readPositiveIntEnv("SHOWS_KOPIS_DETAIL_BATCH_SIZE", 5);
+
+function readPositiveIntEnv(key: string, fallback: number) {
+  const raw = process.env[key];
+  if (!raw) return fallback;
+
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+
+  return parsed;
+}
 
 export const getOrganizations = cache(async () => {
   if (!isSupabaseConfigured) {
@@ -225,6 +293,7 @@ export const getPerformancesByOrganization = cache(async (organizationId: string
 });
 
 export const getFeaturedPerformances = cache(async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const performances: any[] = [];
 
   // 1. Supabase featured performances
@@ -273,6 +342,91 @@ export const getFeaturedPerformances = cache(async () => {
   return performances;
 });
 
+type PerformanceWithOptionalTicketLink = {
+  id?: string | null;
+  ticket_link?: string | null;
+};
+
+const isKopisPerformanceId = (value: unknown): value is string =>
+  typeof value === "string" && value.startsWith("PF");
+
+async function enrichKopisTicketLinks<T extends PerformanceWithOptionalTicketLink>(performances: T[]): Promise<T[]> {
+  if (!isKopisConfigured() || performances.length === 0) {
+    return performances;
+  }
+
+  const targets = performances
+    .filter((performance) => isKopisPerformanceId(performance.id) && !performance.ticket_link)
+    .slice(0, SHOWS_KOPIS_LINK_ENRICH_LIMIT);
+
+  if (targets.length === 0) {
+    return performances;
+  }
+
+  const ticketLinks = new Map<string, string>();
+  const [firstTarget, ...restTargets] = targets;
+
+  if (isKopisPerformanceId(firstTarget.id)) {
+    try {
+      const detail = await fetchKopisDetail(firstTarget.id);
+      const mapped = mapKopisDetailToPerformance(detail) as { ticket_link?: string | null };
+      if (mapped.ticket_link) {
+        ticketLinks.set(firstTarget.id, mapped.ticket_link);
+      }
+    } catch {
+      return performances;
+    }
+  }
+
+  for (let i = 0; i < restTargets.length; i += KOPIS_DETAIL_BATCH_SIZE) {
+    const batch = restTargets.slice(i, i + KOPIS_DETAIL_BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (performance) => {
+        if (!isKopisPerformanceId(performance.id)) {
+          return null;
+        }
+
+        try {
+          const detail = await fetchKopisDetail(performance.id);
+          const mapped = mapKopisDetailToPerformance(detail) as { ticket_link?: string | null };
+          return mapped.ticket_link ? { id: performance.id, link: mapped.ticket_link } : null;
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    for (const result of results) {
+      if (result) {
+        ticketLinks.set(result.id, result.link);
+      }
+    }
+  }
+
+  if (ticketLinks.size === 0) {
+    return performances;
+  }
+
+  return performances.map((performance) => {
+    if (!isKopisPerformanceId(performance.id)) {
+      return performance;
+    }
+    const ticketLink = ticketLinks.get(performance.id);
+    if (!ticketLink) {
+      return performance;
+    }
+    return { ...performance, ticket_link: ticketLink };
+  });
+}
+
+export const getShowsPerformances = cache(async () => {
+  const performances = await getAllPerformances();
+  const head = performances.slice(0, SHOWS_KOPIS_LINK_ENRICH_LIMIT);
+  const tail = performances.slice(SHOWS_KOPIS_LINK_ENRICH_LIMIT);
+  const enrichedHead = await enrichKopisTicketLinks(head);
+  return [...enrichedHead, ...tail];
+});
+
 export const getRecentPerformances = cache(async () => {
   if (!isSupabaseConfigured) {
     return mockPerformances;
@@ -298,14 +452,28 @@ export const getPerformanceBySlug = cache(async (slug: string) => {
   if (isSupabaseConfigured) {
     try {
       const supabase = await createServerSupabaseClient();
-      const { data, error } = await supabase
+      const { data: performance, error } = await supabase
         .from("performances")
-        .select(`${PERFORMANCE_SELECT}, ticket_campaigns ( id, slug, performance_id, title, description, reward, starts_at, ends_at, form_link, created_at, updated_at )`)
+        .select(PERFORMANCE_SELECT)
         .eq("slug", slug)
         .maybeSingle();
 
-      if (!error && data) {
-        return data;
+      if (!error && performance) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: campaigns, error: campaignsError } = await (supabase as any)
+          .from("public_ticket_campaigns")
+          .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
+          .eq("performance_id", performance.id)
+          .order("starts_at", { ascending: false });
+
+        if (campaignsError) {
+          console.error("getPerformanceBySlug campaigns error", campaignsError);
+        }
+
+        return {
+          ...performance,
+          ticket_campaigns: campaigns ?? [],
+        };
       }
     } catch (err) {
       console.error("getPerformanceBySlug Supabase error", err);
@@ -350,9 +518,10 @@ export const getActiveTicketCampaigns = cache(async () => {
     ? createAdminSupabaseClient()
     : await createServerSupabaseClient();
   const now = new Date().toISOString();
-  const { data, error } = await supabase
-    .from("ticket_campaigns")
-    .select(TICKET_CAMPAIGN_SELECT)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from("public_ticket_campaigns")
+    .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
     .eq("status", "approved")  // 승인된 것만
     .lte("starts_at", now)
     .gte("ends_at", now)
@@ -381,9 +550,10 @@ export const getTicketCampaigns = cache(async () => {
       ? createAdminSupabaseClient()
       : await createServerSupabaseClient();
 
-    const { data, error } = await supabase
-      .from("ticket_campaigns")
-      .select(TICKET_CAMPAIGN_SELECT)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("public_ticket_campaigns")
+      .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
       .order("starts_at", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -436,10 +606,11 @@ export const getTicketCampaignBySlug = cache(async (identifier: string) => {
     const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
       ? createAdminSupabaseClient()
       : await createServerSupabaseClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fetchCampaign = (field: "id" | "slug", value: string) =>
-      supabase
-        .from("ticket_campaigns")
-        .select(TICKET_CAMPAIGN_SELECT)
+      (supabase as any)
+        .from("public_ticket_campaigns")
+        .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
         .eq(field, value)
         .maybeSingle();
 
@@ -515,20 +686,28 @@ export async function submitTicketEntry(payload: TicketEntryPayload) {
     ? createAdminSupabaseClient()
     : await createServerSupabaseClient();
 
-  const { error } = await supabase.functions.invoke("campaign-entry-submit", {
-    body: payload,
-  });
-
-  if (!error) {
-    return;
+  let edgeFnError: unknown = null;
+  try {
+    const { error } = await supabase.functions.invoke("campaign-entry-submit", {
+      body: payload,
+    });
+    if (!error) return;
+    edgeFnError = error;
+  } catch (invokeErr) {
+    edgeFnError = invokeErr;
   }
+
+  console.warn("campaign-entry-submit edge function unavailable, falling back to direct insert:", edgeFnError);
 
   // Fallback: store minimal entry data when the edge function is unavailable or not authorized.
   const metadata = (payload.metadata ?? {}) as Record<string, unknown>;
   const applicantName = typeof metadata.applicantName === "string" ? metadata.applicantName : "익명";
   const applicantEmail = typeof metadata.email === "string" ? metadata.email : "";
   const applicantPhone = typeof metadata.phone === "string" ? metadata.phone : null;
-  const answers = typeof metadata.answers === "object" && metadata.answers ? metadata.answers : null;
+  const answers =
+    typeof metadata.answers === "object" && metadata.answers
+      ? (metadata.answers as Database["public"]["Tables"]["ticket_entries"]["Insert"]["answers"])
+      : null;
   const consentMarketing = Boolean(metadata.consentMarketing);
 
   const { error: insertError } = await supabase.from("ticket_entries").insert({
@@ -541,7 +720,7 @@ export async function submitTicketEntry(payload: TicketEntryPayload) {
   });
 
   if (insertError) {
-    console.error("submitTicketEntry error", error, insertError);
+    console.error("submitTicketEntry error", edgeFnError, insertError);
     throw insertError;
   }
 }
@@ -556,7 +735,6 @@ export async function submitPromotionRequest(payload: PromotionRequestPayload) {
     : await createServerSupabaseClient();
   const insertPayload: Database["public"]["Tables"]["promotion_requests"]["Insert"] = {
     status: payload.status,
-    inquiry_type: payload.inquiryType,
     organization_name: payload.organizationName,
     contact_name: payload.contactName,
     contact_email: payload.contactEmail,
@@ -589,7 +767,9 @@ export const getPartnerCampaigns = cache(async (partnerEmail: string) => {
     return mockCampaigns;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
   const { data, error } = await supabase
     .from("ticket_campaigns")
     .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
@@ -613,7 +793,9 @@ export const getCampaignEntries = cache(async (campaignId: string, partnerEmail:
     return [];
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
 
   // 1. 권한 확인: 이 캠페인이 해당 공연 종사자의 것인지 검증
   const { data: campaign } = await supabase
@@ -629,7 +811,7 @@ export const getCampaignEntries = cache(async (campaignId: string, partnerEmail:
   // 2. 응모자 목록 조회
   const { data, error } = await supabase
     .from("ticket_entries")
-    .select("*")
+    .select(TICKET_ENTRY_SELECT)
     .eq("campaign_id", campaignId)
     .order("submitted_at", { ascending: false });
 
@@ -650,7 +832,9 @@ export const getPendingCampaigns = cache(async () => {
     return [];
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : await createServerSupabaseClient();
   const { data, error } = await supabase
     .from("ticket_campaigns")
     .select(TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT)
@@ -671,9 +855,7 @@ export const getPendingCampaigns = cache(async () => {
 
 import {
   isKopisConfigured,
-  fetchRecentPerformances as fetchKopisPerformances,
   fetchPerformanceDetail as fetchKopisDetail,
-  mapKopisListToPerformances,
   mapKopisDetailToPerformance,
 } from '@/lib/kopis';
 
@@ -684,6 +866,7 @@ import {
  * Supabase 데이터와 병합합니다.
  */
 export const getAllPerformances = cache(async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const performances: any[] = [];
 
   // 1. Supabase 데이터 가져오기
@@ -707,7 +890,11 @@ export const getAllPerformances = cache(async () => {
   if (isKopisConfigured()) {
     try {
       const { fetchAllUpcomingPerformances, mapKopisListToPerformances } = await import('@/lib/kopis');
-      const kopisData = await fetchAllUpcomingPerformances(10); // 최대 1000개 (10페이지 × 100)
+      const [theaterData, musicalData] = await Promise.all([
+        fetchAllUpcomingPerformances(5, 'AAAA'), // 연극
+        fetchAllUpcomingPerformances(5, 'BBBC'), // 뮤지컬
+      ]);
+      const kopisData = [...theaterData, ...musicalData];
       const mappedKopis = mapKopisListToPerformances(kopisData);
 
       // KOPIS 데이터를 Supabase 데이터와 병합 (중복 제거)
@@ -749,6 +936,376 @@ export const getPerformanceFromKopis = cache(async (kopisId: string) => {
     return null;
   }
 });
+
+// ============================================================
+// Review queries
+// ============================================================
+
+function computeReviewSummary(
+  rows: Array<{ rating_overall: number; verified_attendance: boolean; tags: string[] | null }>
+): ReviewSummary {
+  const total = rows.length;
+  if (total === 0) {
+    return { avgRating: 0, totalCount: 0, verifiedCount: 0, tagFrequency: {} };
+  }
+  const avgRating =
+    Math.round((rows.reduce((sum, r) => sum + r.rating_overall, 0) / total) * 10) / 10;
+  const verifiedCount = rows.filter((r) => r.verified_attendance).length;
+  const tagFrequency: Record<string, number> = {};
+  for (const row of rows) {
+    for (const tag of row.tags ?? []) {
+      tagFrequency[tag] = (tagFrequency[tag] ?? 0) + 1;
+    }
+  }
+  return { avgRating, totalCount: total, verifiedCount, tagFrequency };
+}
+
+export const getReviewsByPerformance = cache(
+  async (
+    performanceId: string,
+    opts?: { limit?: number; verifiedOnly?: boolean }
+  ): Promise<ReviewRow[]> => {
+    const limit = opts?.limit ?? 20;
+    const verifiedOnly = opts?.verifiedOnly ?? false;
+
+    if (!isSupabaseConfigured) {
+      let results = mockReviews.filter(
+        (r) => r.performance_id === performanceId && r.status === "published"
+      );
+      if (verifiedOnly) results = results.filter((r) => r.verified_attendance);
+      results = [...results].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      return results.slice(0, limit);
+    }
+
+    try {
+      const supabase = await createServerSupabaseClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase as any)
+        .from("reviews")
+        .select("*")
+        .eq("performance_id", performanceId)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      if (verifiedOnly) {
+        query = query.eq("verified_attendance", true);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error("getReviewsByPerformance error", error);
+        return mockReviews
+          .filter((r) => r.performance_id === performanceId && r.status === "published")
+          .slice(0, limit);
+      }
+      return (data as ReviewRow[]) ?? [];
+    } catch (err) {
+      console.error("getReviewsByPerformance exception", err);
+      return [];
+    }
+  }
+);
+
+export const getReviewSummary = cache(async (performanceId: string): Promise<ReviewSummary> => {
+  if (!isSupabaseConfigured) {
+    const relevant = mockReviews.filter(
+      (r) => r.performance_id === performanceId && r.status === "published"
+    );
+    return computeReviewSummary(relevant);
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("reviews")
+      .select("rating_overall, verified_attendance, tags")
+      .eq("performance_id", performanceId)
+      .eq("status", "published");
+
+    if (error) {
+      console.error("getReviewSummary error", error);
+      const relevant = mockReviews.filter(
+        (r) => r.performance_id === performanceId && r.status === "published"
+      );
+      return computeReviewSummary(relevant);
+    }
+    return computeReviewSummary(
+      (data as Array<{ rating_overall: number; verified_attendance: boolean; tags: string[] | null }>) ?? []
+    );
+  } catch (err) {
+    console.error("getReviewSummary exception", err);
+    return { avgRating: 0, totalCount: 0, verifiedCount: 0, tagFrequency: {} };
+  }
+});
+
+export async function checkReservationForVerification(
+  email: string,
+  performanceId: string
+): Promise<{ verified: boolean; reservationId: string | null }> {
+  if (!isSupabaseConfigured) {
+    // Mock 모드: @example.com 이메일은 인증된 것으로 처리
+    const isVerified = email.endsWith("@example.com");
+    return { verified: isVerified, reservationId: isVerified ? "mock-reservation-id" : null };
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+    // ticket_entries → ticket_campaigns JOIN으로 performance_id 매칭
+    // 1단계: 해당 performance의 campaign id 목록 조회
+    const { data: campaigns, error: campaignError } = await supabase
+      .from("ticket_campaigns")
+      .select("id")
+      .eq("performance_id", performanceId);
+
+    if (campaignError || !campaigns || campaigns.length === 0) {
+      return { verified: false, reservationId: null };
+    }
+
+    const campaignIds = campaigns.map((c) => c.id);
+
+    // 2단계: 해당 캠페인에 이메일로 응모한 ticket_entries 조회
+    const { data: entry, error: entryError } = await supabase
+      .from("ticket_entries")
+      .select("id")
+      .eq("applicant_email", email.trim().toLowerCase())
+      .in("campaign_id", campaignIds)
+      .maybeSingle();
+
+    if (entryError) {
+      console.error("checkReservationForVerification entry error", entryError);
+      return { verified: false, reservationId: null };
+    }
+
+    if (entry) {
+      return { verified: true, reservationId: entry.id };
+    }
+    return { verified: false, reservationId: null };
+  } catch (err) {
+    console.error("checkReservationForVerification exception", err);
+    return { verified: false, reservationId: null };
+  }
+}
+
+export const getRecentReviews = cache(
+  async (opts?: { limit?: number; verifiedOnly?: boolean }): Promise<ReviewRow[]> => {
+    const limit = opts?.limit ?? 20
+    const verifiedOnly = opts?.verifiedOnly ?? false
+
+    if (!isSupabaseConfigured) {
+      let results = [...mockReviews].filter((r) => r.status === "published")
+      if (verifiedOnly) results = results.filter((r) => r.verified_attendance)
+      return results
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, limit)
+    }
+
+    try {
+      const supabase = await createServerSupabaseClient()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase as any)
+        .from("reviews")
+        .select("*")
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(limit)
+
+      if (verifiedOnly) query = query.eq("verified_attendance", true)
+
+      const { data, error } = await query
+      if (error) {
+        console.error("getRecentReviews error", error)
+        return mockReviews.filter((r) => r.status === "published").slice(0, limit)
+      }
+      return (data as ReviewRow[]) ?? []
+    } catch (err) {
+      console.error("getRecentReviews exception", err)
+      return []
+    }
+  }
+)
+
+export type CampaignSummary = {
+  id: string
+  slug: string
+  title: string
+  description: string | null
+  reward: string | null
+  ends_at: string | null
+}
+
+export const getCampaignByPerformanceId = cache(
+  async (performanceId: string): Promise<CampaignSummary | null> => {
+    if (!isSupabaseConfigured) {
+      const found = mockCampaigns.find(
+        (c) => (c as unknown as { performance_id?: string }).performance_id === performanceId
+      )
+      if (!found) return null
+      return {
+        id: found.id,
+        slug: found.slug,
+        title: found.title,
+        description: found.description ?? null,
+        reward: found.reward ?? null,
+        ends_at: found.ends_at ?? null,
+      }
+    }
+
+    try {
+      const supabase = await createServerSupabaseClient()
+      const { data, error } = await supabase
+        .from("ticket_campaigns")
+        .select("id, slug, title, description, reward, ends_at")
+        .eq("performance_id", performanceId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (error || !data) return null
+      return data as CampaignSummary
+    } catch (err) {
+      console.error("getCampaignByPerformanceId exception", err)
+      return null
+    }
+  }
+)
+
+export async function incrementReviewHelpful(reviewId: string): Promise<void> {
+  if (!isSupabaseConfigured) return;
+
+  try {
+    const supabase = await createServerSupabaseClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc("increment_review_helpful", {
+      review_id: reviewId,
+    });
+    if (error) {
+      console.error("incrementReviewHelpful error", error);
+    }
+  } catch (err) {
+    console.error("incrementReviewHelpful exception", err);
+  }
+}
+
+/**
+ * KOPIS `entrpsnm`(제작사) 텍스트로 reviews 조회
+ * performances.organization 컬럼이 entrpsnm을 저장함
+ */
+export const getReviewsByOrgName = cache(
+  async (
+    orgName: string,
+    opts?: { limit?: number; verifiedOnly?: boolean }
+  ): Promise<ReviewRow[]> => {
+    const limit = opts?.limit ?? 50;
+    const verifiedOnly = opts?.verifiedOnly ?? false;
+
+    if (!isSupabaseConfigured) {
+      // mock: performances.organization 텍스트 매칭
+      const perfIds = mockPerformances
+        .filter((p) => p.organization === orgName)
+        .map((p) => p.id);
+      let results = mockReviews.filter(
+        (r) => perfIds.includes(r.performance_id) && r.status === "published"
+      );
+      if (verifiedOnly) results = results.filter((r) => r.verified_attendance);
+      results = [...results].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      return results.slice(0, limit);
+    }
+
+    try {
+      const supabase = await createServerSupabaseClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase as any)
+        .from("reviews")
+        .select("*, performances!inner(organization)")
+        .eq("performances.organization", orgName)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      if (verifiedOnly) {
+        query = query.eq("verified_attendance", true);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error("getReviewsByOrgName error", error);
+        return [];
+      }
+      return ((data as ReviewRow[]) ?? []).map((row) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { performances: _p, ...reviewOnly } = row as any;
+        return reviewOnly as ReviewRow;
+      });
+    } catch (err) {
+      console.error("getReviewsByOrgName exception", err);
+      return [];
+    }
+  }
+);
+
+export const getReviewsByOrganization = cache(
+  async (
+    organizationId: string,
+    opts?: { limit?: number; verifiedOnly?: boolean }
+  ): Promise<ReviewRow[]> => {
+    const limit = opts?.limit ?? 50;
+    const verifiedOnly = opts?.verifiedOnly ?? false;
+
+    if (!isSupabaseConfigured) {
+      // 해당 단체의 공연 id 목록 추출
+      const perfIds = mockPerformances
+        .filter((p) => p.organization_id === organizationId)
+        .map((p) => p.id);
+      let results = mockReviews.filter(
+        (r) => perfIds.includes(r.performance_id) && r.status === "published"
+      );
+      if (verifiedOnly) results = results.filter((r) => r.verified_attendance);
+      results = [...results].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      return results.slice(0, limit);
+    }
+
+    try {
+      const supabase = await createServerSupabaseClient();
+      // performances.organization_id 기준으로 reviews를 조인 조회
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase as any)
+        .from("reviews")
+        .select("*, performances!inner(organization_id)")
+        .eq("performances.organization_id", organizationId)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      if (verifiedOnly) {
+        query = query.eq("verified_attendance", true);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error("getReviewsByOrganization error", error);
+        return [];
+      }
+      // 조인 필드 제거하고 ReviewRow만 반환
+      return ((data as ReviewRow[]) ?? []).map(({ ...row }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { performances: _p, ...reviewOnly } = row as any;
+        return reviewOnly as ReviewRow;
+      });
+    } catch (err) {
+      console.error("getReviewsByOrganization exception", err);
+      return [];
+    }
+  }
+);
+
 
 
 
