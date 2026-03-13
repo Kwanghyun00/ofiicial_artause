@@ -159,6 +159,7 @@ const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   available_dates,
   performance_period_start,
   performance_period_end,
+  entry_count,
   performances (
     id,
     slug,

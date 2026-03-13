@@ -43,7 +43,7 @@ export default async function EventCenterPage() {
     }
 
     // entry_count는 DB 트리거로 항상 최신 상태 유지 — entries 조회 실패 시도 정확한 값 표시
-    const total = (campaign as { entry_count?: number | null }).entry_count ?? entries.length;
+    const total = campaign.entry_count ?? entries.length;
     const selected = entries.filter((e) => e.selection_status === "selected").length;
     const checkedIn = entries.filter((e) => e.attendance_status === "checked_in").length;
     const noShow = entries.filter((e) => e.attendance_status === "no_show").length;
