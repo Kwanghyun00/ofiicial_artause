@@ -1,9 +1,10 @@
 -- Feedback System
+create extension if not exists "pgcrypto";
 -- 사용자 피드백 및 문의사항 수집 시스템
 
 -- 피드백 테이블 생성
 create table if not exists public.feedback (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
 
   -- 피드백 유형
   type text not null check (type in ('bug', 'feature', 'improvement', 'question', 'other')),
@@ -108,3 +109,4 @@ comment on table public.feedback is '사용자 피드백 및 문의사항';
 comment on column public.feedback.type is '피드백 유형: bug, feature, improvement, question, other';
 comment on column public.feedback.status is '처리 상태: new, in_review, planned, completed, rejected';
 comment on column public.feedback.priority is '우선순위: low, medium, high, urgent';
+

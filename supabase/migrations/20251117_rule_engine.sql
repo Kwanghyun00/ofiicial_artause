@@ -5,7 +5,7 @@
 -- ============================================================================
 
 -- Ensure uuid-ossp extension exists
-create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
 
 -- 0. users 테이블에 email 컬럼 추가 (없는 경우)
 ALTER TABLE users
@@ -16,7 +16,7 @@ COMMENT ON COLUMN users.email IS '사용자 이메일 주소 (선택, 고유)';
 -- 1. user_penalties 테이블 생성
 -- 사용자의 패널티 기록을 추적 (노쇼, 취소, 규칙 위반 등)
 CREATE TABLE IF NOT EXISTS user_penalties (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   entry_id UUID REFERENCES entries(id) ON DELETE SET NULL,
   campaign_id UUID REFERENCES event_campaigns(id) ON DELETE SET NULL,
@@ -58,7 +58,7 @@ COMMENT ON COLUMN user_penalties.expires_at IS '패널티 만료일 (자동 삭�
 -- 2. campaign_rules 테이블 생성
 -- 캠페인별 규칙 정의 (취소 마감, 출석 필수, 양도 금지 등)
 CREATE TABLE IF NOT EXISTS campaign_rules (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID NOT NULL REFERENCES event_campaigns(id) ON DELETE CASCADE,
 
   -- 규칙 유형
@@ -141,7 +141,8 @@ CREATE POLICY "Partners can view penalties for their campaigns"
   USING (
     EXISTS (
       SELECT 1 FROM event_campaigns ec
-      INNER JOIN users u ON u.email = ec.partner_email
+      INNER JOIN shows s ON s.id = ec.show_id
+      INNER JOIN users u ON u.id = s.partner_id
       WHERE ec.id = user_penalties.campaign_id
         AND u.id = auth.uid()
         AND u.role = 'partner'
@@ -156,7 +157,8 @@ CREATE POLICY "Partners can create penalties for their campaigns"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM event_campaigns ec
-      INNER JOIN users u ON u.email = ec.partner_email
+      INNER JOIN shows s ON s.id = ec.show_id
+      INNER JOIN users u ON u.id = s.partner_id
       WHERE ec.id = user_penalties.campaign_id
         AND u.id = auth.uid()
         AND u.role = 'partner'
@@ -194,7 +196,8 @@ CREATE POLICY "Partners can manage rules for their campaigns"
   USING (
     EXISTS (
       SELECT 1 FROM event_campaigns ec
-      INNER JOIN users u ON u.email = ec.partner_email
+      INNER JOIN shows s ON s.id = ec.show_id
+      INNER JOIN users u ON u.id = s.partner_id
       WHERE ec.id = campaign_rules.campaign_id
         AND u.id = auth.uid()
         AND u.role = 'partner'
@@ -322,10 +325,11 @@ SELECT
   p.*,
   u.email AS user_email,
   u.trust_score,
-  ec.title AS campaign_title
+  s.title AS campaign_title
 FROM user_penalties p
 INNER JOIN users u ON u.id = p.user_id
 LEFT JOIN event_campaigns ec ON ec.id = p.campaign_id
+LEFT JOIN shows s ON s.id = ec.show_id
 WHERE p.expires_at > NOW()
 ORDER BY p.created_at DESC;
 
@@ -347,3 +351,6 @@ BEGIN
   RAISE NOTICE '- RLS 정책 설정 완료';
   RAISE NOTICE '- 자동 점수 재계산 트리거 설정 완료';
 END $$;
+
+
+
