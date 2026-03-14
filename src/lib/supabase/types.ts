@@ -1556,6 +1556,50 @@ export type Database = {
           },
         ]
       }
+      public_ticket_campaigns: {
+        Row: {
+          age_rating: string | null
+          algorithm_version: string
+          allocation: Json
+          approved_at: string | null
+          approved_by: string | null
+          available_dates: string[] | null
+          config: Json
+          created_at: string
+          description: string | null
+          ends_at: string
+          entry_count: number
+          form_link: string | null
+          hashtags: Json | null
+          id: string
+          kopis_id: string | null
+          last_draw_at: string | null
+          one_line_intro: string | null
+          performance_id: string
+          performance_period_end: string | null
+          performance_period_start: string | null
+          poster_image: string | null
+          production_team: Json | null
+          reward: string | null
+          running_time: number | null
+          sessions_per_week: number | null
+          slug: string | null
+          snapshot_seed: number | null
+          sns_instagram: string | null
+          sns_tiktok: string | null
+          sns_youtube: string | null
+          starts_at: string
+          status: string
+          still_images: Json | null
+          ticket_allocations: Json | null
+          ticket_purchase_url: string | null
+          title: string
+          updated_at: string
+          venue_address: string | null
+          venue_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       next_waitlist_promotions: {

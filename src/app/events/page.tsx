@@ -1,4 +1,3 @@
-import { EventsExplorer } from "@/components/events/EventsExplorer"
 import { EventsHero } from "@/components/events/EventsHero"
 import { EventsGrid } from "@/components/events/EventsGrid"
 import { Reveal } from "@/components/motion/Reveal"

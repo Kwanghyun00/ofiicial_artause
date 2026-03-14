@@ -1,7 +1,10 @@
-// @ts-nocheck
 "use server"
 
-import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server"
+import {
+  createAdminSupabaseClient,
+  createPublicSupabaseClient,
+  createReadOnlySupabaseClient,
+} from "@/lib/supabase/server"
 import { isSupabaseConfigured } from "@/lib/config"
 import { headers } from "next/headers"
 
@@ -38,14 +41,13 @@ export async function submitFeedback(payload: SubmitFeedbackPayload): Promise<Ac
   try {
     const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
       ? createAdminSupabaseClient()
-      : await createServerSupabaseClient()
+      : createPublicSupabaseClient()
 
     const headersList = await headers()
     const referer = headersList.get("referer") || null
     const userAgent = headersList.get("user-agent") || null
 
-    // @ts-ignore - feedback table not in types yet
-    const { error } = await supabase.from("feedback").insert({
+const { error } = await supabase.from("feedback").insert({
       type: payload.type,
       title: payload.title,
       description: payload.description,
@@ -85,12 +87,9 @@ export async function getAllFeedback() {
   }
 
   try {
-    const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? createAdminSupabaseClient()
-      : await createServerSupabaseClient()
+    const supabase = createReadOnlySupabaseClient()
 
-    // @ts-ignore - feedback table not in types yet
-    const { data, error } = await supabase
+const { data, error } = await supabase
       .from("feedback")
       .select("*")
       .order("created_at", { ascending: false })
@@ -123,7 +122,7 @@ export async function updateFeedbackStatus(
   try {
     const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
       ? createAdminSupabaseClient()
-      : await createServerSupabaseClient()
+      : createPublicSupabaseClient()
 
     const updateData: Record<string, unknown> = {
       status,
@@ -134,8 +133,7 @@ export async function updateFeedbackStatus(
       updateData.admin_notes = adminNotes
     }
 
-    // @ts-ignore - feedback table not in types yet
-    const { error } = await supabase
+const { error } = await supabase
       .from("feedback")
       .update(updateData)
       .eq("id", feedbackId)

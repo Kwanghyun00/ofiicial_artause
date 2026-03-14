@@ -1,8 +1,10 @@
 "use client"
 
 import { type ComponentType, useMemo, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpDown, Calendar, Heart, LayoutGrid, MapPin, Rows, Users } from "lucide-react"
+import { trackEvent } from "@/lib/analytics"
 
 type Campaign = {
   id: string
@@ -13,6 +15,7 @@ type Campaign = {
   ends_at?: string | null
   reward?: string | null
   entry_count?: number | null
+  poster_image?: string | null
   performances?: {
     region?: string | null
     title?: string | null
@@ -27,6 +30,9 @@ export function EventsGrid({ campaigns }: Props) {
   const [sortBy, setSortBy] = useState<"popular" | "latest" | "deadline" | "match">("popular")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [saved, setSaved] = useState<string[]>([])
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const now = useMemo(() => Date.now(), [])
 
   const sortedCampaigns = useMemo(() => {
     const cloned = [...campaigns]
@@ -51,11 +57,11 @@ export function EventsGrid({ campaigns }: Props) {
           <p className="mt-1 text-sm text-muted-foreground">현재 {campaigns.length}개의 초대가 진행 중입니다.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center rounded-full border border-border/80 bg-white/70 p-1 shadow-sm">
+          <div className="flex items-center rounded-full border border-border/80 bg-background/70 p-1 shadow-sm">
             <ToggleButton label="카드" icon={LayoutGrid} active={viewMode === "grid"} onClick={() => setViewMode("grid")} />
             <ToggleButton label="리스트" icon={Rows} active={viewMode === "list"} onClick={() => setViewMode("list")} />
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-border/80 bg-white/70 px-3 py-1.5 shadow-sm">
+          <div className="flex items-center gap-2 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 shadow-sm">
             <ArrowUpDown className="h-4 w-4" />
             <select
               value={sortBy}
@@ -73,22 +79,54 @@ export function EventsGrid({ campaigns }: Props) {
 
       <div className={`grid gap-6 ${viewMode === "grid" ? "sm:grid-cols-2 xl:grid-cols-3" : ""}`}>
         {sortedCampaigns.map((campaign) => {
+          const isClosed = campaign.ends_at ? new Date(campaign.ends_at).getTime() < now : false
           const ratio = getProgressRatio(campaign.entry_count ?? 0)
           const href = campaign.slug ? `/events/${campaign.slug}` : `/events/${campaign.id}`
           return (
             <article
               key={campaign.id}
-              className={`group relative h-full overflow-hidden rounded-3xl border border-border/70 bg-white/90 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl ${
+              className={`spotlight-card group h-full ${isClosed ? "opacity-60 grayscale" : ""} ${
                 viewMode === "list" ? "flex flex-col md:flex-row" : ""
               }`}
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,108,205,0.14),_transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,210,140,0.12),_transparent_60%)]" />
+              {/* 포스터 이미지 (그리드 모드) */}
+              {viewMode === "grid" && campaign.poster_image && (
+                <div className="relative h-44 w-full overflow-hidden rounded-t-2xl">
+                  <Image
+                    src={campaign.poster_image}
+                    alt={campaign.title}
+                    fill
+                    className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                    unoptimized={campaign.poster_image.startsWith("http://www.kopis.or.kr")}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+                  {isClosed ? (
+                    <span className="absolute right-3 top-3 rounded-full bg-slate-800/80 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                      마감
+                    </span>
+                  ) : (
+                    <span className="absolute right-3 top-3">
+                      <UrgencyBadge endsAt={campaign.ends_at} now={now} />
+                    </span>
+                  )}
+                </div>
+              )}
               <div className={`relative p-5 ${viewMode === "list" ? "md:w-2/3" : ""}`}>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="rounded-full bg-secondary px-3 py-1 text-foreground/80">
+                  <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-foreground/80">
                     {campaign.reward ?? "체험형 초대"}
                   </span>
-                  {campaign.ends_at && <span className="font-semibold text-primary">마감 {formatDate(campaign.ends_at)}</span>}
+                  {/* 포스터 없을 때만 배지 노출 (포스터 있으면 이미지 위에 표시) */}
+                  {!campaign.poster_image || viewMode === "list" ? (
+                    isClosed ? (
+                      <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold text-slate-500">
+                        마감
+                      </span>
+                    ) : (
+                      <UrgencyBadge endsAt={campaign.ends_at} now={now} />
+                    )
+                  ) : null}
                 </div>
                 <h3 className="mt-3 text-xl font-bold text-foreground">{campaign.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
@@ -115,7 +153,7 @@ export function EventsGrid({ campaigns }: Props) {
                     <span>신청률</span>
                     <span>{ratio}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-secondary">
+                  <div className="h-2 rounded-full bg-secondary/70">
                     <div className="h-2 rounded-full bg-primary" style={{ width: `${ratio}%` }} />
                   </div>
                 </div>
@@ -139,6 +177,7 @@ export function EventsGrid({ campaigns }: Props) {
                   </button>
                   <Link
                     href={href}
+                    onClick={() => trackEvent("event_card_click", { id: campaign.id, title: campaign.title })}
                     className="flex-1 rounded-full bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90"
                   >
                     상세 보기
@@ -175,6 +214,30 @@ function ToggleButton({
       <Icon className="h-4 w-4" />
       {label}
     </button>
+  )
+}
+
+function UrgencyBadge({ endsAt, now }: { endsAt?: string | null; now: number }) {
+  if (!endsAt) return null
+  const end = new Date(endsAt).getTime()
+  if (end <= now) return null
+
+  const diffMs = end - now
+  const diffHours = diffMs / (1000 * 60 * 60)
+
+  if (diffHours <= 72) {
+    return (
+      <span className="rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground">
+        🔥 마감임박
+      </span>
+    )
+  }
+
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+  return (
+    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+      D-{diffDays}
+    </span>
   )
 }
 

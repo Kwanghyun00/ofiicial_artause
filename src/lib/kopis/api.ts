@@ -21,6 +21,17 @@ import type {
  * KOPIS API 기본 URL
  */
 const KOPIS_BASE_URL = 'http://www.kopis.or.kr/openApi/restful';
+const KOPIS_REVALIDATE_SECONDS = readPositiveIntEnv("KOPIS_REVALIDATE_SECONDS", 120);
+
+function readPositiveIntEnv(key: string, fallback: number): number {
+  const raw = process.env[key];
+  if (!raw) return fallback;
+
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+
+  return parsed;
+}
 
 /**
  * 환경변수에서 서비스 키 가져오기
@@ -45,7 +56,7 @@ export function isKopisConfigured(): boolean {
  */
 function buildQueryString(params: Record<string, string | number | undefined>): string {
   const filtered = Object.entries(params)
-    .filter(([_, value]) => value !== undefined)
+    .filter(([, value]) => value !== undefined)
     .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
     .join('&');
   return filtered;
@@ -89,9 +100,17 @@ export async function fetchPerformanceList(
 
     console.log('Fetching KOPIS performance list:', url);
 
-    const response = await fetch(url, {
-      next: { revalidate: 3600 }, // 1시간 캐시
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10_000);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        signal: controller.signal,
+        next: { revalidate: KOPIS_REVALIDATE_SECONDS },
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(`KOPIS API error: ${response.status} ${response.statusText}`);
@@ -125,9 +144,17 @@ export async function fetchPerformanceDetail(
 
     console.log('Fetching KOPIS performance detail:', url);
 
-    const response = await fetch(url, {
-      next: { revalidate: 3600 }, // 1시간 캐시
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10_000);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        signal: controller.signal,
+        next: { revalidate: KOPIS_REVALIDATE_SECONDS },
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(`KOPIS API error: ${response.status} ${response.statusText}`);
@@ -173,7 +200,10 @@ export async function fetchRecentPerformances(rows: number = 20): Promise<KopisP
  * @param maxPages - 최대 페이지 수 (기본값: 5)
  * @returns 모든 공연 목록
  */
-export async function fetchAllUpcomingPerformances(maxPages: number = 5): Promise<KopisPerformanceItem[]> {
+export async function fetchAllUpcomingPerformances(
+  maxPages: number = 5,
+  shcate?: string,
+): Promise<KopisPerformanceItem[]> {
   const now = new Date();
   const startDate = new Date(now);
   const endDate = new Date(now);
@@ -189,6 +219,7 @@ export async function fetchAllUpcomingPerformances(maxPages: number = 5): Promis
         eddate: formatDateForKopis(endDate),
         cpage: page,
         rows: 100, // 페이지당 최대
+        shcate,
       });
 
       allPerformances.push(...performances);
@@ -203,7 +234,7 @@ export async function fetchAllUpcomingPerformances(maxPages: number = 5): Promis
     }
   }
 
-  console.log(`✅ Fetched ${allPerformances.length} performances from KOPIS (${maxPages} pages)`);
+  console.log(`✅ Fetched ${allPerformances.length} performances from KOPIS (genre: ${shcate ?? 'all'}, ${maxPages} pages max)`);
 
   return allPerformances;
 }

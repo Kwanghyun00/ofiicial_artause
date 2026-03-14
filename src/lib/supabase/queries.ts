@@ -7,7 +7,11 @@ import {
   mockPerformances,
   mockReviews,
 } from "@/lib/mocks/performances";
-import { createAdminSupabaseClient, createServerSupabaseClient } from "./server";
+import {
+  createAdminSupabaseClient,
+  createReadOnlySupabaseClient,
+  createServerSupabaseClient,
+} from "./server";
 import type { Database } from "./types";
 import type { PromotionRequestPayload } from "@/lib/models/promotion-request";
 import type { PerformanceSubmissionPayload } from "@/lib/models/performance-submission";
@@ -185,12 +189,18 @@ function readPositiveIntEnv(key: string, fallback: number) {
   return parsed;
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string) {
+  return UUID_PATTERN.test(value);
+}
+
 export const getOrganizations = cache(async () => {
   if (!isSupabaseConfigured) {
     return [...mockOrganizations].sort((a, b) => b.follower_count - a.follower_count);
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("organizations")
     .select(ORGANIZATION_SELECT)
@@ -214,7 +224,7 @@ export const getOrganizationBySlug = cache(async (slug: string) => {
     return mockOrganizations.find((organization) => organization.slug === slug) ?? null;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("organizations")
     .select(ORGANIZATION_SELECT)
@@ -239,7 +249,7 @@ export const getCommunityPosts = cache(async () => {
     });
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("community_posts")
     .select(COMMUNITY_POST_SELECT)
@@ -259,7 +269,7 @@ export const getCommunityPostBySlug = cache(async (slug: string) => {
     return mockCommunityPosts.find((post) => post.slug === slug) ?? null;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("community_posts")
     .select(COMMUNITY_POST_SELECT)
@@ -279,7 +289,7 @@ export const getPerformancesByOrganization = cache(async (organizationId: string
     return mockPerformances.filter((item) => item.organization_id === organizationId);
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("performances")
     .select(PERFORMANCE_SELECT)
@@ -301,7 +311,7 @@ export const getFeaturedPerformances = cache(async () => {
   // 1. Supabase featured performances
   if (isSupabaseConfigured) {
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
       const { data, error } = await supabase
         .from("performances")
         .select(PERFORMANCE_SELECT)
@@ -434,7 +444,7 @@ export const getRecentPerformances = cache(async () => {
     return mockPerformances;
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("performances")
     .select(PERFORMANCE_SELECT)
@@ -453,7 +463,7 @@ export const getPerformanceBySlug = cache(async (slug: string) => {
   // 1. Supabase에서 조회
   if (isSupabaseConfigured) {
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
       const { data: performance, error } = await supabase
         .from("performances")
         .select(PERFORMANCE_SELECT)
@@ -461,8 +471,7 @@ export const getPerformanceBySlug = cache(async (slug: string) => {
         .maybeSingle();
 
       if (!error && performance) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: campaigns, error: campaignsError } = await (supabase as any)
+        const { data: campaigns, error: campaignsError } = await supabase
           .from("public_ticket_campaigns")
           .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
           .eq("performance_id", performance.id)
@@ -516,12 +525,9 @@ export const getActiveTicketCampaigns = cache(async () => {
     return mockCampaigns;
   }
 
-  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
-    ? createAdminSupabaseClient()
-    : await createServerSupabaseClient();
+  const supabase = createReadOnlySupabaseClient();
   const now = new Date().toISOString();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("public_ticket_campaigns")
     .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
     .eq("status", "approved")  // 승인된 것만
@@ -548,12 +554,9 @@ export const getTicketCampaigns = cache(async () => {
   }
 
   try {
-    const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? createAdminSupabaseClient()
-      : await createServerSupabaseClient();
+    const supabase = createReadOnlySupabaseClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("public_ticket_campaigns")
       .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
       .order("starts_at", { ascending: false })
@@ -605,22 +608,19 @@ export const getTicketCampaignBySlug = cache(async (identifier: string) => {
   }
 
   try {
-    const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? createAdminSupabaseClient()
-      : await createServerSupabaseClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = createReadOnlySupabaseClient();
     const fetchCampaign = (field: "id" | "slug", value: string) =>
-      (supabase as any)
+      supabase
         .from("public_ticket_campaigns")
         .select(PUBLIC_TICKET_CAMPAIGN_SELECT)
         .eq(field, value)
         .maybeSingle();
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    const identifierIsUuid = isUuid(identifier);
 
-    let { data, error } = await fetchCampaign(isUuid ? "id" : "slug", identifier);
+    let { data, error } = await fetchCampaign(identifierIsUuid ? "id" : "slug", identifier);
 
-    if (!data && !error && !isUuid) {
+    if (!data && !error && !identifierIsUuid) {
       const fallback = await fetchCampaign("id", identifier);
       data = fallback.data;
       error = fallback.error;
@@ -875,7 +875,7 @@ export const getAllPerformances = cache(async () => {
   // 1. Supabase 데이터 가져오기
   if (isSupabaseConfigured) {
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
       const { data, error } = await supabase
         .from("performances")
         .select(PERFORMANCE_SELECT)
@@ -982,8 +982,19 @@ export const getReviewsByPerformance = cache(
       return results.slice(0, limit);
     }
 
+    if (!isUuid(performanceId)) {
+      let results = mockReviews.filter(
+        (r) => r.performance_id === performanceId && r.status === "published"
+      );
+      if (verifiedOnly) results = results.filter((r) => r.verified_attendance);
+      results = [...results].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      return results.slice(0, limit);
+    }
+
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query = (supabase as any)
         .from("reviews")
@@ -1020,8 +1031,15 @@ export const getReviewSummary = cache(async (performanceId: string): Promise<Rev
     return computeReviewSummary(relevant);
   }
 
+  if (!isUuid(performanceId)) {
+    const relevant = mockReviews.filter(
+      (r) => r.performance_id === performanceId && r.status === "published"
+    );
+    return computeReviewSummary(relevant);
+  }
+
   try {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createReadOnlySupabaseClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from("reviews")
@@ -1107,7 +1125,7 @@ export const getRecentReviews = cache(
     }
 
     try {
-      const supabase = await createServerSupabaseClient()
+      const supabase = createReadOnlySupabaseClient()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query = (supabase as any)
         .from("reviews")
@@ -1157,8 +1175,23 @@ export const getCampaignByPerformanceId = cache(
       }
     }
 
+    if (!isUuid(performanceId)) {
+      const found = mockCampaigns.find(
+        (c) => (c as unknown as { performance_id?: string }).performance_id === performanceId
+      )
+      if (!found) return null
+      return {
+        id: found.id,
+        slug: found.slug,
+        title: found.title,
+        description: found.description ?? null,
+        reward: found.reward ?? null,
+        ends_at: found.ends_at ?? null,
+      }
+    }
+
     try {
-      const supabase = await createServerSupabaseClient()
+      const supabase = createReadOnlySupabaseClient()
       const { data, error } = await supabase
         .from("ticket_campaigns")
         .select("id, slug, title, description, reward, ends_at")
@@ -1221,7 +1254,7 @@ export const getReviewsByOrgName = cache(
     }
 
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query = (supabase as any)
         .from("reviews")
@@ -1276,7 +1309,7 @@ export const getReviewsByOrganization = cache(
     }
 
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
       // performances.organization_id 기준으로 reviews를 조인 조회
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query = (supabase as any)
