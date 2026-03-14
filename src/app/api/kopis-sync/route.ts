@@ -104,7 +104,8 @@ export async function POST() {
           period_start: p.period_start ?? null,
           period_end: p.period_end ?? null,
           poster_url: p.poster_url ?? null,
-          ticket_link: p.ticket_link ?? null,
+          // ticket_link은 list API에 없으므로 기존 값 보존 (null로 덮어쓰지 않음)
+          ...(p.ticket_link ? { ticket_link: p.ticket_link } : {}),
           status: "ongoing",
           source: "kopis",
           last_synced_at: syncedAt,
@@ -160,10 +161,14 @@ export async function POST() {
     result.errors++;
   }
 
-  // ─── 2단계: 활성 캠페인 연결 공연 상세 동기화 ────────────────────
-  // campaign.performance_id 기준으로 performances 레코드를 업데이트
-  // → 중복 레코드 없이 기존 레코드가 KOPIS 데이터로 보강됨
+  // ─── 2단계: 상세 정보 미입력 공연 동기화 ────────────────────────
+  // description IS NULL인 KOPIS 공연 30개씩 처리 (타임아웃 방지)
+  // organization, description, cast, crew, runtime, age_limit, price,
+  // schedule, ticket_link, poster_url 모두 업데이트
   try {
+    const DETAIL_BATCH = 30;
+
+    // 2-a. 캠페인 연결 공연 (승인된 것, 우선순위 높음)
     const { data: campaigns } = await supabase
       .from("ticket_campaigns")
       .select("kopis_id, performance_id")
@@ -171,10 +176,34 @@ export async function POST() {
       .not("performance_id", "is", null)
       .eq("status", "approved");
 
-    for (const campaign of campaigns ?? []) {
-      const kopisId = campaign.kopis_id as string;
-      const performanceId = campaign.performance_id as string;
+    const campaignPerfIds = new Set((campaigns ?? []).map((c) => c.performance_id as string));
+    const campaignByPerfId = new Map(
+      (campaigns ?? []).map((c) => [c.performance_id as string, c.kopis_id as string])
+    );
 
+    // 2-b. description이 null인 KOPIS 공연 (배치 제한)
+    const { data: nullDescPerfs } = await supabase
+      .from("performances")
+      .select("id, kopis_id")
+      .not("kopis_id", "is", null)
+      .is("description", null)
+      .limit(DETAIL_BATCH);
+
+    // 캠페인 공연 + null-description 공연 합산 (중복 제거)
+    const toDetailSync = new Map<string, string>(); // performanceId → kopisId
+
+    for (const c of campaigns ?? []) {
+      if (c.performance_id && c.kopis_id) {
+        toDetailSync.set(c.performance_id as string, c.kopis_id as string);
+      }
+    }
+    for (const p of nullDescPerfs ?? []) {
+      if (!toDetailSync.has(p.id as string)) {
+        toDetailSync.set(p.id as string, p.kopis_id as string);
+      }
+    }
+
+    for (const [performanceId, kopisId] of toDetailSync) {
       try {
         const detail = await fetchPerformanceDetail(kopisId);
         const mapped = mapKopisDetailToPerformance(detail);
@@ -182,16 +211,18 @@ export async function POST() {
         const { error } = await supabase
           .from("performances")
           .update({
-            kopis_id: kopisId, // 기존 manual 레코드에 kopis_id 설정 (없으면)
+            kopis_id: kopisId,
+            organization: mapped.organization ?? null,
             description: mapped.description ?? null,
+            synopsis: mapped.description ?? null,
             cast_info: mapped.cast ?? null,
             crew_info: mapped.crew ?? null,
             runtime_text: mapped.runtime ?? null,
             age_limit: mapped.age_limit ?? null,
             price_info: mapped.price ?? null,
             schedule_info: mapped.schedule ?? null,
-            ticket_link: mapped.ticket_link ?? null,
-            poster_url: mapped.poster_url ?? null,
+            ...(mapped.ticket_link ? { ticket_link: mapped.ticket_link } : {}),
+            ...(mapped.poster_url ? { poster_url: mapped.poster_url } : {}),
             last_synced_at: syncedAt,
             sync_status: "synced",
             source: "kopis",
@@ -204,13 +235,17 @@ export async function POST() {
           result.errors++;
         } else {
           result.detailSynced++;
-          console.log(`[kopis-sync] ✅ 상세 동기화: ${mapped.title} (${kopisId})`);
+          if (campaignPerfIds.has(performanceId)) {
+            console.log(`[kopis-sync] ✅ 캠페인 상세: ${mapped.title} (${kopisId})`);
+          }
         }
       } catch (err) {
         console.error(`[kopis-sync] 상세 수집 실패 (${kopisId}):`, err);
         result.errors++;
       }
     }
+
+    console.log(`[kopis-sync] ✅ 상세: ${result.detailSynced}건 완료 (캠페인 ${campaignByPerfId.size}건 포함)`);
   } catch (err) {
     console.error("[kopis-sync] 상세 동기화 단계 실패:", err);
     result.errors++;
