@@ -1,23 +1,46 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { submitTicketEntryAction } from "@/app/events/tickets/[slug]/actions";
 import { ticketEntryInitialState } from "@/app/events/tickets/[slug]/form-state";
+import { trackEntrySubmit } from "@/lib/analytics";
+
+// TODO: ADGATE_RESTORE — 광고 계정 준비 완료 시 아래 주석 해제 후 연결
+// import { useRewardedAdGate } from "@/lib/ads/useRewardedAdGate";
+// 연결 방법: src/lib/ads/_disabled/useRewardedAdGate.ts 참고
 
 interface TicketEntryFormProps {
   campaignId: string;
   slug: string;
   campaignTitle: string;
   performanceTitle?: string;
+  availableDates?: string[] | null;
 }
 
-export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTitle }: TicketEntryFormProps) {
+export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTitle, availableDates }: TicketEntryFormProps) {
   const [state, formAction] = useActionState(submitTicketEntryAction, ticketEntryInitialState);
+  const trackedStatusRef = useRef<string>("idle");
+
+  useEffect(() => {
+    if (state.status === trackedStatusRef.current) return;
+    if (state.status === "success") {
+      trackEntrySubmit("success", { campaign_id: campaignId, slug });
+      trackedStatusRef.current = "success";
+    } else if (state.status === "error") {
+      trackEntrySubmit("error", { campaign_id: campaignId, slug, error_message: state.message });
+      trackedStatusRef.current = "error";
+    }
+  }, [state.status, state.message, campaignId, slug]);
+
+  const handleSubmit = () => {
+    trackEntrySubmit("attempt", { campaign_id: campaignId, slug });
+  };
+
   const headline = performanceTitle ? `${campaignTitle} · ${performanceTitle}` : campaignTitle;
 
   return (
-    <form action={formAction} className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
+    <form action={formAction} onSubmit={handleSubmit} className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold text-slate-900">{headline}</h2>
         <p className="text-sm text-slate-600">
@@ -46,7 +69,6 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
           <span className="text-xs text-rose-600">(필수)</span>
         </div>
 
-        {/* 인스타그램 팔로우 안내 */}
         <div className="rounded-2xl border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-5">
           <div className="flex items-start gap-3">
             <span className="text-2xl">✨</span>
@@ -88,33 +110,40 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
           <span className="text-lg font-bold text-slate-900">🎫 티켓 정보</span>
           <span className="text-xs text-rose-600">(필수)</span>
         </div>
-        <InputField
-          label="희망 관람일자"
-          name="preferredDate"
-          type="date"
-          required
-        />
+
+        {/* 희망 관람일자 */}
+        <div className="space-y-2">
+          <p className="text-sm text-slate-700">
+            희망 관람일자 <span className="text-rose-500">*</span>
+          </p>
+          {availableDates && availableDates.length > 0 ? (
+            <DateToggleField name="preferredDate" dates={availableDates} />
+          ) : (
+            <InputField label="" name="preferredDate" type="date" required />
+          )}
+        </div>
+
         <div>
           <label className="block space-y-2 text-sm text-slate-700">
             <span>
-              매수
+              일반 관람권 선택
               <span className="ml-1 text-rose-500">*</span>
             </span>
             <select
               name="ticketCount"
               required
-              className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             >
               <option value="">선택하세요</option>
-              <option value="1">1매</option>
-              <option value="2">2매</option>
+              <option value="1">일반 관람권 1매</option>
+              <option value="2">일반 관람권 2매</option>
             </select>
           </label>
-          <p className="mt-1 text-xs text-slate-500">최대 2매까지 신청 가능합니다.</p>
+          <p className="mt-1 text-xs text-slate-500">초대권은 일반 관람권 1매/2매로만 선택 가능합니다.</p>
         </div>
       </section>
 
-      {/* 추가 정보 */}
+      {/* 기대평 */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b-2 border-slate-200">
           <span className="text-lg font-bold text-slate-900">💭 기대평</span>
@@ -128,13 +157,12 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
         />
       </section>
 
-      {/* 약관 동의 섹션 */}
+      {/* 약관 동의 */}
       <section className="space-y-5">
         <div className="flex items-center gap-2 pb-2 border-b-2 border-slate-200">
           <span className="text-lg font-bold text-slate-900">📝 약관 동의</span>
         </div>
 
-        {/* 이용 규칙 동의 (필수) */}
         <div className="rounded-2xl border-3 border-red-300 bg-red-50 p-6">
           <label className="flex items-start gap-4 cursor-pointer">
             <input
@@ -164,7 +192,6 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
           </label>
         </div>
 
-        {/* 마케팅 수신 동의 (선택) */}
         <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-5">
           <label className="flex items-start gap-4 cursor-pointer">
             <input
@@ -184,8 +211,12 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
         </div>
       </section>
 
-      {state.status === "error" && state.message ? <p className="text-sm text-rose-600">{state.message}</p> : null}
-      {state.status === "success" && state.message ? <p className="text-sm text-emerald-600">{state.message}</p> : null}
+      {state.status === "error" && state.message && (
+        <p className="text-sm text-rose-600">{state.message}</p>
+      )}
+      {state.status === "success" && state.message && (
+        <p className="text-sm text-emerald-600">{state.message}</p>
+      )}
 
       <SubmitButton disabled={state.status === "success"} />
     </form>
@@ -216,7 +247,7 @@ function InputField({
         name={name}
         placeholder={placeholder}
         required={required}
-        className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
       />
     </label>
   );
@@ -246,9 +277,47 @@ function TextareaField({
         placeholder={placeholder}
         rows={rows}
         required={required}
-        className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+        className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-base focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
       />
     </label>
+  );
+}
+
+function DateToggleField({ name, dates }: { name: string; dates: string[] }) {
+  const [selected, setSelected] = useState<string>("");
+
+  const formatDate = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {dates.map((date) => {
+          const isSelected = selected === date;
+          return (
+            <button
+              key={date}
+              type="button"
+              onClick={() => setSelected(isSelected ? "" : date)}
+              className={`rounded-2xl border-2 px-4 py-2.5 text-sm font-semibold transition ${
+                isSelected
+                  ? "border-indigo-500 bg-indigo-500 text-white shadow-md shadow-indigo-200"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-indigo-50"
+              }`}
+            >
+              {formatDate(date)}
+            </button>
+          );
+        })}
+      </div>
+      <input type="hidden" name={name} value={selected} />
+      {!selected && (
+        <p className="text-xs text-slate-400">관람 희망 날짜를 선택해 주세요.</p>
+      )}
+    </div>
   );
 }
 

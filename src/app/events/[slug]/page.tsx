@@ -270,6 +270,7 @@ export default async function EventApplyPage({ params }: Props) {
                     campaignId={c.id}
                     slug={slug}
                     campaignTitle={c.title}
+                    availableDates={Array.isArray(c.available_dates) ? c.available_dates as string[] : null}
                   />
                 </section>
               ) : (
