@@ -1,8 +1,8 @@
 import type { Database } from "@/lib/supabase/types";
 
 type PerformanceRow = Database["public"]["Tables"]["performances"]["Row"];
-type MockPerformance = Omit<PerformanceRow, "description" | "tags"> &
-  Partial<Pick<PerformanceRow, "description" | "tags">>;
+type MockPerformance = Omit<PerformanceRow, "description" | "tags" | "age_limit" | "cast_info" | "crew_info" | "kopis_id" | "last_synced_at" | "price_info" | "runtime_text" | "schedule_info" | "source" | "sync_status"> &
+  Partial<Pick<PerformanceRow, "description" | "tags" | "age_limit" | "cast_info" | "crew_info" | "kopis_id" | "last_synced_at" | "price_info" | "runtime_text" | "schedule_info" | "source" | "sync_status">>;
 type CampaignRow = Database["public"]["Tables"]["ticket_campaigns"]["Row"] & {
   slug: string;
   performances?: Pick<PerformanceRow, "slug" | "title" | "poster_url" | "region" | "organization_id" | "period_start" | "period_end"> | null;
@@ -510,6 +510,16 @@ const mockPerformancesData: MockPerformance[] = [
 export const mockPerformances: PerformanceRow[] = mockPerformancesData.map((item) => ({
   description: null,
   tags: [],
+  age_limit: null,
+  cast_info: null,
+  crew_info: null,
+  kopis_id: null,
+  last_synced_at: null,
+  price_info: null,
+  runtime_text: null,
+  schedule_info: null,
+  source: "manual",
+  sync_status: null,
   ...item,
 }));
 

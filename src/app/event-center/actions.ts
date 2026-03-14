@@ -514,6 +514,90 @@ export async function createEnhancedEventCampaign(formData: {
 }
 
 /**
+ * 추첨 실행 — ticket_entries에서 랜덤으로 winnerCount명을 선정합니다.
+ * - 중복 추첨 방지 (이미 선정된 항목이 있으면 에러)
+ * - 파트너 본인 캠페인만 가능
+ */
+export async function runLotteryDraw(
+  campaignId: string,
+  winnerCount: number,
+): Promise<ActionResult<{ winnerCount: number }>> {
+  const partnerEmail = await getPartnerSession();
+  if (!partnerEmail) return { success: false, error: '로그인이 필요합니다.' };
+
+  if (winnerCount < 1 || !Number.isFinite(winnerCount)) {
+    return { success: false, error: '당첨 인원을 1명 이상 입력해 주세요.' };
+  }
+
+  if (!isSupabaseConfigured) {
+    console.info('[Mock Mode] 추첨 실행:', campaignId, winnerCount);
+    return { success: true, data: { winnerCount } };
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // 권한 확인
+    const { data: campaign } = await supabase
+      .from('ticket_campaigns')
+      .select('partner_email, ends_at, status')
+      .eq('id', campaignId)
+      .single();
+
+    if (!campaign || campaign.partner_email !== partnerEmail) {
+      return { success: false, error: '권한이 없습니다.' };
+    }
+
+    // 중복 추첨 방지
+    const { count: existingCount } = await supabase
+      .from('ticket_entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('campaign_id', campaignId)
+      .eq('selection_status', 'selected');
+
+    if (existingCount && existingCount > 0) {
+      return {
+        success: false,
+        error: `이미 ${existingCount}명이 선정되어 있습니다. 재추첨은 지원하지 않습니다.`,
+      };
+    }
+
+    // 응모자 목록 조회 (미선정 항목만)
+    const { data: entries, error: fetchError } = await supabase
+      .from('ticket_entries')
+      .select('id')
+      .eq('campaign_id', campaignId)
+      .is('selection_status', null);
+
+    if (fetchError || !entries || entries.length === 0) {
+      return { success: false, error: '응모자가 없습니다.' };
+    }
+
+    // 랜덤 셔플 → winnerCount만큼 선택
+    const shuffled = [...entries].sort(() => Math.random() - 0.5);
+    const winners = shuffled.slice(0, Math.min(winnerCount, shuffled.length));
+    const winnerIds = winners.map((w) => w.id);
+
+    // 당첨자 업데이트
+    const { error: updateError } = await supabase
+      .from('ticket_entries')
+      .update({ selection_status: 'selected', selected_at: new Date().toISOString() })
+      .in('id', winnerIds);
+
+    if (updateError) {
+      console.error('runLotteryDraw update error:', updateError);
+      return { success: false, error: '추첨 중 오류가 발생했습니다.' };
+    }
+
+    revalidatePath('/event-center');
+    return { success: true, data: { winnerCount: winnerIds.length } };
+  } catch (error) {
+    console.error('Unexpected error in runLotteryDraw:', error);
+    return { success: false, error: '서버 오류가 발생했습니다.' };
+  }
+}
+
+/**
  * Slug 생성 헬퍼 함수
  */
 function generateSlug(title: string, date: string): string {

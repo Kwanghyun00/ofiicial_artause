@@ -3,78 +3,95 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Light mode - 공연장 콘셉트 (따뜻한 오렌지/코랄) */
+  --background: oklch(0.99 0.002 85);
+  --foreground: oklch(0.15 0.01 20);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.15 0.01 20);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.15 0.01 20);
+  --primary: oklch(0.65 0.22 35);
+  --primary-foreground: oklch(0.99 0.002 85);
+  --secondary: oklch(0.96 0.01 85);
+  --secondary-foreground: oklch(0.15 0.01 20);
+  --muted: oklch(0.96 0.01 85);
+  --muted-foreground: oklch(0.5 0.01 20);
+  --accent: oklch(0.68 0.18 50);
+  --accent-foreground: oklch(0.99 0.002 85);
+  --destructive: oklch(0.6 0.23 25);
+  --destructive-foreground: oklch(0.99 0.002 85);
+  --border: oklch(0.92 0.005 85);
+  --input: oklch(0.92 0.005 85);
+  --ring: oklch(0.65 0.22 35);
+  --chart-1: oklch(0.65 0.22 35);
+  --chart-2: oklch(0.68 0.18 50);
+  --chart-3: oklch(0.72 0.14 65);
+  --chart-4: oklch(0.58 0.26 25);
+  --chart-5: oklch(0.62 0.2 45);
+  --radius: 1rem;
+  --sidebar: oklch(0.99 0.002 85);
+  --sidebar-foreground: oklch(0.15 0.01 20);
+  --sidebar-primary: oklch(0.65 0.22 35);
+  --sidebar-primary-foreground: oklch(0.99 0.002 85);
+  --sidebar-accent: oklch(0.96 0.01 85);
+  --sidebar-accent-foreground: oklch(0.15 0.01 20);
+  --sidebar-border: oklch(0.92 0.005 85);
+  --sidebar-ring: oklch(0.65 0.22 35);
+  --font-body: "Pretendard Variable", "Pretendard", system-ui, sans-serif;
+  --font-display: "Pretendard Variable", "Pretendard", sans-serif;
+
+  /* 공연장 테마 변수 - Light Mode */
+  --stage-ink: #fefefe;
+  --stage-panel: rgba(255, 255, 255, 0.85);
+  --stage-panel-strong: rgba(255, 255, 255, 0.95);
+  --stage-glow: rgba(255, 107, 53, 0.08);
+  --stage-spot: rgba(255, 140, 66, 0.06);
+  --stage-curtain: rgba(255, 107, 53, 0.03);
+  --spotlight-warm: rgba(255, 140, 66, 0.15);
+  --spotlight-soft: rgba(255, 183, 77, 0.1);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Dark mode - 공연장 무대 콘셉트 */
+  --background: oklch(0.14 0.02 20);
+  --foreground: oklch(0.96 0.01 85);
+  --card: oklch(0.18 0.02 20);
+  --card-foreground: oklch(0.96 0.01 85);
+  --popover: oklch(0.16 0.02 20);
+  --popover-foreground: oklch(0.96 0.01 85);
+  --primary: oklch(0.68 0.22 35);
+  --primary-foreground: oklch(0.99 0.002 85);
+  --secondary: oklch(0.22 0.02 20);
+  --secondary-foreground: oklch(0.92 0.01 85);
+  --muted: oklch(0.22 0.02 20);
+  --muted-foreground: oklch(0.68 0.02 85);
+  --accent: oklch(0.7 0.18 50);
+  --accent-foreground: oklch(0.16 0.02 20);
+  --border: oklch(0.26 0.02 20);
+  --input: oklch(0.26 0.02 20);
+  --ring: oklch(0.68 0.22 35);
+  --sidebar: oklch(0.16 0.02 20);
+  --sidebar-foreground: oklch(0.96 0.01 85);
+  --sidebar-primary: oklch(0.68 0.22 35);
+  --sidebar-primary-foreground: oklch(0.99 0.002 85);
+  --sidebar-accent: oklch(0.22 0.02 20);
+  --sidebar-accent-foreground: oklch(0.96 0.01 85);
+  --sidebar-border: oklch(0.26 0.02 20);
+  --sidebar-ring: oklch(0.68 0.22 35);
+
+  /* 공연장 테마 변수 - Dark Mode */
+  --stage-ink: #0b0b0f;
+  --stage-panel: rgba(20, 20, 26, 0.92);
+  --stage-panel-strong: rgba(24, 24, 32, 0.98);
+  --stage-glow: rgba(255, 140, 66, 0.16);
+  --stage-spot: rgba(255, 107, 53, 0.12);
+  --stage-curtain: rgba(255, 140, 66, 0.08);
+  --spotlight-warm: rgba(255, 140, 66, 0.2);
+  --spotlight-soft: rgba(255, 183, 77, 0.15);
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback", "Pretendard Variable", "Noto Sans KR", system-ui, sans-serif;
+  --font-sans: var(--font-body);
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -121,8 +138,185 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     font-feature-settings: "liga" 1, "calt" 1;
+    line-height: 1.75;
+    letter-spacing: -0.01em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-display {
+    font-family: var(--font-display);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer components {
+  .stage-shell {
+    min-height: 100vh;
+    background-color: var(--background);
+    background-image: radial-gradient(1400px 600px at 50% -15%, var(--stage-glow), transparent 65%),
+      radial-gradient(1000px 500px at 85% 8%, var(--stage-spot), transparent 60%),
+      radial-gradient(900px 450px at 10% 15%, var(--spotlight-soft), transparent 55%),
+      linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--background) 98%, var(--muted)) 100%);
+    color: var(--foreground);
+  }
+
+  .stage-panel {
+    border-radius: calc(var(--radius) + 4px);
+    border: 1px solid var(--border);
+    background: var(--stage-panel);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.08), 0 20px 48px -24px rgba(0, 0, 0, 0.06);
+    transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .stage-panel:hover {
+    border-color: color-mix(in oklab, var(--primary) 20%, var(--border));
+  }
+
+  .spotlight-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: calc(var(--radius) + 4px);
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.06), 0 8px 32px -12px rgba(0, 0, 0, 0.04);
+    transition: all 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .spotlight-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(140% 180% at 20% 0%, var(--spotlight-warm), transparent 70%);
+    opacity: 0;
+    transition: opacity 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .spotlight-card:hover,
+  .spotlight-card:focus-within {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 25%, var(--border));
+    box-shadow: 0 6px 20px -6px rgba(255, 107, 53, 0.08), 0 12px 32px -12px rgba(255, 107, 53, 0.05);
+  }
+
+  .spotlight-card:hover::before,
+  .spotlight-card:focus-within::before {
+    opacity: 0.4;
+  }
+
+  .spotlight-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cue {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid color-mix(in oklab, var(--primary) 40%, transparent);
+    background: color-mix(in oklab, var(--primary) 8%, var(--background));
+    color: var(--primary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    transition: all 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .cue:hover {
+    border-color: var(--primary);
+    background: color-mix(in oklab, var(--primary) 12%, var(--background));
+  }
+
+  .highlight-token {
+    background-image: linear-gradient(0deg, var(--primary) 0%, var(--primary) 100%);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 0.35em;
+    opacity: 0.25;
+  }
+
+  /* 공연장 인터랙티브 요소 */
+  .curtain-rise {
+    animation: curtainRise 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .spotlight-focus {
+    position: relative;
+  }
+
+  .spotlight-focus::after {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(ellipse at center, var(--spotlight-warm), transparent 70%);
+    opacity: 0;
+    animation: spotlight 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .stage-entrance {
+    animation: stageEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+  }
+
+  @keyframes curtainRise {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes spotlight {
+    0%, 100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes stageEntrance {
+    from {
+      transform: translateY(30px) scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+@layer utilities {
+  @media (prefers-reduced-motion: no-preference) {
+    .highlight-token {
+      background-size: 0% 0.3em;
+      animation: highlight-line 0.25s ease forwards;
+    }
+  }
+
+  @keyframes highlight-line {
+    to {
+      background-size: 100% 0.3em;
+    }
   }
 }

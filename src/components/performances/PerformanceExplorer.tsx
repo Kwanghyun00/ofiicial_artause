@@ -88,7 +88,7 @@ export function PerformanceExplorer({ performances }: Props) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
+      <section className="stage-panel p-6">
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="flex-1 space-y-3">
             <p className="text-sm font-semibold text-primary">라이브 공연 탐색기</p>
@@ -100,7 +100,7 @@ export function PerformanceExplorer({ performances }: Props) {
 
           <div className="flex flex-1 flex-col gap-4">
             <label className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">검색</label>
-            <div className="flex items-center gap-2 rounded-2xl border border-border bg-background px-4 py-2.5">
+            <div className="flex items-center gap-2 rounded-2xl border border-border bg-background/60 px-4 py-2.5">
               <Search className="h-4 w-4 text-muted-foreground" />
               <input
                 value={searchTerm}
@@ -117,7 +117,7 @@ export function PerformanceExplorer({ performances }: Props) {
                 <select
                   value={regionFilter}
                   onChange={(event) => setRegionFilter(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
+                  className="h-11 w-full rounded-xl border border-border bg-background/60 px-3 text-sm"
                 >
                   <option value="all">전체 지역</option>
                   {regionOptions.map((region) => (
@@ -133,7 +133,7 @@ export function PerformanceExplorer({ performances }: Props) {
                 <select
                   value={categoryFilter}
                   onChange={(event) => setCategoryFilter(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
+                  className="h-11 w-full rounded-xl border border-border bg-background/60 px-3 text-sm"
                 >
                   <option value="all">전체 장르</option>
                   {categoryOptions.map((category) => (
@@ -153,12 +153,12 @@ export function PerformanceExplorer({ performances }: Props) {
               key={filter}
               type="button"
               onClick={() => setStatusFilter(filter)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
                 statusFilter === filter
                   ? "bg-primary text-primary-foreground"
-                  : "border border-border bg-white text-muted-foreground hover:border-primary/40"
+                  : "border border-border bg-background/60 text-muted-foreground hover:border-primary/40"
               }`}
-            >
+              >
               <span>
                 {filter === "all"
                   ? "전체"
@@ -169,7 +169,7 @@ export function PerformanceExplorer({ performances }: Props) {
                       : "종료"}
               </span>
               {filter !== "all" && (
-                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
+                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary-foreground">
                   {statusCounts[filter as Exclude<StatusFilter, "all">]}
                 </span>
               )}
@@ -200,7 +200,7 @@ export function PerformanceExplorer({ performances }: Props) {
         </div>
 
         {filteredPerformances.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {filteredPerformances.map((performance) => (
               <PerformanceCard key={performance.id} performance={performance} />
             ))}
@@ -219,10 +219,10 @@ export function PerformanceExplorer({ performances }: Props) {
 
 function PerformanceCard({ performance }: { performance: Performance }) {
   const status = getStatus(performance)
-  const badge = status === "all" ? null : STATUS_META[status]
+  const badge = STATUS_META[status]
 
   return (
-    <article className="flex h-full flex-col rounded-3xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+    <article className="spotlight-card flex h-full flex-col p-4">
       <div className="relative h-52 w-full overflow-hidden rounded-2xl bg-muted/60">
         {performance.poster_url ? (
           <Image
@@ -244,34 +244,30 @@ function PerformanceCard({ performance }: { performance: Performance }) {
 
       <div className="mt-4 flex flex-1 flex-col gap-4">
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">{performance.organization ?? "주최 미정"}</p>
-          <h3 className="text-lg font-bold text-foreground">{performance.title}</h3>
+          <p className="line-clamp-1 text-xs font-semibold text-muted-foreground">{performance.organization ?? "주최 미정"}</p>
+          <h3 className="line-clamp-2 text-lg font-bold text-foreground">{performance.title}</h3>
           <div className="space-y-1 text-sm text-muted-foreground">
-            {performance.region && (
-              <p className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                {performance.region}
-              </p>
-            )}
             <p className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              {formatPeriod(performance.period_start, performance.period_end)}
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="line-clamp-1">{performance.region ?? "지역 미정"}</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 shrink-0" />
+              <span>{formatPeriod(performance.period_start, performance.period_end)}</span>
             </p>
           </div>
-          {performance.tags && performance.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {performance.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex min-h-[1.5rem] flex-wrap gap-2">
+            {performance.tags?.slice(0, 3).map((tag) => (
+              <span key={tag} className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary">
+                #{tag}
+              </span>
+            ))}
+          </div>
         </div>
 
         <Link
           href={`/performances/${performance.slug}`}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
+          className="mt-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
         >
           <Ticket className="h-4 w-4" />
           상세 페이지

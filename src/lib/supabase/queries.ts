@@ -38,6 +38,15 @@ const PERFORMANCE_SELECT = `
   hero_subtitle,
   ticket_link,
   is_featured,
+  kopis_id,
+  source,
+  last_synced_at,
+  cast_info,
+  crew_info,
+  runtime_text,
+  age_limit,
+  price_info,
+  schedule_info,
   created_at,
   updated_at
 `;
@@ -176,8 +185,6 @@ const TICKET_CAMPAIGN_WITH_PERFORMANCE_SELECT = `
   )
 `;
 
-const SHOWS_KOPIS_LINK_ENRICH_LIMIT = readPositiveIntEnv("SHOWS_KOPIS_LINK_ENRICH_LIMIT", 120);
-const KOPIS_DETAIL_BATCH_SIZE = readPositiveIntEnv("SHOWS_KOPIS_DETAIL_BATCH_SIZE", 5);
 
 function readPositiveIntEnv(key: string, fallback: number) {
   const raw = process.env[key];
@@ -305,138 +312,28 @@ export const getPerformancesByOrganization = cache(async (organizationId: string
 });
 
 export const getFeaturedPerformances = cache(async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const performances: any[] = [];
-
-  // 1. Supabase featured performances
-  if (isSupabaseConfigured) {
-    try {
-      const supabase = createReadOnlySupabaseClient();
-      const { data, error } = await supabase
-        .from("performances")
-        .select(PERFORMANCE_SELECT)
-        .eq("is_featured", true)
-        .order("period_start", { ascending: true });
-
-      if (!error && data) {
-        performances.push(...data);
-      }
-    } catch (err) {
-      console.error("getFeaturedPerformances exception", err);
-    }
-  }
-
-  // 2. KOPIS 최신 공연 추가 (featured가 부족한 경우)
-  if (performances.length < 12 && isKopisConfigured()) {
-    try {
-      const { fetchRecentPerformances: fetchKopisPerformances, mapKopisListToPerformances } = await import('@/lib/kopis');
-      const kopisData = await fetchKopisPerformances(20);
-      const mappedKopis = mapKopisListToPerformances(kopisData);
-
-      const existingIds = new Set(performances.map(p => p.id));
-      const newKopisPerformances = mappedKopis
-        .filter(p => !existingIds.has(p.id))
-        .slice(0, 12 - performances.length);
-
-      performances.push(...newKopisPerformances);
-
-      console.log(`✅ getFeaturedPerformances: Added ${newKopisPerformances.length} KOPIS performances`);
-    } catch (err) {
-      console.error("Failed to fetch KOPIS performances:", err);
-    }
-  }
-
-  // 3. Mock fallback
-  if (performances.length === 0) {
+  if (!isSupabaseConfigured) {
     return mockPerformances.filter((item) => item.is_featured);
   }
 
-  return performances;
+  try {
+    const supabase = createReadOnlySupabaseClient();
+    const { data, error } = await supabase
+      .from("performances")
+      .select(PERFORMANCE_SELECT)
+      .eq("is_featured", true)
+      .order("period_start", { ascending: true });
+
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error("getFeaturedPerformances exception", err);
+    return mockPerformances.filter((item) => item.is_featured);
+  }
 });
 
-type PerformanceWithOptionalTicketLink = {
-  id?: string | null;
-  ticket_link?: string | null;
-};
-
-const isKopisPerformanceId = (value: unknown): value is string =>
-  typeof value === "string" && value.startsWith("PF");
-
-async function enrichKopisTicketLinks<T extends PerformanceWithOptionalTicketLink>(performances: T[]): Promise<T[]> {
-  if (!isKopisConfigured() || performances.length === 0) {
-    return performances;
-  }
-
-  const targets = performances
-    .filter((performance) => isKopisPerformanceId(performance.id) && !performance.ticket_link)
-    .slice(0, SHOWS_KOPIS_LINK_ENRICH_LIMIT);
-
-  if (targets.length === 0) {
-    return performances;
-  }
-
-  const ticketLinks = new Map<string, string>();
-  const [firstTarget, ...restTargets] = targets;
-
-  if (isKopisPerformanceId(firstTarget.id)) {
-    try {
-      const detail = await fetchKopisDetail(firstTarget.id);
-      const mapped = mapKopisDetailToPerformance(detail) as { ticket_link?: string | null };
-      if (mapped.ticket_link) {
-        ticketLinks.set(firstTarget.id, mapped.ticket_link);
-      }
-    } catch {
-      return performances;
-    }
-  }
-
-  for (let i = 0; i < restTargets.length; i += KOPIS_DETAIL_BATCH_SIZE) {
-    const batch = restTargets.slice(i, i + KOPIS_DETAIL_BATCH_SIZE);
-    const results = await Promise.all(
-      batch.map(async (performance) => {
-        if (!isKopisPerformanceId(performance.id)) {
-          return null;
-        }
-
-        try {
-          const detail = await fetchKopisDetail(performance.id);
-          const mapped = mapKopisDetailToPerformance(detail) as { ticket_link?: string | null };
-          return mapped.ticket_link ? { id: performance.id, link: mapped.ticket_link } : null;
-        } catch {
-          return null;
-        }
-      }),
-    );
-
-    for (const result of results) {
-      if (result) {
-        ticketLinks.set(result.id, result.link);
-      }
-    }
-  }
-
-  if (ticketLinks.size === 0) {
-    return performances;
-  }
-
-  return performances.map((performance) => {
-    if (!isKopisPerformanceId(performance.id)) {
-      return performance;
-    }
-    const ticketLink = ticketLinks.get(performance.id);
-    if (!ticketLink) {
-      return performance;
-    }
-    return { ...performance, ticket_link: ticketLink };
-  });
-}
-
 export const getShowsPerformances = cache(async () => {
-  const performances = await getAllPerformances();
-  const head = performances.slice(0, SHOWS_KOPIS_LINK_ENRICH_LIMIT);
-  const tail = performances.slice(SHOWS_KOPIS_LINK_ENRICH_LIMIT);
-  const enrichedHead = await enrichKopisTicketLinks(head);
-  return [...enrichedHead, ...tail];
+  return getAllPerformances();
 });
 
 export const getRecentPerformances = cache(async () => {
@@ -491,29 +388,7 @@ export const getPerformanceBySlug = cache(async (slug: string) => {
     }
   }
 
-  // 2. KOPIS 데이터에서 조회 (slug 형식: "title-mt20id")
-  if (isKopisConfigured()) {
-    try {
-      // slug에서 KOPIS ID 추출
-      const kopisId = slug.split('-').pop();
-      if (kopisId && kopisId.startsWith('PF')) {
-        const { fetchPerformanceDetail, mapKopisDetailToPerformance } = await import('@/lib/kopis');
-        const kopisDetail = await fetchPerformanceDetail(kopisId);
-        const mapped = mapKopisDetailToPerformance(kopisDetail);
-
-        console.log(`✅ Found KOPIS performance: ${mapped.title} (${kopisId})`);
-
-        return {
-          ...mapped,
-          ticket_campaigns: [], // KOPIS 공연은 초대권 캠페인 없음
-        };
-      }
-    } catch (err) {
-      console.error("getPerformanceBySlug KOPIS error", err);
-    }
-  }
-
-  // 3. Mock 데이터 fallback
+  // 2. Mock 데이터 fallback
   const performance = mockPerformances.find((item) => item.slug === slug);
   if (!performance) return null;
   const campaigns = mockCampaigns.filter((item) => item.performance_id === performance.id);
@@ -853,89 +728,69 @@ export const getPendingCampaigns = cache(async () => {
 });
 
 // ============================================================
-// KOPIS API 통합 (공연예술통합전산망)
+// KOPIS DB 조회 (배치 동기화된 데이터만 사용)
+// 실시간 KOPIS API 호출 없음 — /api/kopis-sync 배치가 매일 갱신
 // ============================================================
 
-import {
-  isKopisConfigured,
-  fetchPerformanceDetail as fetchKopisDetail,
-  mapKopisDetailToPerformance,
-} from '@/lib/kopis';
-
 /**
- * KOPIS API와 Supabase 데이터를 병합하여 공연 목록 조회
- *
- * KOPIS API가 설정되어 있으면 실시간 공연 데이터를 가져와서
- * Supabase 데이터와 병합합니다.
+ * 전체 공연 목록 (Supabase DB만 조회)
+ * KOPIS 공연은 배치 동기화(/api/kopis-sync)로 performances 테이블에 저장됨
  */
 export const getAllPerformances = cache(async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const performances: any[] = [];
-
-  // 1. Supabase 데이터 가져오기
-  if (isSupabaseConfigured) {
-    try {
-      const supabase = createReadOnlySupabaseClient();
-      const { data, error } = await supabase
-        .from("performances")
-        .select(PERFORMANCE_SELECT)
-        .order("period_start", { ascending: false });
-
-      if (!error && data) {
-        performances.push(...data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch Supabase performances:", err);
-    }
-  }
-
-  // 2. KOPIS API 데이터 가져오기 (모든 공연)
-  if (isKopisConfigured()) {
-    try {
-      const { fetchAllUpcomingPerformances, mapKopisListToPerformances } = await import('@/lib/kopis');
-      const [theaterData, musicalData] = await Promise.all([
-        fetchAllUpcomingPerformances(5, 'AAAA'), // 연극
-        fetchAllUpcomingPerformances(5, 'BBBC'), // 뮤지컬
-      ]);
-      const kopisData = [...theaterData, ...musicalData];
-      const mappedKopis = mapKopisListToPerformances(kopisData);
-
-      // KOPIS 데이터를 Supabase 데이터와 병합 (중복 제거)
-      const existingIds = new Set(performances.map(p => p.id));
-      const newKopisPerformances = mappedKopis.filter(p => !existingIds.has(p.id));
-
-      performances.push(...newKopisPerformances);
-
-      console.log(`✅ getAllPerformances: Merged ${newKopisPerformances.length} KOPIS performances with ${performances.length - newKopisPerformances.length} Supabase performances`);
-    } catch (err) {
-      console.error("Failed to fetch KOPIS performances:", err);
-    }
-  }
-
-  // 3. Mock 데이터 fallback
-  if (performances.length === 0) {
+  if (!isSupabaseConfigured) {
     return mockPerformances;
   }
 
-  return performances;
+  try {
+    const supabase = createReadOnlySupabaseClient();
+    const { data, error } = await supabase
+      .from("performances")
+      .select(PERFORMANCE_SELECT)
+      .order("period_start", { ascending: false });
+
+    if (error) throw error;
+    return data && data.length > 0 ? data : mockPerformances;
+  } catch (err) {
+    console.error("getAllPerformances error:", err);
+    return mockPerformances;
+  }
 });
 
 /**
- * KOPIS API에서 공연 상세 정보 조회 (KOPIS ID로)
- *
- * @param kopisId - KOPIS 공연 ID (mt20id)
+ * KOPIS ID로 공연 상세 조회 (DB에서)
+ * events/[slug]/page.tsx 에서 kopis_id로 공연 정보 표시에 사용
  */
-export const getPerformanceFromKopis = cache(async (kopisId: string) => {
-  if (!isKopisConfigured()) {
-    console.warn("KOPIS API is not configured");
-    return null;
-  }
+export const getPerformanceByKopisId = cache(async (kopisId: string) => {
+  if (!isSupabaseConfigured) return null;
 
   try {
-    const kopisDetail = await fetchKopisDetail(kopisId);
-    return mapKopisDetailToPerformance(kopisDetail);
+    const supabase = createReadOnlySupabaseClient();
+    const { data, error } = await supabase
+      .from("performances")
+      .select(PERFORMANCE_SELECT)
+      .eq("kopis_id", kopisId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    // events/[slug]/page.tsx의 kopis 객체 형태로 매핑
+    return {
+      period_start: (data as Record<string, unknown>).period_start as string | null ?? null,
+      period_end: (data as Record<string, unknown>).period_end as string | null ?? null,
+      venue: (data as Record<string, unknown>).venue as string | null ?? null,
+      poster_url: (data as Record<string, unknown>).poster_url as string | null ?? null,
+      runtime: (data as Record<string, unknown>).runtime_text as string | null ?? null,
+      age_limit: (data as Record<string, unknown>).age_limit as string | null ?? null,
+      schedule: (data as Record<string, unknown>).schedule_info as string | null ?? null,
+      cast: (data as Record<string, unknown>).cast_info as string | null ?? null,
+      crew: (data as Record<string, unknown>).crew_info as string | null ?? null,
+      organization: (data as Record<string, unknown>).organization as string | null ?? null,
+      price: (data as Record<string, unknown>).price_info as string | null ?? null,
+      ticket_link: (data as Record<string, unknown>).ticket_link as string | null ?? null,
+      description: (data as Record<string, unknown>).description as string | null ?? null,
+    };
   } catch (err) {
-    console.error(`Failed to fetch KOPIS performance ${kopisId}:`, err);
+    console.error(`getPerformanceByKopisId error (${kopisId}):`, err);
     return null;
   }
 });

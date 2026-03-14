@@ -7,8 +7,10 @@
  */
 
 import { ApplyPenaltyForm } from "./ApplyPenaltyForm";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createReadOnlySupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/config";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "패널티 관리 | 관리자",
@@ -22,7 +24,7 @@ export default async function AdminPenaltiesPage() {
 
   if (isSupabaseConfigured) {
     try {
-      const supabase = await createServerSupabaseClient();
+      const supabase = createReadOnlySupabaseClient();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data }: any = await supabase

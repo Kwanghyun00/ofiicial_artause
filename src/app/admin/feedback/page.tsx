@@ -1,6 +1,8 @@
 import { getAllFeedback } from "@/components/common/feedback-actions";
 import { FeedbackList } from "./FeedbackList";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "피드백 관리",
   description: "사용자 피드백 및 문의사항을 확인하고 관리합니다.",

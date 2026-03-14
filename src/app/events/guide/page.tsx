@@ -33,11 +33,11 @@ export const metadata = {
 
 export default function EventsGuidePage() {
   return (
-    <div className="bg-gradient-to-b from-[#F7F4EC] via-white to-white pb-20 pt-10 text-foreground">
+    <div className="pb-24 pt-12 text-foreground">
       <section className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
-        <div className="rounded-[32px] border border-white/70 bg-white/80 p-8 text-center shadow-sm backdrop-blur md:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary">Guide</p>
-          <h1 className="mt-2 text-3xl font-bold sm:text-4xl">초대권 응모 가이드</h1>
+        <div className="stage-panel p-8 text-center md:p-10">
+          <span className="cue">Guide</span>
+          <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">초대권 응모 가이드</h1>
           <p className="mt-3 text-base text-muted-foreground">
             초대권 이벤트 참여 과정을 한눈에 정리했습니다.
           </p>
@@ -50,7 +50,7 @@ export default function EventsGuidePage() {
             </Link>
             <Link
               href="/rules"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-white px-6 text-base font-semibold text-foreground transition hover:border-primary hover:text-primary"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-background/60 px-6 text-base font-semibold text-foreground transition hover:border-primary hover:text-primary"
             >
               자세한 규정 보기
             </Link>
@@ -59,17 +59,14 @@ export default function EventsGuidePage() {
       </section>
 
       <section className="mx-auto mt-12 max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           {steps.map((step, index) => (
-            <article
-              key={step.title}
-              className="rounded-3xl border border-border/60 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-            >
+            <article key={step.title} className="spotlight-card p-6">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                   {index + 1}
                 </span>
-                <h2 className="text-lg font-bold text-foreground">{step.title}</h2>
+                <h2 className="text-lg font-semibold text-foreground">{step.title}</h2>
               </div>
               <p className="mt-3 text-sm text-muted-foreground">{step.description}</p>
             </article>
@@ -78,13 +75,13 @@ export default function EventsGuidePage() {
       </section>
 
       <section className="mx-auto mt-12 max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-border/60 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-foreground">유의사항</h2>
+        <div className="spotlight-card p-6">
+          <h2 className="text-xl font-semibold text-foreground">유의사항</h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {notices.map((notice) => (
               <li
                 key={notice}
-                className="flex items-center gap-2 rounded-2xl border border-border/60 bg-white/70 px-4 py-3 text-sm text-muted-foreground"
+                className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm text-muted-foreground"
               >
                 <span className="h-2 w-2 rounded-full bg-primary" />
                 {notice}

@@ -33,18 +33,35 @@ export async function createServerSupabaseClient() {
   });
 }
 
-export function createAdminSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+function createStatelessSupabaseClient(key: string) {
+  const { url } = getSupabaseCredentials();
 
-  if (!url || !serviceRoleKey) {
-    throw new Error("Missing Supabase admin environment variables");
-  }
-
-  return createClient<Database>(url, serviceRoleKey, {
+  return createClient<Database>(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
   });
+}
+
+export function createPublicSupabaseClient() {
+  const { anonKey } = getSupabaseCredentials();
+  return createStatelessSupabaseClient(anonKey);
+}
+
+export function createAdminSupabaseClient() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error("Missing Supabase admin environment variables");
+  }
+
+  return createStatelessSupabaseClient(serviceRoleKey);
+}
+
+export function createReadOnlySupabaseClient() {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createAdminSupabaseClient()
+    : createPublicSupabaseClient();
 }

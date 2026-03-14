@@ -975,20 +975,29 @@ export type Database = {
       }
       performances: {
         Row: {
+          age_limit: string | null
+          cast_info: string | null
           category: string | null
           created_at: string
+          crew_info: string | null
           description: string | null
           hero_headline: string | null
           hero_subtitle: string | null
           id: string
           is_featured: boolean
+          kopis_id: string | null
+          last_synced_at: string | null
           organization: string | null
           organization_id: string | null
           period_end: string | null
           period_start: string | null
           poster_url: string | null
+          price_info: string | null
           region: string | null
+          runtime_text: string | null
+          schedule_info: string | null
           slug: string
+          source: string
           status: string
           synopsis: string | null
           tags: string[] | null
@@ -997,22 +1006,32 @@ export type Database = {
           title: string
           updated_at: string
           venue: string | null
+          sync_status: string | null
         }
         Insert: {
+          age_limit?: string | null
+          cast_info?: string | null
           category?: string | null
           created_at?: string
+          crew_info?: string | null
           description?: string | null
           hero_headline?: string | null
           hero_subtitle?: string | null
           id?: string
           is_featured?: boolean
+          kopis_id?: string | null
+          last_synced_at?: string | null
           organization?: string | null
           organization_id?: string | null
           period_end?: string | null
           period_start?: string | null
           poster_url?: string | null
+          price_info?: string | null
           region?: string | null
+          runtime_text?: string | null
+          schedule_info?: string | null
           slug: string
+          source?: string
           status?: string
           synopsis?: string | null
           tags?: string[] | null
@@ -1021,22 +1040,32 @@ export type Database = {
           title: string
           updated_at?: string
           venue?: string | null
+          sync_status?: string | null
         }
         Update: {
+          age_limit?: string | null
+          cast_info?: string | null
           category?: string | null
           created_at?: string
+          crew_info?: string | null
           description?: string | null
           hero_headline?: string | null
           hero_subtitle?: string | null
           id?: string
           is_featured?: boolean
+          kopis_id?: string | null
+          last_synced_at?: string | null
           organization?: string | null
           organization_id?: string | null
           period_end?: string | null
           period_start?: string | null
           poster_url?: string | null
+          price_info?: string | null
           region?: string | null
+          runtime_text?: string | null
+          schedule_info?: string | null
           slug?: string
+          source?: string
           status?: string
           synopsis?: string | null
           tags?: string[] | null
@@ -1045,6 +1074,7 @@ export type Database = {
           title?: string
           updated_at?: string
           venue?: string | null
+          sync_status?: string | null
         }
         Relationships: [
           {

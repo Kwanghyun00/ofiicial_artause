@@ -12,37 +12,39 @@ export function PerformanceShowcase({ shows }: Props) {
   if (!shows.length) return null
 
   return (
-    <section className="space-y-6 border-t border-border/60 bg-secondary/30 py-12 md:py-16">
+    <section className="space-y-6 border-t border-border/60 py-16">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">현재 진행 중 공연/이벤트</h2>
-          <p className="text-sm text-muted-foreground">알터즈가 함께 운영하거나 홍보한 공연을 확인하세요.</p>
+          <span className="cue">공연검색</span>
+          <h2 className="text-3xl font-semibold text-foreground md:text-4xl">지금 볼 수 있는 공연</h2>
+          <p className="text-sm text-muted-foreground">장르·지역·기간으로 공연을 검색하고 초대권 이벤트로 바로 연결하세요.</p>
         </div>
         <Link
-          href="/works"
+          href="/shows"
           className="self-start rounded-full border border-primary/40 px-6 py-2 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/10"
         >
-          전체 아카이브
+          공연 전체 검색
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {shows.map((show, index) => {
           const posterUrl = show.poster_url ?? getPosterFallback(index)
           return (
-            <article key={show.id} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <article key={show.id} className="spotlight-card flex h-full flex-col">
               <div className="relative h-48 w-full">
                 <Image src={posterUrl} alt={show.title} fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
               </div>
               <div className="flex flex-1 flex-col p-4">
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                   {(show.tags ?? []).slice(0, 3).map((tag) => (
-                    <span key={tag} className="rounded-full bg-primary/10 px-3 py-1 text-primary">
+                    <span key={tag} className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-primary">
                       {tag}
                     </span>
                   ))}
                 </div>
-                <h3 className="mt-3 line-clamp-2 text-lg font-bold text-foreground">{show.title}</h3>
+                <h3 className="mt-3 line-clamp-2 text-lg font-semibold text-foreground">{show.title}</h3>
                 <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                   {show.region && (
                     <p className="flex items-center gap-2">
@@ -58,10 +60,10 @@ export function PerformanceShowcase({ shows }: Props) {
                   )}
                 </div>
                 <Link
-                  href="/contact"
-                  className="mt-4 inline-flex items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:bg-primary/10"
+                  href={show.slug ? `/performances/${show.slug}` : "/events"}
+                  className="mt-4 inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
                 >
-                  협업 문의
+                  초대권 보기
                 </Link>
               </div>
             </article>

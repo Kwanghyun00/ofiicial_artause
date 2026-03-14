@@ -4,8 +4,10 @@
  * KOPIS API 연동이 정상적으로 작동하는지 확인합니다.
  */
 
-import { getAllPerformances, getPerformanceFromKopis } from '@/lib/supabase/queries';
+import { getAllPerformances, getPerformanceByKopisId } from '@/lib/supabase/queries';
 import { isKopisConfigured } from '@/lib/kopis';
+
+export const dynamic = 'force-dynamic';
 
 export default async function TestKopisPage() {
   const kopisConfigured = isKopisConfigured();

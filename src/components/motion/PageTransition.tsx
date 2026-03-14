@@ -12,13 +12,13 @@ export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname()
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait" initial>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 16, scale: 0.98, filter: "blur(6px)" }}
+        initial={{ opacity: 0, y: 16, scale: 0.985, filter: "blur(6px)" }}
         animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-        exit={{ opacity: 0, y: -12, scale: 0.98, filter: "blur(6px)" }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
+        exit={{ opacity: 0, y: -12, scale: 0.985, filter: "blur(6px)" }}
+        transition={{ duration: 0.32, ease: "easeOut" }}
       >
         {children}
       </motion.div>

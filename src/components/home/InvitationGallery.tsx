@@ -10,10 +10,11 @@ export function InvitationGallery({ campaigns }: Props) {
   if (!campaigns.length) return null
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 border-t border-border/60 pt-16">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">이벤트 아카이브</h2>
+          <span className="cue">Archive</span>
+          <h2 className="text-2xl font-semibold text-foreground">이벤트 아카이브</h2>
           <p className="text-sm text-muted-foreground">알터즈가 운영한 이벤트를 한눈에 확인하세요.</p>
         </div>
         <Link href="/works" className="text-sm font-semibold text-primary hover:text-primary/80">
@@ -21,14 +22,18 @@ export function InvitationGallery({ campaigns }: Props) {
         </Link>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {campaigns.map((campaign) => (
-          <article key={campaign.id} className="flex flex-col rounded-3xl border border-border bg-card p-4 shadow">
+          <article key={campaign.id} className="spotlight-card flex flex-col p-4">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="rounded-full bg-secondary px-3 py-1 text-foreground/80">{campaign.reward ?? "이벤트"}</span>
-              {campaign.ends_at && <span className="font-bold text-primary">마감 {formatShortDate(campaign.ends_at)}</span>}
+              <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-foreground/80">
+                {campaign.reward ?? "이벤트"}
+              </span>
+              {campaign.ends_at && (
+                <span className="font-semibold text-primary">마감 {formatShortDate(campaign.ends_at)}</span>
+              )}
             </div>
-            <h3 className="mt-3 line-clamp-1 text-lg font-bold text-foreground">{campaign.title}</h3>
+            <h3 className="mt-3 line-clamp-1 text-lg font-semibold text-foreground">{campaign.title}</h3>
             <p className="text-sm text-muted-foreground line-clamp-2">
               {campaign.description ?? "관객 참여를 확장하기 위한 이벤트입니다."}
             </p>
@@ -50,7 +55,7 @@ export function InvitationGallery({ campaigns }: Props) {
 
             <Link
               href="/contact"
-              className="mt-4 inline-flex items-center justify-center rounded-xl border border-primary/40 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10"
+              className="mt-4 inline-flex items-center justify-center rounded-full border border-primary/40 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10"
             >
               이벤트 문의
             </Link>

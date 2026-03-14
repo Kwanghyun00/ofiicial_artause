@@ -66,9 +66,9 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border/60 bg-white shadow-2xl">
-        <div className="bg-gradient-to-r from-[#F7F4EC] via-white to-white px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border/70 bg-card/95 shadow-2xl">
+        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(255,210,140,0.16),_transparent_60%)] px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary">Feedback</p>
@@ -79,7 +79,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
             </div>
             <button
               onClick={onClose}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-muted-foreground transition hover:border-primary hover:text-primary"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/60 text-muted-foreground transition hover:border-primary hover:text-primary"
               aria-label="닫기"
             >
               <X className="h-5 w-5" />
@@ -89,9 +89,9 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-6 p-6">
           {success ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-              <p className="text-lg font-semibold text-emerald-900">피드백이 전송되었습니다</p>
-              <p className="mt-2 text-sm text-emerald-700">소중한 의견 감사합니다.</p>
+            <div className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-6 text-center">
+              <p className="text-lg font-semibold text-emerald-200">피드백이 전송되었습니다</p>
+              <p className="mt-2 text-sm text-emerald-200/80">소중한 의견 감사합니다.</p>
             </div>
           ) : (
             <>
@@ -109,7 +109,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                         className={`flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
                           isActive
                             ? "border-primary bg-primary/10 text-primary"
-                            : "border-border bg-white text-muted-foreground hover:border-primary/40"
+                            : "border-border bg-background/60 text-muted-foreground hover:border-primary/40"
                         }`}
                       >
                         <Icon className="h-4 w-4" />
@@ -130,7 +130,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="간단히 요약해 주세요"
-                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="w-full rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10"
                   disabled={isPending}
                   maxLength={100}
                 />
@@ -146,14 +146,14 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="자세한 내용을 알려 주세요"
                   rows={5}
-                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="w-full rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10"
                   disabled={isPending}
                   maxLength={2000}
                 />
                 <p className="text-xs text-muted-foreground">{description.length} / 2000</p>
               </div>
 
-              <div className="space-y-4 rounded-2xl border border-border bg-white/70 p-4">
+              <div className="space-y-4 rounded-2xl border border-border bg-background/60 p-4">
                 <p className="text-sm font-semibold text-foreground">연락처 (선택)</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
@@ -166,7 +166,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="홍길동"
-                      className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
+                      className="w-full rounded-xl border border-border bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10"
                       disabled={isPending}
                     />
                   </div>
@@ -180,7 +180,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="example@email.com"
-                      className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/10"
+                      className="w-full rounded-xl border border-border bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10"
                       disabled={isPending}
                     />
                   </div>
@@ -191,7 +191,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
               </div>
 
               {error && (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                <div className="rounded-2xl border border-rose-400/40 bg-rose-500/10 p-4 text-sm text-rose-200">
                   {error}
                 </div>
               )}
@@ -200,7 +200,7 @@ export function FeedbackModal({ isOpen, onClose }: Props) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 rounded-2xl border border-border bg-white px-6 py-3 font-semibold text-foreground transition hover:border-primary hover:text-primary"
+                  className="flex-1 rounded-2xl border border-border bg-background/60 px-6 py-3 font-semibold text-foreground transition hover:border-primary hover:text-primary"
                   disabled={isPending}
                 >
                   취소

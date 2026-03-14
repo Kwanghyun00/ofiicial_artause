@@ -1,133 +1,211 @@
+"use client"
+
 import Link from "next/link"
-import { ArrowRight, Bell, Sparkles, Zap } from "lucide-react"
+import { ArrowRight, Sparkles, Star, Ticket, Zap } from "lucide-react"
+import { HeroSearchBar } from "./HeroSearchBar"
+import { trackEvent } from "@/lib/analytics"
+import type { Campaign } from "./types"
 
 type HomeHeroProps = {
   totalCampaigns: number
   activeCampaigns: number
   liveApplicants: number
   nextDeadline?: string
+  featuredCampaign?: Campaign
 }
 
 const timeline = [
   {
-    title: "자료 수집",
-    description: "공연 정보와 관람 포인트를 빠르게 정리합니다.",
+    title: "이벤트 선택",
+    description: "원하는 공연 초대권 이벤트를 골라보세요.",
   },
   {
-    title: "이벤트 제작",
-    description: "초대권 이벤트 페이지와 참여 흐름을 구성합니다.",
+    title: "정보 입력",
+    description: "이름·연락처·인스타그램 정보를 입력합니다.",
   },
   {
-    title: "운영/확산",
-    description: "채널 운영과 공지로 관객을 연결합니다.",
+    title: "당첨 확인",
+    description: "추첨 후 이메일로 당첨 결과를 알려드려요.",
   },
 ]
 
-export function HomeHero({ totalCampaigns, activeCampaigns, liveApplicants, nextDeadline }: HomeHeroProps) {
+function getDDay(endsAt?: string | null): string | null {
+  if (!endsAt) return null
+  const diff = new Date(endsAt).getTime() - Date.now()
+  if (diff <= 0) return null
+  return `D-${Math.ceil(diff / (1000 * 60 * 60 * 24))}`
+}
+
+export function HomeHero({ totalCampaigns, activeCampaigns, liveApplicants, nextDeadline, featuredCampaign }: HomeHeroProps) {
   const stats = [
-    { label: "진행 중 이벤트", value: `${activeCampaigns}건`, caption: `전체 ${totalCampaigns}건` },
-    { label: "누적 응모", value: `${liveApplicants.toLocaleString()}명`, caption: "커뮤니티 참여" },
-    { label: "다음 마감", value: nextDeadline ?? "이번 주", caption: "초대권 이벤트" },
+    { label: "진행 중 이벤트", value: `${activeCampaigns}건`, caption: `전체 ${totalCampaigns}건`, icon: "🎭" },
+    { label: "누적 응모", value: `${liveApplicants.toLocaleString()}명`, caption: "함께하는 관객", icon: "👥" },
+    { label: "다음 마감", value: nextDeadline ?? "이번 주", caption: "초대권 이벤트", icon: "⏰" },
   ]
 
+  const dday = getDDay(featuredCampaign?.ends_at)
+
   return (
-    <section className="relative overflow-hidden py-12 md:py-18">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(139,123,168,0.18),_transparent_55%)]" />
-      <div className="absolute -left-24 top-8 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
-      <div className="absolute -right-24 bottom-6 h-56 w-56 rounded-full bg-secondary/30 blur-3xl" />
+    <section className="relative overflow-hidden py-12 sm:py-16 md:py-20 lg:py-24">
+      {/* 배경 그라데이션 - 공연장 조명 효과 */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 rounded-[100%] bg-gradient-radial from-primary/12 via-primary/5 to-transparent blur-3xl" />
+        <div className="absolute right-0 top-1/4 h-[500px] w-[500px] rounded-full bg-gradient-radial from-accent/10 via-accent/3 to-transparent blur-3xl" />
+        <div className="absolute left-0 bottom-0 h-[400px] w-[400px] rounded-full bg-gradient-radial from-primary/8 to-transparent blur-3xl" />
+      </div>
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <div className="space-y-8">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary shadow-sm shadow-primary/20">
-              <Sparkles className="h-4 w-4" />
-              초대권 이벤트 운영
-            </span>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-10 md:gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+          {/* 왼쪽: 메인 메시지 */}
+          <div className="space-y-8 md:space-y-10">
+            <div className="inline-block">
+              <span className="cue group cursor-pointer">
+                <Sparkles className="h-3.5 w-3.5 transition-transform group-hover:rotate-12" />
+                Artause
+              </span>
+            </div>
 
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                초대권 이벤트로
+            <div className="space-y-5 md:space-y-6">
+              <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
+                지금 무대,
                 <br />
-                <span className="bg-gradient-to-r from-primary via-[#6b4eff] to-secondary bg-clip-text text-transparent">
-                  관객을 모읍니다.
+                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent leading-tight">
+                  초대권으로 만나세요
                 </span>
               </h1>
-              <p className="text-lg leading-relaxed text-muted-foreground">
-                이 사이트에서 진행 중인 초대권 이벤트를 확인하고 바로 응모하세요. 알터즈는 공연 홍보와
-                이벤트 운영을 연결해 관객 접점을 확장합니다.
+              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
+                뮤지컬·연극 초대권 이벤트에 지금 바로 응모하세요.
+                <br className="hidden sm:block" />
+                당첨되면 무료로 공연을 즐길 수 있습니다.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-wrap gap-2.5 text-xs font-medium text-muted-foreground">
+              {[
+                { label: "뮤지컬 팬", emoji: "🎵" },
+                { label: "연극 관람", emoji: "🎭" },
+              ].map((tag) => (
+                <span
+                  key={tag.label}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 transition-all hover:border-primary/50 hover:bg-primary/5"
+                >
+                  <span className="transition-transform group-hover:scale-110">{tag.emoji}</span>
+                  {tag.label}
+                </span>
+              ))}
+            </div>
+
+            {/* 통합 검색창 */}
+            <HeroSearchBar />
+
+            {/* 핵심 액션 3버튼 */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-3">
               <Link
                 href="/events"
-                className="group inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition hover:-translate-y-0.5 hover:bg-primary/90"
+                onClick={() => trackEvent("home_click_apply")}
+                className="group inline-flex h-12 items-center justify-center rounded-full bg-primary px-7 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:-translate-y-1 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 sm:h-14 sm:px-8 sm:text-lg"
               >
                 초대권 응모하기
-                <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
-                href="/contact"
-                className="inline-flex h-12 items-center justify-center rounded-full border-2 border-border bg-white/70 px-8 text-base font-semibold text-foreground transition hover:border-primary hover:bg-primary/5"
+                href="/shows"
+                className="group inline-flex h-12 items-center justify-center rounded-full border-2 border-border bg-card px-7 text-base font-bold text-foreground transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 hover:text-primary sm:h-14 sm:px-8 sm:text-lg"
               >
-                기업/단체 문의
-                <Bell className="ml-2 h-4 w-4" />
+                공연 검색
+              </Link>
+              <Link
+                href="/reviews"
+                className="group inline-flex h-12 items-center justify-center rounded-full border border-border/60 bg-background/60 px-7 text-base font-bold text-foreground/70 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary sm:h-14 sm:px-8 sm:text-lg"
+              >
+                후기 보기
+                <Star className="ml-2 h-5 w-5" />
               </Link>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            {/* 통계 카드 */}
+            <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
               {stats.map((stat, index) => (
                 <div
                   key={`${stat.label}-${index}`}
-                  className="rounded-2xl border border-border/80 bg-white/80 p-4 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-lg"
+                  className="group spotlight-card p-4 sm:p-5"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
-                  <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.caption}</p>
+                  <div className="flex items-start justify-between">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:text-xs">
+                      {stat.label}
+                    </p>
+                    <span className="text-lg transition-transform group-hover:scale-110 sm:text-xl">
+                      {stat.icon}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xl font-bold text-foreground sm:text-2xl">{stat.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{stat.caption}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative mx-auto flex w-full max-w-md flex-col gap-6 rounded-[28px] border border-white/60 bg-white/90 p-6 shadow-xl backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl">
-            <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-white to-white p-6">
-              <div className="mb-5 flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-3 py-1 text-primary">
-                  <Zap className="h-3.5 w-3.5" />
-                  이번 주 이벤트
+          {/* 오른쪽: 이벤트 카드 */}
+          <div className="relative mx-auto flex w-full max-w-none flex-col gap-5 sm:max-w-md lg:max-w-lg">
+            {/* 메인 이벤트 카드 */}
+            <div className="group stage-panel p-5 sm:p-6">
+              <div className="mb-4 flex items-center justify-between text-xs font-bold text-muted-foreground sm:mb-5">
+                <span className="inline-flex items-center gap-2 rounded-full border-2 border-primary/40 bg-primary/5 px-3 py-1.5 text-primary">
+                  <Zap className="h-4 w-4 animate-pulse" />
+                  지금 모집 중
                 </span>
-                <span className="text-primary">D-4</span>
+                {dday && (
+                  <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
+                    {dday}
+                  </span>
+                )}
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-primary/70">연극</p>
-                <p className="text-2xl font-bold text-foreground">햄릿재판</p>
-                <p className="text-sm text-muted-foreground">홍대 라이브홀 · 3월 8일(토) 19:30</p>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-primary/90">초대권 이벤트 🎭</p>
+                <h3 className="text-2xl font-bold text-foreground transition-colors group-hover:text-primary sm:text-3xl">
+                  {featuredCampaign?.title ?? "진행 중 이벤트"}
+                </h3>
+                <p className="line-clamp-2 text-sm text-muted-foreground sm:text-base">
+                  {featuredCampaign?.one_line_intro ?? featuredCampaign?.description ?? "지금 바로 응모하고 공연을 무료로 즐기세요."}
+                </p>
               </div>
-              <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/90 p-4">
+              <div className="mt-5 flex items-center justify-between rounded-2xl border-2 border-border bg-muted/30 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">응모</p>
-                  <p className="text-xl font-bold text-primary">초대권 이벤트</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground flex items-center gap-1">
+                    <Ticket className="h-3 w-3" />
+                    무료 초대권
+                  </p>
+                  <p className="mt-0.5 text-base font-bold text-primary sm:text-lg">
+                    {featuredCampaign?.reward ?? "초대권 응모"}
+                  </p>
                 </div>
                 <Link
-                  href="/events"
-                  className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:-translate-y-0.5 hover:bg-primary/90"
+                  href={featuredCampaign?.slug ? `/events/${featuredCampaign.slug}` : "/events"}
+                  className="group/btn rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
                 >
                   응모하기
+                  <ArrowRight className="ml-1 inline h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </Link>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-border/60 bg-background/80 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">이벤트 운영 방식</p>
-              <div className="mt-4 space-y-4">
+            {/* 응모 가이드 카드 */}
+            <div className="stage-panel p-5 sm:p-6">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground sm:mb-5">
+                이렇게 응모하세요 ✨
+              </p>
+              <div className="space-y-3 sm:space-y-4">
                 {timeline.map((item, index) => (
-                  <div key={item.title} className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 text-sm font-semibold text-primary">
+                  <div
+                    key={item.title}
+                    className="group/item flex items-start gap-3 rounded-xl p-2 transition-colors hover:bg-primary/5"
+                  >
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 text-sm font-bold text-primary transition-all group-hover/item:scale-110 group-hover/item:border-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground sm:h-10 sm:w-10">
                       0{index + 1}
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-foreground sm:text-base">{item.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">{item.description}</p>
                     </div>
                   </div>
                 ))}

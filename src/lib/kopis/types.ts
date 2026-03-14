@@ -36,6 +36,11 @@ export type KopisPerformanceDetailResponse = {
   db: KopisPerformanceDetail;
 };
 
+export type KopisRelateItem = {
+  relatenm?: string;
+  relateurl?: string;
+};
+
 /**
  * 공연 상세 정보
  */
@@ -59,6 +64,9 @@ export type KopisPerformanceDetail = {
   dtguidance?: string;      // 공연 시간
   styurls?: {               // 소개이미지 목록
     styurl?: string[];
+  };
+  relates?: {
+    relate?: KopisRelateItem | KopisRelateItem[];
   };
   mt10id?: string;          // 공연시설 ID
   area?: string;            // 지역

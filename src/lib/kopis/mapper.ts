@@ -4,7 +4,7 @@
  * Maps KOPIS responses to app-friendly performance objects.
  */
 
-import type { KopisPerformanceItem, KopisPerformanceDetail } from "./types";
+import type { KopisPerformanceItem, KopisPerformanceDetail, KopisRelateItem } from "./types";
 import { parseKopisDate } from "./parser";
 
 type Performance = {
@@ -28,6 +28,7 @@ type Performance = {
   openrun?: string | null;
   organization?: string | null;
   images?: string[] | null;
+  ticket_link?: string | null;
 };
 
 const GENRE_CLASSIC = "\uD074\uB798\uC2DD";
@@ -55,6 +56,18 @@ const REGION_NAMES = [
   "\uACBD\uBD81",
   "\uACBD\uB0A8",
   "\uC81C\uC8FC",
+];
+
+const BOOKING_SOURCE_KEYWORDS = [
+  "예매",
+  "티켓",
+  "ticket",
+  "booking",
+  "인터파크",
+  "yes24",
+  "멜론",
+  "티켓링크",
+  "네이버",
 ];
 
 function normalizeGenre(kopisGenre: string): string {
@@ -132,7 +145,43 @@ export function mapKopisDetailToPerformance(detail: KopisPerformanceDetail): Per
         ? detail.styurls.styurl
         : [detail.styurls.styurl]
       : null,
+    ticket_link: extractKopisTicketLink(detail.relates),
   };
+}
+
+function extractKopisTicketLink(relates?: KopisPerformanceDetail["relates"]): string | null {
+  if (!relates?.relate) {
+    return null;
+  }
+
+  const entries = Array.isArray(relates.relate) ? relates.relate : [relates.relate];
+  const links = entries
+    .map((entry) => normalizeRelate(entry))
+    .filter((entry): entry is { name: string; url: string } => Boolean(entry && entry.url));
+
+  if (!links.length) {
+    return null;
+  }
+
+  const preferred = links.find((entry) =>
+    BOOKING_SOURCE_KEYWORDS.some((keyword) => entry.name.toLowerCase().includes(keyword.toLowerCase()))
+  );
+
+  return preferred?.url ?? links[0].url;
+}
+
+function normalizeRelate(entry: KopisRelateItem | undefined): { name: string; url: string } | null {
+  if (!entry) {
+    return null;
+  }
+
+  const name = typeof entry.relatenm === "string" ? entry.relatenm.trim() : "";
+  const url = typeof entry.relateurl === "string" ? entry.relateurl.trim() : "";
+  if (!/^https?:\/\//i.test(url)) {
+    return null;
+  }
+
+  return { name, url };
 }
 
 function createSlug(title: string, id: string): string {

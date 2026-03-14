@@ -5,9 +5,7 @@ import { ArrowLeft, BadgeCheck, Calendar, Clock, MapPin, MessageSquarePlus, Mic2
 import { TicketEntryForm } from "@/components/forms/TicketEntryForm"
 import { WinnerCheckSection } from "@/components/events/WinnerCheckSection"
 import { Badge } from "@/components/ui/badge"
-import { getTicketCampaignBySlug } from "@/lib/supabase/queries"
-import { fetchPerformanceDetail, isKopisConfigured } from "@/lib/kopis/api"
-import { mapKopisDetailToPerformance } from "@/lib/kopis/mapper"
+import { getTicketCampaignBySlug, getPerformanceByKopisId } from "@/lib/supabase/queries"
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -39,16 +37,8 @@ export default async function EventApplyPage({ params }: Props) {
     kopis_id?: string | null
   }
 
-  // KOPIS 공식 데이터 fetch (kopis_id 설정 시)
-  let kopis: ReturnType<typeof mapKopisDetailToPerformance> | null = null
-  if (c.kopis_id && isKopisConfigured()) {
-    try {
-      const kopisRaw = await fetchPerformanceDetail(c.kopis_id)
-      kopis = mapKopisDetailToPerformance(kopisRaw)
-    } catch {
-      // KOPIS fetch 실패 시 캠페인 데이터로 fallback
-    }
-  }
+  // KOPIS 공식 데이터 — 배치 동기화된 DB 데이터에서 조회 (실시간 API 호출 없음)
+  const kopis = c.kopis_id ? await getPerformanceByKopisId(c.kopis_id) : null
 
   const deadline = c.ends_at ? calcDeadline(c.ends_at) : null
   // eslint-disable-next-line react-compiler/react-compiler

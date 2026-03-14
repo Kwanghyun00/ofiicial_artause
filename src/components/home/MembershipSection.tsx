@@ -24,22 +24,30 @@ const services = [
 
 export function MembershipSection() {
   return (
-    <section className="space-y-10 border-t border-border/60 bg-gradient-to-br from-[#F5EFE7] via-[#FBF9F6] to-[#FFFFFF] py-16">
-      <div className="text-center space-y-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary">서비스</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground">공연을 위한 홍보·이벤트 운영</h2>
-        <p className="text-base text-muted-foreground md:text-lg">문제를 어떻게 해결하는지 중심으로 서비스 방식을 정리했습니다.</p>
+    <section className="space-y-10 border-t border-border/60 py-16">
+      <div className="space-y-4 text-center">
+        <span className="cue">Services</span>
+        <h2 className="text-3xl font-semibold text-foreground md:text-4xl">공연을 위한 홍보·이벤트 운영</h2>
+        <p className="text-base text-muted-foreground md:text-lg">
+          문제를 어떻게 해결하는지 중심으로 서비스 방식을 정리했습니다.
+        </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {services.map((service) => (
           <article
             key={service.name}
-            className={`flex flex-col rounded-3xl p-6 shadow ${service.featured ? "bg-white/90 shadow-primary/30" : "bg-white/70"}`}
+            className={`spotlight-card flex flex-col p-6 ${
+              service.featured ? "border-primary/40" : ""
+            }`}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-foreground">{service.name}</h3>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${service.featured ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"}`}>
+              <h3 className="text-2xl font-semibold text-foreground">{service.name}</h3>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  service.featured ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground"
+                }`}
+              >
                 {service.badge}
               </span>
             </div>
@@ -56,7 +64,11 @@ export function MembershipSection() {
             </ul>
             <Link
               href="/contact"
-              className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition ${service.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border border-primary/40 text-primary hover:bg-primary/5"}`}
+              className={`mt-6 inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold transition ${
+                service.featured
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "border border-primary/40 text-primary hover:bg-primary/10"
+              }`}
             >
               {service.featured ? "제작 문의하기" : "상세 문의"}
             </Link>

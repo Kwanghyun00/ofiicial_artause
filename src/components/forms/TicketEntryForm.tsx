@@ -95,11 +95,10 @@ export function TicketEntryForm({ campaignId, slug, campaignTitle, performanceTi
             label="후기를 남길 SNS 주소"
             name="reviewUrl"
             type="url"
-            required
             placeholder="https://instagram.com/yourhandle 또는 블로그 주소"
           />
           <p className="mt-1 text-xs text-slate-500">
-            공연 관람 후 후기를 남길 인스타그램, 블로그, 또는 기타 SNS 주소를 입력해주세요.
+            공연 관람 후 후기를 남길 인스타그램, 블로그, 또는 기타 SNS 주소를 입력해주세요. (선택)
           </p>
         </div>
       </section>
@@ -283,32 +282,37 @@ function TextareaField({
   );
 }
 
+// "YYYY-MM-DD HH:mm" 또는 "YYYY-MM-DD" 형식 모두 지원
 function DateToggleField({ name, dates }: { name: string; dates: string[] }) {
   const [selected, setSelected] = useState<string>("");
 
-  const formatDate = (iso: string) => {
-    const [y, m, d] = iso.split("-").map(Number);
+  const formatSlot = (slot: string) => {
+    const spaceIdx = slot.indexOf(" ");
+    const datePart = spaceIdx > -1 ? slot.slice(0, spaceIdx) : slot;
+    const timePart = spaceIdx > -1 ? slot.slice(spaceIdx + 1) : null;
+    const [y, m, d] = datePart.split("-").map(Number);
     const dt = new Date(y, m - 1, d);
-    return dt.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+    const dateStr = dt.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+    return timePart ? `${dateStr} ${timePart}` : dateStr;
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        {dates.map((date) => {
-          const isSelected = selected === date;
+        {dates.map((slot) => {
+          const isSelected = selected === slot;
           return (
             <button
-              key={date}
+              key={slot}
               type="button"
-              onClick={() => setSelected(isSelected ? "" : date)}
+              onClick={() => setSelected(isSelected ? "" : slot)}
               className={`rounded-2xl border-2 px-4 py-2.5 text-sm font-semibold transition ${
                 isSelected
                   ? "border-indigo-500 bg-indigo-500 text-white shadow-md shadow-indigo-200"
                   : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-indigo-50"
               }`}
             >
-              {formatDate(date)}
+              {formatSlot(slot)}
             </button>
           );
         })}
@@ -324,8 +328,22 @@ function DateToggleField({ name, dates }: { name: string; dates: string[] }) {
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="btn-primary w-full md:w-auto" disabled={pending || disabled}>
-      {pending ? "전송 중..." : "이벤트 응모하기"}
+    <button
+      type="submit"
+      disabled={pending || disabled}
+      className="w-full rounded-full bg-primary py-4 text-lg font-bold text-primary-foreground shadow-xl shadow-primary/30 transition-all hover:-translate-y-1 hover:bg-primary/90 hover:shadow-2xl hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? (
+        <span className="flex items-center justify-center gap-2">
+          <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+          </svg>
+          전송 중...
+        </span>
+      ) : (
+        "✨ 이벤트 응모하기"
+      )}
     </button>
   );
 }

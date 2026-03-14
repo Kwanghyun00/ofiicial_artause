@@ -56,7 +56,7 @@ export function EventsExplorer({ campaigns }: Props) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
+      <section className="stage-panel p-6">
         <div className="space-y-4">
           <div className="space-y-2">
             <p className="text-sm font-semibold text-primary">실시간 초대 탐색기</p>
@@ -64,7 +64,7 @@ export function EventsExplorer({ campaigns }: Props) {
             <p className="text-sm text-muted-foreground">마감 일정이나 프로그램 키워드로 검색하면 원하는 초대를 빠르게 찾을 수 있습니다.</p>
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-background px-4 py-3">
+          <div className="rounded-2xl border border-border/70 bg-background/60 px-4 py-3">
             <label htmlFor="campaign-search" className="text-xs font-semibold text-muted-foreground">
               검색어 입력
             </label>
@@ -94,11 +94,13 @@ export function EventsExplorer({ campaigns }: Props) {
                 className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
                   statusFilter === filter.value
                     ? "bg-primary text-primary-foreground"
-                    : "border border-border bg-white text-muted-foreground hover:border-primary/40"
+                    : "border border-border bg-background/60 text-muted-foreground hover:border-primary/40"
                 }`}
               >
                 <span>{filter.label}</span>
-                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs text-primary-foreground">{filter.count}</span>
+                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary-foreground">
+                  {filter.count}
+                </span>
               </button>
             ))}
           </div>
@@ -120,7 +122,7 @@ export function EventsExplorer({ campaigns }: Props) {
         {filteredCampaigns.length > 0 ? (
           <CampaignBoard campaigns={filteredCampaigns as any} />
         ) : (
-          <div className="rounded-3xl border-2 border-dashed border-border bg-background px-8 py-12 text-center text-sm text-muted-foreground">
+          <div className="rounded-3xl border-2 border-dashed border-border bg-background/60 px-8 py-12 text-center text-sm text-muted-foreground">
             조건에 맞는 초대가 없습니다.
             <br />
             다른 검색어나 필터를 선택해 주세요.

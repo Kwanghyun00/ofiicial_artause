@@ -57,11 +57,11 @@ const rules = [
 
 export default function RulesPage() {
   return (
-    <div className="bg-gradient-to-b from-[#F7F4EC] via-white to-white pb-20 pt-10 text-foreground">
+    <div className="pb-24 pt-12 text-foreground">
       <header className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-[32px] border border-white/70 bg-white/80 p-8 text-center shadow-sm backdrop-blur md:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary">Rules</p>
-          <h1 className="mt-2 text-3xl font-bold sm:text-4xl">초대권 이벤트 이용 규정</h1>
+        <div className="stage-panel p-8 text-center md:p-10">
+          <span className="cue">Rules</span>
+          <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">초대권 이벤트 이용 규정</h1>
           <p className="mt-3 text-base text-muted-foreground">
             공정하고 투명한 초대권 이벤트 운영을 위한 기본 규정입니다.
           </p>
@@ -70,7 +70,7 @@ export default function RulesPage() {
               <a
                 key={rule.id}
                 href={`#${rule.id}`}
-                className="rounded-full border border-border/70 bg-white/70 px-4 py-2 transition hover:border-primary hover:text-primary"
+                className="rounded-full border border-border/70 bg-background/60 px-4 py-2 transition hover:border-primary hover:text-primary"
               >
                 {rule.title}
               </a>
@@ -84,11 +84,11 @@ export default function RulesPage() {
           <article
             key={rule.id}
             id={rule.id}
-            className="scroll-mt-24 rounded-3xl border border-border/60 bg-white p-6 shadow-sm md:p-8"
+            className="spotlight-card scroll-mt-24 p-6 md:p-8"
           >
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">규정</p>
-              <h2 className="text-2xl font-bold text-foreground">{rule.title}</h2>
+              <h2 className="text-2xl font-semibold text-foreground">{rule.title}</h2>
               <p className="text-sm text-muted-foreground">{rule.subtitle}</p>
             </div>
 
@@ -101,7 +101,7 @@ export default function RulesPage() {
               ))}
             </ul>
 
-            <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
+            <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-foreground">
               {rule.tip}
             </div>
           </article>
@@ -109,8 +109,8 @@ export default function RulesPage() {
       </section>
 
       <section className="mx-auto mt-12 max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-border/60 bg-white p-6 text-center shadow-sm">
-          <h2 className="text-xl font-bold text-foreground">규정 확인은 필수입니다</h2>
+        <div className="stage-panel p-6 text-center">
+          <h2 className="text-xl font-semibold text-foreground">규정 확인은 필수입니다</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             이용 규정을 확인하셨다면 바로 초대권 이벤트에 응모해 보세요.
           </p>
@@ -123,7 +123,7 @@ export default function RulesPage() {
             </Link>
             <Link
               href="/events/guide"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-white px-6 text-base font-semibold text-foreground transition hover:border-primary hover:text-primary"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-background/60 px-6 text-base font-semibold text-foreground transition hover:border-primary hover:text-primary"
             >
               응모 가이드 보기
             </Link>

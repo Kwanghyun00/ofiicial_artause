@@ -1,4 +1,5 @@
 import { ApprovalQueue } from "@/components/admin/ApprovalQueue";
+import { KopisSyncButton } from "@/components/admin/KopisSyncButton";
 
 export const metadata = {
   title: "관리자 대시보드",
@@ -37,6 +38,7 @@ export default function AdminPage() {
         </div>
       </header>
 
+      <KopisSyncButton />
       <ApprovalQueue />
     </div>
   );

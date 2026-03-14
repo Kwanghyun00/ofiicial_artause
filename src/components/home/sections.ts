@@ -1,4 +1,5 @@
 export { HomeHero } from "./HomeHero"
+export { HomeDidPopup } from "./HomeDidPopup"
 export { TrustMarquee } from "./TrustMarquee"
 export { ExperienceMetrics } from "./ExperienceMetrics"
 export { FeaturedInvitations } from "./FeaturedInvitations"

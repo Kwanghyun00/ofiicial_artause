@@ -19,9 +19,11 @@ export function TrustMarquee({ partners = defaultPartners }: TrustMarqueeProps) 
   if (!partners.length) return null
 
   return (
-    <section className="border-b border-border bg-card/80 py-10">
+    <section className="border-y border-border/60 bg-background/60 py-10">
       <div className="mx-auto max-w-6xl px-4 md:px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">SNS & 파트너</p>
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
+          Partner Credits
+        </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
           {partners.map((partner) => (
             <div key={partner.name} className="text-center text-sm font-semibold text-foreground/80">

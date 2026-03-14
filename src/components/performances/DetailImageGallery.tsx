@@ -21,11 +21,11 @@ export function DetailImageGallery({ title, images }: Props) {
             key={`${url}-${index}`}
             type="button"
             onClick={() => setActive(url)}
-            className="group relative h-64 w-full overflow-hidden rounded-2xl border border-black/10 bg-white"
+            className="spotlight-card group h-64 w-full"
             aria-label={`상세 이미지 ${index + 1} 확대`}
           >
             <Image src={url} alt={`${title} 상세 이미지 ${index + 1}`} fill className="object-cover transition group-hover:scale-[1.02]" />
-            <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/10" />
+            <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
           </button>
         ))}
       </div>
@@ -39,7 +39,7 @@ export function DetailImageGallery({ title, images }: Props) {
         >
           <button
             type="button"
-            className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black"
+            className="absolute right-4 top-4 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-semibold text-foreground"
             onClick={() => setActive(null)}
           >
             닫기

@@ -14,6 +14,8 @@ export type Campaign = {
   slug?: string | null
   title: string
   description?: string | null
+  one_line_intro?: string | null
+  poster_image?: string | null
   reward?: string | null
   ends_at?: string | null
   starts_at?: string | null

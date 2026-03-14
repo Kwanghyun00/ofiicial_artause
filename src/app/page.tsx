@@ -1,57 +1,38 @@
 import {
-  CallToAction,
-  CategoryShowcase,
-  CompanySnapshot,
-  ExperienceMetrics,
   FeaturedInvitations,
   HomeHero,
-  HowItWorks,
-  MembershipSection,
-  PerformanceShowcase,
+  HomeDidPopup,
   TestimonialsSection,
-  TrustMarquee,
-  ValuePropSection,
+  CallToAction,
 } from "@/components/home/sections"
 import { Reveal } from "@/components/motion/Reveal"
-import type { Campaign, Organization as OrganizationSummary, Show } from "@/components/home/types"
-import { getOrganizations, getRecentPerformances, getTicketCampaigns } from "@/lib/supabase/queries"
+import type { Campaign } from "@/components/home/types"
+import { getTicketCampaigns, getRecentReviews } from "@/lib/supabase/queries"
 
 type RawCampaign = Awaited<ReturnType<typeof getTicketCampaigns>>[number]
-type RawPerformance = Awaited<ReturnType<typeof getRecentPerformances>>[number]
-type RawOrganization = Awaited<ReturnType<typeof getOrganizations>>[number]
 
 const isCampaignRecord = (record: RawCampaign): record is RawCampaign & { id: string; title: string } =>
   Boolean(record && typeof record === "object" && "id" in record && "title" in record)
 
-const isPerformanceRecord = (record: RawPerformance): record is RawPerformance & { id: string; title: string } =>
-  Boolean(record && typeof record === "object" && "id" in record && "title" in record)
-
-const isOrganizationRecord = (record: RawOrganization): record is RawOrganization & { id: string; name: string } =>
-  Boolean(record && typeof record === "object" && "id" in record && "name" in record)
-
 export default async function HomePage() {
-  const [campaignRecords, performanceRecords, organizationRecords] = await Promise.all([
+  const [campaignRecords, recentReviews] = await Promise.all([
     getTicketCampaigns(),
-    getRecentPerformances(),
-    getOrganizations(),
+    getRecentReviews({ limit: 3 }),
   ])
 
   const campaigns = campaignRecords.filter(isCampaignRecord).map(normalizeCampaign)
-  const shows = performanceRecords.filter(isPerformanceRecord).slice(0, 6).map(normalizeShow)
-  const organizations = organizationRecords.filter(isOrganizationRecord).map(normalizeOrganization)
+  const now = Date.now()
+  const activeCampaigns = campaigns.filter((c) => !c.ends_at || new Date(c.ends_at).getTime() > now)
 
   const heroStats = createHeroStats(campaigns)
-  const partnerBadges = organizations.length
-    ? organizations.slice(0, 6).map((org) => ({
-        name: org.name,
-        label: org.region ? `${org.region} 지역` : "파트너",
-      }))
-    : undefined
-
-  const featuredCampaigns = campaigns.slice(0, 2)
+  const featuredCampaign = activeCampaigns[0] ?? campaigns[0]
+  const featuredCampaigns = activeCampaigns.slice(0, 12)
 
   return (
-    <div className="space-y-20 bg-gradient-to-b from-[#F7F4EC] via-[#FAF7F0] to-white pb-24 pt-10">
+    <div className="space-y-16 pb-24 pt-12 sm:space-y-20 lg:space-y-24">
+      <HomeDidPopup />
+
+      {/* 1. Hero — 핵심 액션 3버튼 */}
       <Reveal>
         <section>
           <div className="mx-auto max-w-6xl space-y-10 px-4 sm:px-6 lg:px-8">
@@ -60,51 +41,30 @@ export default async function HomePage() {
               activeCampaigns={heroStats.activeCampaigns}
               liveApplicants={heroStats.liveApplicants}
               nextDeadline={heroStats.nextDeadline}
+              featuredCampaign={featuredCampaign}
             />
           </div>
         </section>
       </Reveal>
 
-      <Reveal>
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <TrustMarquee partners={partnerBadges} />
-        </div>
-      </Reveal>
-
       <section>
         <div className="mx-auto max-w-6xl space-y-12 px-4 sm:px-6 lg:px-8">
+          {/* 2. 진행 중 초대권 이벤트 */}
           <Reveal>
             <FeaturedInvitations campaigns={featuredCampaigns} />
           </Reveal>
+
+          {/* 3. 관객 후기 하이라이트 — 신뢰 구축 */}
           <Reveal delay={0.05}>
-            <ExperienceMetrics />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <CategoryShowcase />
-          </Reveal>
-          <Reveal delay={0.15}>
-            <PerformanceShowcase shows={shows} />
-          </Reveal>
-          <Reveal delay={0.2}>
-            <HowItWorks />
-          </Reveal>
-          <Reveal delay={0.25}>
-            <MembershipSection />
-          </Reveal>
-          <Reveal delay={0.3}>
-            <TestimonialsSection />
-          </Reveal>
-          <Reveal delay={0.35}>
-            <ValuePropSection />
-          </Reveal>
-          <Reveal delay={0.4}>
-            <CompanySnapshot />
-          </Reveal>
-          <Reveal delay={0.45}>
-            <CallToAction />
+            <TestimonialsSection reviews={recentReviews} />
           </Reveal>
         </div>
       </section>
+
+      {/* 4. 관객용 최종 CTA */}
+      <Reveal>
+        <CallToAction />
+      </Reveal>
     </div>
   )
 }
@@ -113,6 +73,8 @@ function normalizeCampaign(record: RawCampaign): Campaign {
   const campaign = record as RawCampaign & {
     slug?: string | null
     description?: string | null
+    one_line_intro?: string | null
+    poster_image?: string | null
     reward?: string | null
     starts_at?: string | null
     ends_at?: string | null
@@ -124,43 +86,12 @@ function normalizeCampaign(record: RawCampaign): Campaign {
     slug: campaign.slug ?? null,
     title: campaign.title,
     description: campaign.description ?? null,
+    one_line_intro: campaign.one_line_intro ?? null,
+    poster_image: campaign.poster_image ?? null,
     reward: campaign.reward ?? null,
     starts_at: campaign.starts_at ?? null,
     ends_at: campaign.ends_at ?? null,
     entry_count: campaign.entry_count ?? null,
-  }
-}
-
-function normalizeShow(record: RawPerformance): Show {
-  const performance = record as RawPerformance & {
-    slug?: string | null
-    region?: string | null
-    period_start?: string | null
-    period_end?: string | null
-    poster_url?: string | null
-  }
-
-  return {
-    id: performance.id,
-    slug: performance.slug ?? performance.id,
-    title: performance.title,
-    region: performance.region ?? null,
-    tags: null,
-    period_start: performance.period_start ?? null,
-    period_end: performance.period_end ?? null,
-    poster_url: performance.poster_url ?? null,
-  }
-}
-
-function normalizeOrganization(record: RawOrganization): OrganizationSummary {
-  const organization = record as RawOrganization & {
-    region?: string | null
-  }
-
-  return {
-    id: organization.id,
-    name: organization.name,
-    region: organization.region ?? null,
   }
 }
 
