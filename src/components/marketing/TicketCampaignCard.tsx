@@ -95,7 +95,7 @@ export function TicketCampaignCard({ campaign, status = "active" }: TicketCampai
         {/* CTA Button */}
         <div className="mt-auto pt-2">
           <Link
-            href={`/events/${campaign.slug ?? campaign.id}`}
+            href={`/invites/${campaign.slug ?? campaign.id}`}
             className="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800"
           >
             상세보기

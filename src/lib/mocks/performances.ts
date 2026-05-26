@@ -1,8 +1,48 @@
 import type { Database } from "@/lib/supabase/types";
 
 type PerformanceRow = Database["public"]["Tables"]["performances"]["Row"];
-type MockPerformance = Omit<PerformanceRow, "description" | "tags" | "age_limit" | "cast_info" | "crew_info" | "kopis_id" | "last_synced_at" | "price_info" | "runtime_text" | "schedule_info" | "source" | "sync_status"> &
-  Partial<Pick<PerformanceRow, "description" | "tags" | "age_limit" | "cast_info" | "crew_info" | "kopis_id" | "last_synced_at" | "price_info" | "runtime_text" | "schedule_info" | "source" | "sync_status">>;
+type MockPerformance = Omit<
+  PerformanceRow,
+  | "description"
+  | "tags"
+  | "age_limit"
+  | "cast_info"
+  | "crew_info"
+  | "detail_images"
+  | "kopis_facility_id"
+  | "kopis_id"
+  | "kopis_sections"
+  | "last_synced_at"
+  | "openrun"
+  | "price_info"
+  | "runtime_text"
+  | "schedule_info"
+  | "source"
+  | "state"
+  | "sync_status"
+> &
+  Partial<
+    Pick<
+      PerformanceRow,
+      | "description"
+      | "tags"
+      | "age_limit"
+      | "cast_info"
+      | "crew_info"
+      | "detail_images"
+      | "kopis_facility_id"
+      | "kopis_id"
+      | "kopis_sections"
+      | "last_synced_at"
+      | "openrun"
+      | "price_info"
+      | "runtime_text"
+      | "schedule_info"
+      | "source"
+      | "state"
+      | "sync_status"
+    >
+  >;
 type CampaignRow = Database["public"]["Tables"]["ticket_campaigns"]["Row"] & {
   slug: string;
   performances?: Pick<PerformanceRow, "slug" | "title" | "poster_url" | "region" | "organization_id" | "period_start" | "period_end"> | null;
@@ -513,12 +553,17 @@ export const mockPerformances: PerformanceRow[] = mockPerformancesData.map((item
   age_limit: null,
   cast_info: null,
   crew_info: null,
+  detail_images: [],
+  kopis_facility_id: null,
   kopis_id: null,
+  kopis_sections: {},
   last_synced_at: null,
+  openrun: null,
   price_info: null,
   runtime_text: null,
   schedule_info: null,
   source: "manual",
+  state: null,
   sync_status: null,
   ...item,
 }));
@@ -530,16 +575,21 @@ const campaignDefaults: CampaignRow = {
   approved_at: null,
   approved_by: null,
   available_dates: null,
+  billing_enabled: true,
   config: {},
+  cost_per_slot: 1500,
   created_at: now,
   description: null,
   ends_at: now,
   entry_count: 0,
+  experience_dates: null,
+  experience_type: null,
   form_link: null,
   hashtags: null,
   id: "",
   kopis_id: null,
   last_draw_at: null,
+  min_follower_criteria: null,
   one_line_intro: null,
   partner_email: null,
   partner_name: null,
@@ -552,6 +602,11 @@ const campaignDefaults: CampaignRow = {
   reward: null,
   running_time: null,
   sessions_per_week: null,
+  recruit_count: 0,
+  recruit_phase: "recruiting",
+  required_review_platforms: ["instagram"],
+  review_deadline_days: 7,
+  selection_criteria_text: null,
   slug: "",
   snapshot_seed: null,
   sns_instagram: null,
@@ -563,6 +618,7 @@ const campaignDefaults: CampaignRow = {
   ticket_allocations: null,
   ticket_purchase_url: null,
   title: "",
+  total_slots_billed: 0,
   updated_at: now,
   venue_address: null,
   venue_name: null,

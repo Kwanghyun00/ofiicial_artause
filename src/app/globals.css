@@ -2,135 +2,218 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================================
+   ARTAUSE DESIGN SYSTEM — "Stage Gold"
+   레퍼런스: PAMS, Cinecube, FILLTHEFEEL, One Direction M&C
+   컨셉: 공연장 무대 황금빛 × 벨벳 어둠의 프리미엄 공연예술 플랫폼
+   ============================================================================ */
+
+/* ============================================================================
+   1. DESIGN TOKENS — COLOR
+   Light Mode: 따뜻한 아이보리 베이스 + 황금빛 앰버 프라이머리
+   ============================================================================ */
 :root {
-  /* Light mode - 공연장 콘셉트 (따뜻한 오렌지/코랄) */
-  --background: oklch(0.99 0.002 85);
-  --foreground: oklch(0.15 0.01 20);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 20);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 20);
-  --primary: oklch(0.65 0.22 35);
-  --primary-foreground: oklch(0.99 0.002 85);
-  --secondary: oklch(0.96 0.01 85);
-  --secondary-foreground: oklch(0.15 0.01 20);
-  --muted: oklch(0.96 0.01 85);
-  --muted-foreground: oklch(0.5 0.01 20);
-  --accent: oklch(0.68 0.18 50);
-  --accent-foreground: oklch(0.99 0.002 85);
-  --destructive: oklch(0.6 0.23 25);
+  /* ── Core Semantic Colors ── */
+  --background:           oklch(0.985 0.007 80);   /* Warm ivory — 극장 프로그램지 */
+  --foreground:           oklch(0.12 0.018 25);    /* Rich ink */
+  --card:                 oklch(1 0 0);
+  --card-foreground:      oklch(0.12 0.018 25);
+  --popover:              oklch(1 0 0);
+  --popover-foreground:   oklch(0.12 0.018 25);
+
+  /* ── Brand: Stage Gold ── */
+  --primary:              oklch(0.64 0.18 55);     /* Stage amber-gold */
+  --primary-foreground:   oklch(0.99 0.002 85);
+  --secondary:            oklch(0.95 0.009 80);    /* Warm light gray */
+  --secondary-foreground: oklch(0.22 0.018 25);
+  --muted:                oklch(0.95 0.009 80);
+  --muted-foreground:     oklch(0.52 0.012 25);
+  --accent:               oklch(0.58 0.22 38);     /* Ember — 열정적인 오렌지 */
+  --accent-foreground:    oklch(0.99 0.002 85);
+  --destructive:          oklch(0.58 0.23 22);
   --destructive-foreground: oklch(0.99 0.002 85);
-  --border: oklch(0.92 0.005 85);
-  --input: oklch(0.92 0.005 85);
-  --ring: oklch(0.65 0.22 35);
-  --chart-1: oklch(0.65 0.22 35);
-  --chart-2: oklch(0.68 0.18 50);
-  --chart-3: oklch(0.72 0.14 65);
-  --chart-4: oklch(0.58 0.26 25);
-  --chart-5: oklch(0.62 0.2 45);
-  --radius: 1rem;
-  --sidebar: oklch(0.99 0.002 85);
-  --sidebar-foreground: oklch(0.15 0.01 20);
-  --sidebar-primary: oklch(0.65 0.22 35);
-  --sidebar-primary-foreground: oklch(0.99 0.002 85);
-  --sidebar-accent: oklch(0.96 0.01 85);
-  --sidebar-accent-foreground: oklch(0.15 0.01 20);
-  --sidebar-border: oklch(0.92 0.005 85);
-  --sidebar-ring: oklch(0.65 0.22 35);
-  --font-body: "Pretendard Variable", "Pretendard", system-ui, sans-serif;
-  --font-display: "Pretendard Variable", "Pretendard", sans-serif;
+  --border:               oklch(0.90 0.009 80);    /* Warm border */
+  --input:                oklch(0.90 0.009 80);
+  --ring:                 oklch(0.64 0.18 55);
 
-  /* 공연장 테마 변수 - Light Mode */
-  --stage-ink: #fefefe;
-  --stage-panel: rgba(255, 255, 255, 0.85);
-  --stage-panel-strong: rgba(255, 255, 255, 0.95);
-  --stage-glow: rgba(255, 107, 53, 0.08);
-  --stage-spot: rgba(255, 140, 66, 0.06);
-  --stage-curtain: rgba(255, 107, 53, 0.03);
-  --spotlight-warm: rgba(255, 140, 66, 0.15);
-  --spotlight-soft: rgba(255, 183, 77, 0.1);
+  /* ── Charts ── */
+  --chart-1: oklch(0.64 0.18 55);
+  --chart-2: oklch(0.58 0.22 38);
+  --chart-3: oklch(0.72 0.14 75);
+  --chart-4: oklch(0.54 0.22 28);
+  --chart-5: oklch(0.60 0.18 300);
+
+  /* ── Radius System — Broadsheet editorial sharp ── */
+  --radius: 0.125rem;   /* 2px — newspaper editorial, 각진 Broadsheet 스타일 */
+
+  /* ── Sidebar ── */
+  --sidebar:                   oklch(0.985 0.007 80);
+  --sidebar-foreground:        oklch(0.12 0.018 25);
+  --sidebar-primary:           oklch(0.64 0.18 55);
+  --sidebar-primary-foreground:oklch(0.99 0.002 85);
+  --sidebar-accent:            oklch(0.95 0.009 80);
+  --sidebar-accent-foreground: oklch(0.22 0.018 25);
+  --sidebar-border:            oklch(0.90 0.009 80);
+  --sidebar-ring:              oklch(0.64 0.18 55);
+
+  /* ── Typography ── */
+  --font-body:    "Pretendard Variable", "Pretendard", system-ui, sans-serif;
+  --font-display: "Libre Baskerville", "Noto Serif KR", Georgia, serif;
+
+  /* ── Typography Scale ── */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.25rem;    /* 20px */
+  --text-2xl:  1.5rem;     /* 24px */
+  --text-3xl:  1.875rem;   /* 30px */
+  --text-4xl:  2.25rem;    /* 36px */
+  --text-5xl:  3rem;       /* 48px */
+  --text-6xl:  3.75rem;    /* 60px */
+  --text-7xl:  4.5rem;     /* 72px */
+
+  /* ── Shadow System (One Direction M&C 레퍼런스) ── */
+  --shadow-xs:    0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-sm:    0 2px 8px -2px rgba(0, 0, 0, 0.09);
+  --shadow-md:    0 8px 24px -8px rgba(0, 0, 0, 0.12);
+  --shadow-lg:    0 20px 48px -16px rgba(0, 0, 0, 0.16);
+  --shadow-xl:    0 32px 64px -24px rgba(0, 0, 0, 0.2);
+  --shadow-stage: 0 8px 32px -12px rgba(190, 120, 10, 0.18), 0 20px 48px -24px rgba(190, 120, 10, 0.1);
+
+  /* ── Stage / Spotlight Variables — Light Mode ── */
+  --stage-ink:         #fdfaf5;
+  --stage-panel:       rgba(255, 254, 250, 0.88);
+  --stage-panel-strong:rgba(255, 254, 250, 0.97);
+  --stage-glow:        rgba(200, 130, 15, 0.09);    /* 황금 조명 글로우 */
+  --stage-spot:        rgba(220, 150, 20, 0.07);    /* 스포트라이트 */
+  --stage-curtain:     rgba(200, 130, 15, 0.04);
+  --spotlight-warm:    rgba(220, 155, 25, 0.18);
+  --spotlight-soft:    rgba(240, 180, 60, 0.12);
+
+  /* ── Easing Tokens ── */
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Duration Tokens ── */
+  --duration-fast:   150ms;
+  --duration-base:   250ms;
+  --duration-slow:   400ms;
+  --duration-slower: 700ms;
 }
 
+/* ============================================================================
+   2. DESIGN TOKENS — DARK MODE
+   Deep Velvet Black (시네큐브 레퍼런스) + Golden Spotlight
+   ============================================================================ */
 .dark {
-  /* Dark mode - 공연장 무대 콘셉트 */
-  --background: oklch(0.14 0.02 20);
-  --foreground: oklch(0.96 0.01 85);
-  --card: oklch(0.18 0.02 20);
-  --card-foreground: oklch(0.96 0.01 85);
-  --popover: oklch(0.16 0.02 20);
-  --popover-foreground: oklch(0.96 0.01 85);
-  --primary: oklch(0.68 0.22 35);
-  --primary-foreground: oklch(0.99 0.002 85);
-  --secondary: oklch(0.22 0.02 20);
-  --secondary-foreground: oklch(0.92 0.01 85);
-  --muted: oklch(0.22 0.02 20);
-  --muted-foreground: oklch(0.68 0.02 85);
-  --accent: oklch(0.7 0.18 50);
-  --accent-foreground: oklch(0.16 0.02 20);
-  --border: oklch(0.26 0.02 20);
-  --input: oklch(0.26 0.02 20);
-  --ring: oklch(0.68 0.22 35);
-  --sidebar: oklch(0.16 0.02 20);
-  --sidebar-foreground: oklch(0.96 0.01 85);
-  --sidebar-primary: oklch(0.68 0.22 35);
-  --sidebar-primary-foreground: oklch(0.99 0.002 85);
-  --sidebar-accent: oklch(0.22 0.02 20);
-  --sidebar-accent-foreground: oklch(0.96 0.01 85);
-  --sidebar-border: oklch(0.26 0.02 20);
-  --sidebar-ring: oklch(0.68 0.22 35);
+  --background:           oklch(0.11 0.016 285);   /* Deep velvet — 무대 어둠 */
+  --foreground:           oklch(0.95 0.009 80);    /* Warm off-white */
+  --card:                 oklch(0.155 0.016 285);  /* Dark velvet card */
+  --card-foreground:      oklch(0.95 0.009 80);
+  --popover:              oklch(0.135 0.016 285);
+  --popover-foreground:   oklch(0.95 0.009 80);
 
-  /* 공연장 테마 변수 - Dark Mode */
-  --stage-ink: #0b0b0f;
-  --stage-panel: rgba(20, 20, 26, 0.92);
-  --stage-panel-strong: rgba(24, 24, 32, 0.98);
-  --stage-glow: rgba(255, 140, 66, 0.16);
-  --stage-spot: rgba(255, 107, 53, 0.12);
-  --stage-curtain: rgba(255, 140, 66, 0.08);
-  --spotlight-warm: rgba(255, 140, 66, 0.2);
-  --spotlight-soft: rgba(255, 183, 77, 0.15);
+  --primary:              oklch(0.74 0.17 62);     /* Bright stage gold in dark */
+  --primary-foreground:   oklch(0.11 0.016 285);
+  --secondary:            oklch(0.20 0.016 285);
+  --secondary-foreground: oklch(0.90 0.009 80);
+  --muted:                oklch(0.20 0.016 285);
+  --muted-foreground:     oklch(0.64 0.012 80);
+  --accent:               oklch(0.68 0.21 45);     /* Ember — 더 밝게 */
+  --accent-foreground:    oklch(0.11 0.016 285);
+  --destructive:          oklch(0.62 0.24 22);
+  --destructive-foreground: oklch(0.99 0.002 85);
+  --border:               oklch(0.23 0.016 285);
+  --input:                oklch(0.23 0.016 285);
+  --ring:                 oklch(0.74 0.17 62);
+
+  --chart-1: oklch(0.74 0.17 62);
+  --chart-2: oklch(0.68 0.21 45);
+  --chart-3: oklch(0.78 0.14 80);
+  --chart-4: oklch(0.62 0.20 28);
+  --chart-5: oklch(0.66 0.18 300);
+
+  --sidebar:                   oklch(0.135 0.016 285);
+  --sidebar-foreground:        oklch(0.95 0.009 80);
+  --sidebar-primary:           oklch(0.74 0.17 62);
+  --sidebar-primary-foreground:oklch(0.11 0.016 285);
+  --sidebar-accent:            oklch(0.20 0.016 285);
+  --sidebar-accent-foreground: oklch(0.90 0.009 80);
+  --sidebar-border:            oklch(0.23 0.016 285);
+  --sidebar-ring:              oklch(0.74 0.17 62);
+
+  --shadow-xs:    0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-sm:    0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  --shadow-md:    0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --shadow-lg:    0 20px 48px -16px rgba(0, 0, 0, 0.55);
+  --shadow-xl:    0 32px 64px -24px rgba(0, 0, 0, 0.65);
+  --shadow-stage: 0 8px 32px -12px rgba(220, 155, 25, 0.25), 0 20px 48px -24px rgba(220, 155, 25, 0.15);
+
+  --stage-ink:         #0e0d16;
+  --stage-panel:       rgba(16, 15, 26, 0.92);
+  --stage-panel-strong:rgba(19, 18, 30, 0.98);
+  --stage-glow:        rgba(220, 160, 40, 0.18);
+  --stage-spot:        rgba(200, 140, 30, 0.14);
+  --stage-curtain:     rgba(220, 160, 40, 0.08);
+  --spotlight-warm:    rgba(220, 160, 40, 0.24);
+  --spotlight-soft:    rgba(240, 185, 65, 0.16);
 }
 
+/* ============================================================================
+   3. TAILWIND V4 THEME BRIDGE
+   ============================================================================ */
 @theme inline {
   --font-sans: var(--font-body);
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
+  --font-serif: var(--font-display);
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  --color-background:              var(--background);
+  --color-foreground:              var(--foreground);
+  --color-card:                    var(--card);
+  --color-card-foreground:         var(--card-foreground);
+  --color-popover:                 var(--popover);
+  --color-popover-foreground:      var(--popover-foreground);
+  --color-primary:                 var(--primary);
+  --color-primary-foreground:      var(--primary-foreground);
+  --color-secondary:               var(--secondary);
+  --color-secondary-foreground:    var(--secondary-foreground);
+  --color-muted:                   var(--muted);
+  --color-muted-foreground:        var(--muted-foreground);
+  --color-accent:                  var(--accent);
+  --color-accent-foreground:       var(--accent-foreground);
+  --color-destructive:             var(--destructive);
+  --color-destructive-foreground:  var(--destructive-foreground);
+  --color-border:                  var(--border);
+  --color-input:                   var(--input);
+  --color-ring:                    var(--ring);
+  --color-chart-1:                 var(--chart-1);
+  --color-chart-2:                 var(--chart-2);
+  --color-chart-3:                 var(--chart-3);
+  --color-chart-4:                 var(--chart-4);
+  --color-chart-5:                 var(--chart-5);
+  --color-sidebar:                 var(--sidebar);
+  --color-sidebar-foreground:      var(--sidebar-foreground);
+  --color-sidebar-primary:         var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent:          var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border:          var(--sidebar-border);
+  --color-sidebar-ring:            var(--sidebar-ring);
+
+  --radius-xs: 0px;     /* sharp — Broadsheet 원칙 */
+  --radius-sm: 1px;     /* editorial micro */
+  --radius-md: 2px;     /* editorial default */
+  --radius-lg: 2px;     /* editorial default */
+  --radius-xl: 3px;     /* editorial 강조 */
+  --radius-2xl: 4px;    /* editorial 최대 */
+  --radius-full: 9999px; /* pill — 특수 목적만 */
 }
 
+/* ============================================================================
+   4. BASE STYLES
+   ============================================================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -140,118 +223,232 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "liga" 1, "calt" 1;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
     line-height: 1.75;
     letter-spacing: -0.01em;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  .font-display {
+  /* Display headings — Broadsheet serif, editorial */
+  h1, h2, h3, h4, h5, h6, .font-display {
     font-family: var(--font-display);
     line-height: 1.2;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.01em;   /* serif는 자간 덜 좁힘 */
+    font-weight: 700;
+  }
+
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-3xl); }
+  h3 { font-size: var(--text-2xl); }
+  h4 { font-size: var(--text-xl); }
+  h5 { font-size: var(--text-lg); }
+  h6 { font-size: var(--text-base); }
+
+  /* Smooth scroll */
+  html { scroll-behavior: smooth; }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 25%, transparent);
+    color: var(--foreground);
   }
 }
 
+/* ============================================================================
+   5. COMPONENT UTILITIES
+   ============================================================================ */
 @layer components {
+
+  /* ── Stage Shell — page wrapper ── */
   .stage-shell {
     min-height: 100vh;
     background-color: var(--background);
-    background-image: radial-gradient(1400px 600px at 50% -15%, var(--stage-glow), transparent 65%),
-      radial-gradient(1000px 500px at 85% 8%, var(--stage-spot), transparent 60%),
-      radial-gradient(900px 450px at 10% 15%, var(--spotlight-soft), transparent 55%),
-      linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--background) 98%, var(--muted)) 100%);
+    background-image:
+      radial-gradient(1200px 500px at 50% -10%, var(--stage-glow), transparent 65%),
+      radial-gradient(600px 400px at 95% 8%, var(--stage-spot), transparent 60%);
     color: var(--foreground);
   }
 
+  /* ── Stage Panel — editorial card (Broadsheet 레퍼런스) ── */
   .stage-panel {
-    border-radius: calc(var(--radius) + 4px);
+    border-radius: 2px;
     border: 1px solid var(--border);
-    background: var(--stage-panel);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.08), 0 20px 48px -24px rgba(0, 0, 0, 0.06);
-    transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 3px solid var(--primary);
+    background: var(--card);
+    transition: border-color var(--duration-base) var(--ease-in-out);
   }
 
   .stage-panel:hover {
-    border-color: color-mix(in oklab, var(--primary) 20%, var(--border));
+    border-top-color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
   }
 
+  /* ── Spotlight Card — editorial performance card (Broadsheet 레퍼런스) ── */
   .spotlight-card {
     position: relative;
     overflow: hidden;
-    border-radius: calc(var(--radius) + 4px);
+    border-radius: 2px;
     border: 1px solid var(--border);
+    border-top: 3px solid color-mix(in oklab, var(--primary) 60%, transparent);
     background: var(--card);
-    box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.06), 0 8px 32px -12px rgba(0, 0, 0, 0.04);
-    transition: all 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-top-color var(--duration-base) var(--ease-in-out),
+                border-color var(--duration-base) var(--ease-in-out);
   }
 
-  .spotlight-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(140% 180% at 20% 0%, var(--spotlight-warm), transparent 70%);
-    opacity: 0;
-    transition: opacity 320ms cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
+  .spotlight-card:hover {
+    border-top-color: var(--primary);
+    border-color: color-mix(in oklab, var(--primary) 30%, var(--border));
   }
 
-  .spotlight-card:hover,
-  .spotlight-card:focus-within {
-    transform: translateY(-2px);
-    border-color: color-mix(in oklab, var(--primary) 25%, var(--border));
-    box-shadow: 0 6px 20px -6px rgba(255, 107, 53, 0.08), 0 12px 32px -12px rgba(255, 107, 53, 0.05);
+  .spotlight-card > * { position: relative; z-index: 1; }
+
+  /* ── Glass Card — editorial variant ── */
+  .glass-card {
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    background: color-mix(in oklab, var(--card) 90%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
-  .spotlight-card:hover::before,
-  .spotlight-card:focus-within::before {
-    opacity: 0.4;
-  }
-
-  .spotlight-card > * {
-    position: relative;
-    z-index: 1;
-  }
-
+  /* ── Cue — Broadsheet editorial section label (rectangular) ── */
   .cue {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    border: 1.5px solid color-mix(in oklab, var(--primary) 40%, transparent);
-    background: color-mix(in oklab, var(--primary) 8%, var(--background));
+    padding: 0.3rem 0.75rem;
+    border-radius: 0px;
+    border-left: 3px solid var(--primary);
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    background: color-mix(in oklab, var(--primary) 7%, var(--background));
     color: var(--primary);
-    font-size: 0.65rem;
+    font-family: var(--font-body);
+    font-size: 0.625rem;
     font-weight: 700;
-    letter-spacing: 0.35em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    transition: all 240ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background var(--duration-fast) var(--ease-in-out);
   }
 
   .cue:hover {
-    border-color: var(--primary);
     background: color-mix(in oklab, var(--primary) 12%, var(--background));
   }
 
+  /* ── Badge — Broadsheet tag/status (rectangular, uppercase) ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0px;
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .badge-primary {
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--primary);
+    border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+
+  .badge-accent {
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+
+  .badge-muted {
+    background: var(--muted);
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Gradient Text — hero headlines ── */
+  .gradient-text {
+    background: linear-gradient(
+      135deg,
+      var(--foreground) 0%,
+      color-mix(in oklab, var(--primary) 80%, var(--foreground)) 50%,
+      var(--primary) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ── Highlight Token — underline accent ── */
   .highlight-token {
     background-image: linear-gradient(0deg, var(--primary) 0%, var(--primary) 100%);
     background-repeat: no-repeat;
     background-position: 0 100%;
-    background-size: 100% 0.35em;
-    opacity: 0.25;
+    background-size: 100% 0.3em;
+    opacity: 0.3;
   }
 
-  /* 공연장 인터랙티브 요소 */
+  /* ── Stage Divider — Broadsheet double rule ── */
+  .stage-divider {
+    position: relative;
+    height: 4px;
+    margin: 0 auto;
+    background: transparent;
+    border-top: 2px solid var(--foreground);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Editorial Rule — thin single line ── */
+  .editorial-rule {
+    height: 1px;
+    background: var(--border);
+    border: none;
+  }
+
+  /* ── Column Rule — vertical separator ── */
+  .column-rule {
+    width: 1px;
+    background: var(--border);
+  }
+
+  /* ── Shimmer — loading skeleton (FILLTHEFEEL 레퍼런스) ── */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--muted) 0%,
+      color-mix(in oklab, var(--muted) 60%, var(--background)) 50%,
+      var(--muted) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmerSlide 1.8s ease-in-out infinite;
+    border-radius: var(--radius-md);
+  }
+
+  /* ── Curtain Rise — entrance animation ── */
   .curtain-rise {
-    animation: curtainRise 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: curtainRise var(--duration-slower) var(--ease-out-expo) forwards;
+  }
+
+  .stage-entrance {
+    animation: stageEntrance 0.6s var(--ease-spring) forwards;
+    opacity: 0;
+  }
+
+  .fade-up {
+    animation: fadeUp 0.6s var(--ease-out-expo) forwards;
+    opacity: 0;
   }
 
   .spotlight-focus {
@@ -261,62 +458,98 @@
   .spotlight-focus::after {
     content: "";
     position: absolute;
-    inset: -20px;
+    inset: -24px;
     background: radial-gradient(ellipse at center, var(--spotlight-warm), transparent 70%);
     opacity: 0;
-    animation: spotlight 2s ease-in-out infinite;
+    animation: spotlightPulse 2.4s ease-in-out infinite;
     pointer-events: none;
     z-index: -1;
   }
+}
 
-  .stage-entrance {
-    animation: stageEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    opacity: 0;
-  }
-
+/* ============================================================================
+   6. KEYFRAME ANIMATIONS
+   ============================================================================ */
+@layer utilities {
   @keyframes curtainRise {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes spotlight {
-    0%, 100% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 0.4;
-    }
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
   }
 
   @keyframes stageEntrance {
-    from {
-      transform: translateY(30px) scale(0.95);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-    }
+    from { transform: translateY(28px) scale(0.94); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);    opacity: 1; }
   }
-}
 
-@layer utilities {
+  @keyframes fadeUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  @keyframes spotlightPulse {
+    0%, 100% { opacity: 0; }
+    50%       { opacity: 0.5; }
+  }
+
+  @keyframes shimmerSlide {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  @keyframes highlightLine {
+    to { background-size: 100% 0.3em; }
+  }
+
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  @keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    animation: marquee 28s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee { animation: none; }
+  }
+
+  /* Highlight motion */
   @media (prefers-reduced-motion: no-preference) {
     .highlight-token {
       background-size: 0% 0.3em;
-      animation: highlight-line 0.25s ease forwards;
+      animation: highlightLine 0.28s ease forwards;
+    }
+
+    .float {
+      animation: floatUp 3s ease-in-out infinite;
     }
   }
 
-  @keyframes highlight-line {
-    to {
-      background-size: 100% 0.3em;
-    }
+  /* Reduce motion fallback */
+  @media (prefers-reduced-motion: reduce) {
+    .curtain-rise,
+    .stage-entrance,
+    .fade-up,
+    .spotlight-focus::after { animation: none; opacity: 1; transform: none; }
   }
 }

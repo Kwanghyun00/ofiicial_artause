@@ -58,50 +58,51 @@ export function TestimonialsSection({ reviews }: Props) {
       : fallbackTestimonials
 
   return (
-    <section className="border-t border-border/60 py-16">
-      <div className="space-y-4 text-center">
-        <span className="cue">후기</span>
-        <h2 className="text-3xl font-semibold text-foreground md:text-4xl">초대권으로 공연을 만난 관객들</h2>
-        <p className="text-base text-muted-foreground md:text-lg">
-          실제 응모 후 공연을 관람한 관객들의 이야기입니다.
-        </p>
-      </div>
+    <section className="py-16 lg:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-2.5">
+            <span className="cue">관람 후기</span>
+            <h2 className="text-3xl font-bold text-foreground md:text-4xl">초대권으로 공연을 만난 관객들</h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              실제 응모 후 공연을 관람한 관객들의 이야기입니다.
+            </p>
+          </div>
+          <Link
+            href="/reviews"
+            className="self-start rounded-full border border-border/80 px-5 py-2.5 text-sm font-semibold text-foreground/80 transition hover:border-primary/60 hover:text-primary"
+          >
+            후기 더 보기 →
+          </Link>
+        </div>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {testimonials.map((testimonial, idx) => (
-          <article key={idx} className="spotlight-card relative flex h-full flex-col justify-between p-8">
-            <Quote className="absolute right-6 top-6 h-10 w-10 text-primary/20" />
-            <div>
-              <div className="mb-4 flex gap-1 text-primary">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                ))}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {testimonials.map((testimonial, idx) => (
+            <article key={idx} className="spotlight-card relative flex h-full flex-col justify-between p-6">
+              <Quote className="absolute right-5 top-5 h-8 w-8 text-primary/15" />
+              <div>
+                <div className="mb-3 flex gap-0.5">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-[15px] leading-relaxed text-foreground">{testimonial.content}</p>
               </div>
-              <p className="text-foreground">{testimonial.content}</p>
-            </div>
-            <div className="mt-6 border-t border-border pt-4 text-sm">
-              <div className="flex items-center gap-1.5">
-                <p className="font-semibold text-foreground">{testimonial.name}</p>
-                {testimonial.verified && (
-                  <BadgeCheck className="h-4 w-4 text-emerald-500" aria-label="인증 관람" />
+              <div className="mt-5 border-t border-border/60 pt-4 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-semibold text-foreground">{testimonial.name}</p>
+                  {testimonial.verified && (
+                    <BadgeCheck className="h-4 w-4 text-emerald-500" aria-label="인증 관람" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">{testimonial.tag}</p>
+                {testimonial.show && (
+                  <p className="mt-1.5 text-xs font-semibold text-primary">{testimonial.show}</p>
                 )}
               </div>
-              <p className="text-muted-foreground">{testimonial.tag}</p>
-              {testimonial.show && (
-                <p className="mt-2 text-xs font-semibold text-primary">{testimonial.show}</p>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="mt-8 text-center">
-        <Link
-          href="/reviews"
-          className="inline-flex items-center rounded-full border border-primary/40 px-6 py-2.5 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/10"
-        >
-          관람 후기 더 보기
-        </Link>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   )

@@ -11,18 +11,17 @@ function DashboardPreview() {
       <div className="flex items-center justify-between border-b border-border/40 bg-foreground/[0.02] px-4 py-2">
         <div className="flex items-center gap-2">
           <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-          <span className="font-semibold text-foreground">알터즈 대시보드</span>
+          <span className="font-semibold text-foreground">이벤트 운영 현황</span>
         </div>
-        <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700">운영중</span>
+        <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700">진행 중</span>
       </div>
 
       {/* 지표 행 */}
-      <div className="grid grid-cols-4 divide-x divide-border/20 border-b border-border/30">
+      <div className="grid grid-cols-3 divide-x divide-border/20 border-b border-border/30">
         {[
-          { label: "신청", value: "128", color: "text-foreground" },
-          { label: "확정", value: "24", color: "text-green-600" },
-          { label: "체크인", value: "18", color: "text-primary" },
-          { label: "광고 수익", value: "₩54K", color: "text-blue-600" },
+          { label: "응모", value: "128", color: "text-foreground" },
+          { label: "선정", value: "24", color: "text-green-600" },
+          { label: "D-day", value: "D-3", color: "text-primary" },
         ].map((m) => (
           <div key={m.label} className="px-3 py-2.5 text-center">
             <div className={`text-lg font-black ${m.color}`}>{m.value}</div>
@@ -31,15 +30,15 @@ function DashboardPreview() {
         ))}
       </div>
 
-      {/* 실시간 로그 */}
+      {/* 최근 활동 로그 */}
       <div className="space-y-0 divide-y divide-border/10 px-4 py-2">
         {[
-          { time: "방금", text: "김*연 체크인 완료", badge: "체크인", cls: "bg-green-100 text-green-700" },
-          { time: "3분 전", text: "박*수 웨이트리스트 자동 승격", badge: "승격", cls: "bg-primary/10 text-primary" },
-          { time: "5분 전", text: "이*호 광고 시청 → 응모 완료", badge: "AdGate", cls: "bg-blue-100 text-blue-700" },
+          { time: "방금", text: "신규 응모자 접수", badge: "응모", cls: "bg-primary/10 text-primary" },
+          { time: "1시간 전", text: "당첨 이메일 24명 발송 완료", badge: "발송", cls: "bg-green-100 text-green-700" },
+          { time: "어제", text: "이벤트 페이지 오픈됨", badge: "오픈", cls: "bg-slate-100 text-slate-600" },
         ].map((log) => (
           <div key={log.text} className="flex items-center gap-2 py-1.5">
-            <span className="w-10 shrink-0 text-muted-foreground">{log.time}</span>
+            <span className="w-12 shrink-0 text-muted-foreground">{log.time}</span>
             <span className="flex-1 truncate text-foreground">{log.text}</span>
             <span className={`shrink-0 rounded px-1.5 py-0.5 font-semibold ${log.cls}`}>
               {log.badge}
@@ -81,12 +80,12 @@ export function ServiceHero() {
             </h1>
 
             <p className="mx-auto mb-8 max-w-lg text-lg leading-relaxed text-muted-foreground lg:mx-0">
-              초대권 자동 운영 · 보상형 광고 · SNS 콘텐츠 · 관객 CRM.
+              초대권 이벤트 운영 · SNS 홍보 콘텐츠 · 공연 정보 노출.
               <br className="hidden sm:block" />
               <strong className="font-semibold text-foreground">
-                공연 산업의 새로운 수익 구조
+                빈 좌석을 채우는 가장 현실적인 방법
               </strong>
-              를 만들어갑니다.
+              을 제공합니다.
             </p>
 
             {/* CTA */}

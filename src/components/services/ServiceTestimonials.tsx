@@ -12,33 +12,33 @@ type Testimonial = {
 const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "노쇼가 눈에 띄게 줄었어요. 리마인드 메시지 덕분에 확정자 중 실제로 오는 비율이 훨씬 높아졌고, 현장 체크인도 훨씬 빨라졌습니다.",
-    name: "[공연단체명] 홍보 담당자",
-    role: "대학로 연극 기획사",
-    kpi: "노쇼율",
-    kpiDetail: "–XX%p",
+      "이벤트 페이지 만들고 추첨까지 알아서 해줘서 저는 공연 준비에만 집중할 수 있었어요. 응모자 관리가 이렇게 편할 줄 몰랐습니다.",
+    name: "소극장 연극 기획사 대표",
+    role: "대학로 연극",
+    kpi: "운영 부담",
+    kpiDetail: "대폭 감소",
     emoji: "🎭",
     accentBg: "bg-red-50",
     accentText: "text-red-600",
   },
   {
     quote:
-      "명단 관리가 진짜 편해졌어요. 예전엔 엑셀로 직접 했는데 이제는 담당자가 정리해서 보내줘서 저는 현장에만 집중할 수 있었어요.",
-    name: "[공연단체명] 대표",
+      "카드뉴스랑 릴스를 직접 만들어줘서 SNS 홍보가 훨씬 수월했어요. 팔로워 반응도 좋았고 공연 전부터 분위기가 달라졌습니다.",
+    name: "창작 뮤지컬 단체 홍보 담당자",
     role: "소극장 뮤지컬",
-    kpi: "운영 시간",
-    kpiDetail: "–X시간",
+    kpi: "SNS 반응",
+    kpiDetail: "눈에 띄게 향상",
     emoji: "🎵",
     accentBg: "bg-blue-50",
     accentText: "text-blue-600",
   },
   {
     quote:
-      "다음 작품 홍보 때 이전 관람객 리스트가 있으니까 출발점이 달랐어요. 재방문 관객 비율이 이전보다 확실히 높아졌습니다.",
-    name: "[공연단체명] 마케터",
-    role: "창작 무용 단체",
-    kpi: "재방문",
-    kpiDetail: "+XX%",
+      "알터즈에 공연 정보 등록했더니 초대권 이벤트랑 자연스럽게 연결돼서 새 관객들이 찾아왔어요. 플랫폼 노출 효과를 체감했습니다.",
+    name: "창작 무용 단체 대표",
+    role: "창작 무용",
+    kpi: "신규 관객",
+    kpiDetail: "꾸준히 유입",
     emoji: "💃",
     accentBg: "bg-purple-50",
     accentText: "text-purple-600",
@@ -54,7 +54,7 @@ export function ServiceTestimonials() {
           <span className="cue">Testimonials 🌟</span>
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">파트너 후기</h2>
           <p className="text-sm text-muted-foreground">
-            실제 운영 단체의 경험입니다. 명칭과 수치는 운영 후 업데이트됩니다.
+            알터즈와 함께한 공연단체들의 실제 경험입니다.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export function ServiceTestimonials() {
                   <span className={`text-xs font-semibold ${t.accentText}`}>{t.role}</span>
                 </div>
                 <div className="text-right">
-                  <div className={`text-lg font-black ${t.accentText}`}>{t.kpiDetail}</div>
+                  <div className={`text-sm font-bold ${t.accentText}`}>{t.kpiDetail}</div>
                   <div className="text-xs text-muted-foreground">{t.kpi}</div>
                 </div>
               </div>

@@ -17,7 +17,7 @@ export function AnnouncementBar() {
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary shadow">만족도 4.9 / 5.0</span>
           <Link
-            href="/events"
+            href="/invites"
             className="inline-flex items-center gap-2 rounded-full border border-primary/40 px-4 py-2 font-semibold text-primary transition hover:border-primary hover:bg-primary/10"
           >
             브리핑 확인 →

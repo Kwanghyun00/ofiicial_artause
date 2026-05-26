@@ -15,24 +15,25 @@ export async function GET(request: NextRequest) {
   const recent = searchParams.get("recent") === "true"
   const limit = parseInt(searchParams.get("limit") ?? "50", 10)
   const verifiedOnly = searchParams.get("verifiedOnly") === "true"
+  const tag = searchParams.get("tag") ?? undefined
 
   if (organizationId) {
-    const reviews = await getReviewsByOrganization(organizationId, { limit, verifiedOnly })
+    const reviews = await getReviewsByOrganization(organizationId, { limit, verifiedOnly, tag })
     return NextResponse.json(reviews)
   }
 
   if (organizationName) {
-    const reviews = await getReviewsByOrgName(decodeURIComponent(organizationName), { limit, verifiedOnly })
+    const reviews = await getReviewsByOrgName(decodeURIComponent(organizationName), { limit, verifiedOnly, tag })
     return NextResponse.json(reviews)
   }
 
   if (performanceId) {
-    const reviews = await getReviewsByPerformance(performanceId, { limit, verifiedOnly })
+    const reviews = await getReviewsByPerformance(performanceId, { limit, verifiedOnly, tag })
     return NextResponse.json(reviews)
   }
 
   if (recent) {
-    const reviews = await getRecentReviews({ limit, verifiedOnly })
+    const reviews = await getRecentReviews({ limit, verifiedOnly, tag })
     return NextResponse.json(reviews)
   }
 

@@ -21,7 +21,7 @@ type Campaign = {
 
 type AttendanceConsoleProps = {
   campaigns: Campaign[];
-  guests: Record<string, SelectedGuest[]>; // campaignId -> guests
+  guests: Record<string, SelectedGuest[]>;
 };
 
 export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps) {
@@ -95,24 +95,24 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
   };
 
   return (
-    <section id="attendance" className="space-y-6 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-      <header className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">관람 체크</p>
-        <h2 className="text-2xl font-semibold text-slate-900">당첨자 관람 확인</h2>
-        <p className="text-sm text-slate-600">
+    <section id="attendance" className="stage-panel p-8">
+      <header className="mb-6 space-y-1">
+        <span className="cue">Attendance</span>
+        <h2 className="mt-2 text-xl font-bold text-foreground">당첨자 관람 확인</h2>
+        <p className="text-sm text-muted-foreground">
           공연 후 당첨자의 관람 여부를 체크하세요. 노쇼 확정 시 패널티를 부여할 수 있습니다.
         </p>
       </header>
 
       {campaigns.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 p-12 text-center">
-          <p className="text-sm text-slate-500">승인된 이벤트가 없습니다.</p>
+        <div className="border border-dashed border-border p-12 text-center">
+          <p className="text-sm text-muted-foreground">승인된 이벤트가 없습니다.</p>
         </div>
       ) : (
         <>
           {/* 캠페인 선택 */}
-          <div className="space-y-2">
-            <label htmlFor="campaign-select" className="text-sm font-semibold text-slate-900">
+          <div className="mb-6 space-y-2">
+            <label htmlFor="campaign-select" className="text-sm font-semibold text-foreground">
               이벤트 선택
             </label>
             <select
@@ -122,7 +122,7 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
                 setSelectedCampaignId(e.target.value || null);
                 setSearchQuery("");
               }}
-              className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+              className="w-full border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
             >
               {campaigns.map((campaign) => (
                 <option key={campaign.id} value={campaign.id}>
@@ -133,37 +133,37 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
           </div>
 
           {/* 통계 */}
-          <div className="grid grid-cols-2 gap-3 rounded-3xl bg-slate-50 p-4 text-center text-sm text-slate-600 sm:grid-cols-4">
-            <Stat label="당첨 인원" value={stats.total} />
-            <Stat label="체크인" value={stats.checkedIn} highlight="text-emerald-600" />
-            <Stat label="대기" value={stats.pending} highlight="text-amber-600" />
-            <Stat label="노쇼" value={stats.noShow} highlight="text-rose-600" />
+          <div className="mb-6 grid grid-cols-2 divide-x divide-border border border-border sm:grid-cols-4">
+            <StatBox label="당첨 인원" value={stats.total} />
+            <StatBox label="체크인" value={stats.checkedIn} highlight="text-emerald-600" />
+            <StatBox label="대기" value={stats.pending} highlight="text-amber-600" />
+            <StatBox label="노쇼" value={stats.noShow} highlight="text-destructive" />
           </div>
 
           {/* 검색 */}
           {currentGuests.length > 0 && (
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
               <input
                 type="search"
                 placeholder="이름, 이메일, 전화번호 검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                className="w-full border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
               />
             </div>
           )}
 
           {/* 당첨자 목록 */}
           {currentGuests.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 p-12 text-center">
-              <p className="text-sm text-slate-500">
+            <div className="border border-dashed border-border p-12 text-center">
+              <p className="text-sm text-muted-foreground">
                 당첨자가 없습니다. 추첨을 실행하면 여기에 표시됩니다.
               </p>
             </div>
           ) : filteredGuests.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center">
-              <p className="text-sm text-slate-500">검색 결과가 없습니다.</p>
+            <div className="border border-dashed border-border p-8 text-center">
+              <p className="text-sm text-muted-foreground">검색 결과가 없습니다.</p>
             </div>
           ) : (
             <>
@@ -182,9 +182,9 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
               </div>
 
               {/* 데스크톱: 테이블 레이아웃 */}
-              <div className="hidden overflow-hidden rounded-3xl border border-slate-100 sm:block">
-                <table className="min-w-full divide-y divide-slate-100 text-sm text-slate-700">
-                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="hidden overflow-hidden border border-border sm:block">
+                <table className="min-w-full divide-y divide-border text-sm">
+                  <thead className="bg-muted/40 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3 text-left">이름</th>
                       <th className="px-4 py-3 text-left">이메일</th>
@@ -193,23 +193,23 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
                       <th className="px-4 py-3 text-left">조치</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody className="divide-y divide-border bg-card">
                     {filteredGuests.map((guest) => (
-                      <tr key={guest.id} className="transition hover:bg-slate-50">
-                        <td className="px-4 py-3 font-semibold text-slate-900">{guest.name}</td>
-                        <td className="px-4 py-3 text-xs text-slate-500">{guest.email}</td>
-                        <td className="px-4 py-3 text-xs text-slate-500">{guest.phone ?? "미입력"}</td>
+                      <tr key={guest.id} className="transition hover:bg-muted/20">
+                        <td className="px-4 py-3 font-semibold text-foreground">{guest.name}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">{guest.email}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">{guest.phone ?? "미입력"}</td>
                         <td className="px-4 py-3">
                           <AttendanceBadge state={guest.attendance} />
                         </td>
                         <td className="px-4 py-3">
                           {penaltyMessage[guest.id] ? (
-                            <p className="text-xs text-slate-500">{penaltyMessage[guest.id]}</p>
+                            <p className="text-xs text-muted-foreground">{penaltyMessage[guest.id]}</p>
                           ) : (
                             <div className="flex flex-wrap gap-2 text-xs">
                               <button
                                 type="button"
-                                className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
                                 onClick={() => updateAttendance(guest.id, "checked_in")}
                                 disabled={isPending || guest.attendance === "checked_in"}
                               >
@@ -217,7 +217,7 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
                               </button>
                               <button
                                 type="button"
-                                className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1 font-semibold text-rose-700 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1 font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
                                 onClick={() => updateAttendance(guest.id, "no_show")}
                                 disabled={isPending || guest.attendance === "no_show"}
                               >
@@ -226,7 +226,7 @@ export function AttendanceConsole({ campaigns, guests }: AttendanceConsoleProps)
                               {guest.attendance === "no_show" && (
                                 <button
                                   type="button"
-                                  className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700 disabled:opacity-50"
+                                  className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700 transition hover:bg-amber-100 disabled:opacity-50"
                                   onClick={() => handleApplyPenalty(guest)}
                                   disabled={isPending}
                                 >
@@ -263,19 +263,19 @@ function GuestCard({
   onPenalty: (guest: SelectedGuest) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 space-y-3">
+    <div className="spotlight-card space-y-3 p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="font-semibold text-slate-900">{guest.name}</p>
-          <p className="text-xs text-slate-500">{guest.email}</p>
-          {guest.phone && <p className="text-xs text-slate-400">{guest.phone}</p>}
+          <p className="font-semibold text-foreground">{guest.name}</p>
+          <p className="text-xs text-muted-foreground">{guest.email}</p>
+          {guest.phone && <p className="text-xs text-muted-foreground/70">{guest.phone}</p>}
         </div>
         <AttendanceBadge state={guest.attendance} />
       </div>
       {penaltyMessage ? (
-        <p className="text-xs text-slate-500">{penaltyMessage}</p>
+        <p className="text-xs text-muted-foreground">{penaltyMessage}</p>
       ) : (
-        <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex flex-wrap gap-2 border-t border-border/50 pt-3 text-xs">
           <button
             type="button"
             className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700 disabled:opacity-50"
@@ -308,21 +308,25 @@ function GuestCard({
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: number; highlight?: string }) {
+function StatBox({ label, value, highlight }: { label: string; value: number; highlight?: string }) {
   return (
-    <div>
-      <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold ${highlight ?? "text-slate-900"}`}>{value}</p>
+    <div className="p-4 text-center">
+      <p className={`text-2xl font-black ${highlight ?? "text-foreground"}`}>{value}</p>
+      <p className="mt-0.5 text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
     </div>
   );
 }
 
 function AttendanceBadge({ state }: { state: AttendanceState }) {
   const meta: Record<AttendanceState, { label: string; tone: string }> = {
-    pending: { label: "대기", tone: "bg-slate-100 text-slate-600" },
+    pending: { label: "대기", tone: "bg-muted text-muted-foreground" },
     checked_in: { label: "체크인", tone: "bg-emerald-100 text-emerald-700" },
     no_show: { label: "미관람", tone: "bg-rose-100 text-rose-700" },
   };
   const badge = meta[state];
-  return <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.tone}`}>{badge.label}</span>;
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.tone}`}>
+      {badge.label}
+    </span>
+  );
 }

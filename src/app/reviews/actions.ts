@@ -8,18 +8,32 @@ import type { ReviewInsert } from "@/lib/supabase/review-types"
 import type { ReviewFormState } from "./form-state"
 
 const ALLOWED_TAGS = [
+  // 이런 점이 좋았어요
   "감동",
   "몰입감",
   "연기력",
   "연출",
   "음악",
   "무대",
+  // 레거시 태그 (이전 후기 호환)
   "분위기",
   "에너지",
   "스토리",
   "배경",
   "의상",
   "감성",
+  // 이런 분께 추천해요
+  "연인추천",
+  "친구추천",
+  "아이추천",
+  "울고싶을때",
+  "기분전환",
+  "첫관람자추천",
+  // 관람 상황 (신규)
+  "최초관람",
+  "재관람",
+  "원작팬",
+  "뮤지컬입문자",
 ] as const
 
 export async function checkVerificationAction(
@@ -79,12 +93,6 @@ export async function submitReviewAction(
   if (typeof performanceId !== "string" || !performanceId.trim()) {
     return { status: "error", message: "공연 정보를 확인할 수 없습니다." }
   }
-  if (typeof authorName !== "string" || !authorName.trim()) {
-    return { status: "error", message: "이름을 입력해 주세요." }
-  }
-  if (typeof authorEmail !== "string" || !authorEmail.trim()) {
-    return { status: "error", message: "이메일을 입력해 주세요." }
-  }
   if (typeof ratingOverall !== "string" || !ratingOverall) {
     return { status: "error", message: "별점을 입력해 주세요." }
   }
@@ -104,15 +112,38 @@ export async function submitReviewAction(
     .filter((t): t is string => typeof t === "string")
     .filter((t) => (ALLOWED_TAGS as readonly string[]).includes(t))
 
+  const resolvedName =
+    typeof authorName === "string" && authorName.trim()
+      ? authorName.trim()
+      : "익명의 관람객"
+  const resolvedEmail =
+    typeof authorEmail === "string" && authorEmail.trim()
+      ? authorEmail.trim().toLowerCase()
+      : null
+
+  // 이메일이 있으면 예매 인증 시도 (서버 측에서 처리)
+  let resolvedVerified = verifiedAttendance
+  let resolvedReservationId: string | null =
+    typeof reservationId === "string" && reservationId && reservationId !== "null"
+      ? reservationId
+      : null
+
+  if (resolvedEmail && !resolvedVerified) {
+    try {
+      const result = await checkReservationForVerification(resolvedEmail, performanceId.trim())
+      resolvedVerified = result.verified
+      resolvedReservationId = result.reservationId ?? null
+    } catch {
+      // 인증 실패해도 후기 등록은 계속
+    }
+  }
+
   const payload: ReviewInsert = {
     performance_id: performanceId.trim(),
-    author_name: authorName.trim(),
-    author_email: authorEmail.trim().toLowerCase(),
-    reservation_id:
-      typeof reservationId === "string" && reservationId && reservationId !== "null"
-        ? reservationId
-        : null,
-    verified_attendance: verifiedAttendance,
+    author_name: resolvedName,
+    author_email: resolvedEmail ?? "",
+    reservation_id: resolvedReservationId,
+    verified_attendance: resolvedVerified,
     rating_overall: ratingOverallNum,
     rating_acting: parseOptionalRating(ratingActing),
     rating_direction: parseOptionalRating(ratingDirection),
@@ -131,6 +162,7 @@ export async function submitReviewAction(
   if (!isSupabaseConfigured) {
     console.info("Review submission received (mock mode):", payload)
     if (typeof performanceSlug === "string" && performanceSlug) {
+      revalidatePath(`/shows/${performanceSlug}`)
       revalidatePath(`/performances/${performanceSlug}`)
     }
     revalidatePath("/reviews")
@@ -144,17 +176,19 @@ export async function submitReviewAction(
   try {
     const supabase = await createServerSupabaseClient()
 
-    // 동일 이메일+공연 중복 체크
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing } = await (supabase as any)
-      .from("reviews")
-      .select("id")
-      .eq("performance_id", performanceId.trim())
-      .eq("author_email", authorEmail.trim().toLowerCase())
-      .maybeSingle()
+    // 동일 이메일+공연 중복 체크 (이메일이 있는 경우만)
+    if (resolvedEmail) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: existing } = await (supabase as any)
+        .from("reviews")
+        .select("id")
+        .eq("performance_id", performanceId.trim())
+        .eq("author_email", resolvedEmail)
+        .maybeSingle()
 
-    if (existing) {
-      return { status: "error", message: "이미 이 공연에 대한 후기를 작성하셨습니다." }
+      if (existing) {
+        return { status: "error", message: "이미 이 공연에 대한 후기를 작성하셨습니다." }
+      }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,6 +204,7 @@ export async function submitReviewAction(
     }
 
     if (typeof performanceSlug === "string" && performanceSlug) {
+      revalidatePath(`/shows/${performanceSlug}`)
       revalidatePath(`/performances/${performanceSlug}`)
     }
     revalidatePath("/reviews")

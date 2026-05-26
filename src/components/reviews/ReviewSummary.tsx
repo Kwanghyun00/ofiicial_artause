@@ -101,10 +101,15 @@ export async function ReviewSummary({ performanceId, performanceSlug }: ReviewSu
           </div>
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-border bg-background/60 p-8 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-background/60 p-8 text-center space-y-4">
+          <p className="text-base font-semibold text-foreground">아직 등록된 후기가 없어요</p>
           <p className="text-sm text-muted-foreground">
-            아직 등록된 후기가 없습니다. 첫 번째 후기를 남겨보세요!
+            첫 번째 관람 후기를 남겨 다른 분들에게 도움을 주세요!
           </p>
+          <ReviewWriteModalTrigger
+            performanceId={performanceId}
+            performanceSlug={performanceSlug}
+          />
         </div>
       )}
 

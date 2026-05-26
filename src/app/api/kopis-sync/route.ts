@@ -1,37 +1,65 @@
-/**
- * KOPIS 배치 동기화 API
- *
- * - 매일 오전 6시 KST (21:00 UTC) Vercel Cron에 의해 자동 실행
- * - 관리자 대시보드에서 수동 트리거 가능
- *
- * 동작:
- * 1. KOPIS에서 연극 + 뮤지컬 공연 목록 수집
- * 2. performances 테이블에 kopis_id 기준으로 update-or-insert (중복 방지)
- *    - 이미 kopis_id가 있는 performances → UPDATE (캠페인에 연결된 레코드 포함)
- *    - 신규 → INSERT (slug 충돌 시 -kopis_id suffix로 유일성 보장)
- * 3. 활성 ticket_campaigns에 연결된 공연은 상세 정보도 동기화
- *    (campaign.performance_id 기준으로 UPDATE — 중복 레코드 생성 없음)
- */
-
-import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { createAdminSupabaseClient } from "@/lib/supabase/server";
-import type { Database } from "@/lib/supabase/types";
+import { NextResponse } from "next/server";
 import {
-  isKopisConfigured,
   fetchAllUpcomingPerformances,
   fetchPerformanceDetail,
-  mapKopisListToPerformances,
+  isKopisConfigured,
   mapKopisDetailToPerformance,
+  mapKopisListToPerformances,
 } from "@/lib/kopis";
+import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/types";
 
 type PerformanceInsert = Database["public"]["Tables"]["performances"]["Insert"];
 type PerformanceUpdate = Database["public"]["Tables"]["performances"]["Update"];
 
 const CRON_SECRET = process.env.CRON_SECRET;
+// 6개 장르 병렬 수집 기본값 500 (env로 덮어쓰기 가능)
+const KOPIS_SYNC_TARGET_COUNT = readPositiveIntEnv("KOPIS_SYNC_TARGET_COUNT", 500);
+const KOPIS_DETAIL_BATCH = readPositiveIntEnv("KOPIS_DETAIL_BATCH", KOPIS_SYNC_TARGET_COUNT);
+
+function readPositiveIntEnv(key: string, fallback: number): number {
+  const raw = process.env[key];
+  if (!raw) return fallback;
+
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+
+  return parsed;
+}
+
+function toSortableTimestamp(value?: string | null): number {
+  if (!value) return Number.MAX_SAFE_INTEGER;
+
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? Number.MAX_SAFE_INTEGER : time;
+}
+
+function pickSyncTargets(
+  performances: ReturnType<typeof mapKopisListToPerformances>
+): ReturnType<typeof mapKopisListToPerformances> {
+  const deduped = new Map<string, (typeof performances)[number]>();
+
+  for (const performance of performances) {
+    if (!deduped.has(performance.id)) {
+      deduped.set(performance.id, performance);
+    }
+  }
+
+  return [...deduped.values()]
+    .sort((a, b) => {
+      const startDiff = toSortableTimestamp(a.period_start) - toSortableTimestamp(b.period_start);
+      if (startDiff !== 0) return startDiff;
+
+      const endDiff = toSortableTimestamp(a.period_end) - toSortableTimestamp(b.period_end);
+      if (endDiff !== 0) return endDiff;
+
+      return a.title.localeCompare(b.title, "ko-KR");
+    })
+    .slice(0, KOPIS_SYNC_TARGET_COUNT);
+}
 
 export async function POST() {
-  // Vercel Cron 및 관리자 수동 호출 인증
   const headersList = await headers();
   const authHeader = headersList.get("authorization");
 
@@ -49,21 +77,29 @@ export async function POST() {
   const syncedAt = new Date().toISOString();
   const supabase = createAdminSupabaseClient();
   const result = { listSynced: 0, detailSynced: 0, errors: 0 };
+  const targetKopisIds = new Set<string>();
 
-  // ─── 1단계: 공연 목록 동기화 ──────────────────────────────────────
-  // NOTE: supabase.upsert({ onConflict: 'kopis_id' })는 partial unique index와
-  // 호환되지 않아, 수동으로 existing 조회 후 update/insert 방식 사용
   try {
-    const [theaterData, musicalData] = await Promise.all([
-      fetchAllUpcomingPerformances(5, "AAAA"), // 연극
-      fetchAllUpcomingPerformances(5, "BBBC"), // 뮤지컬
+    // 연극(AAAA), 뮤지컬(BBBC), 클래식(CCCA), 무용(GGGA), 국악(EEEB), 대중음악(CCCD)
+    const [theaterData, musicalData, classicData, danceData, gugakData, popData] = await Promise.all([
+      fetchAllUpcomingPerformances("AAAA"),
+      fetchAllUpcomingPerformances("BBBC"),
+      fetchAllUpcomingPerformances("CCCA"),
+      fetchAllUpcomingPerformances("GGGA"),
+      fetchAllUpcomingPerformances("EEEB"),
+      fetchAllUpcomingPerformances("CCCD"),
     ]);
 
-    const mapped = mapKopisListToPerformances([...theaterData, ...musicalData]);
+    const mapped = pickSyncTargets(
+      mapKopisListToPerformances([...theaterData, ...musicalData, ...classicData, ...danceData, ...gugakData, ...popData])
+    );
+
+    for (const performance of mapped) {
+      targetKopisIds.add(performance.id);
+    }
 
     if (mapped.length > 0) {
-      // 1-a. 이미 DB에 있는 kopis_id 목록 조회 (performances)
-      const kopisIds = mapped.map((p) => p.id).filter(Boolean);
+      const kopisIds = mapped.map((performance) => performance.id).filter(Boolean);
 
       const { data: existingPerfs } = await supabase
         .from("performances")
@@ -71,104 +107,110 @@ export async function POST() {
         .in("kopis_id", kopisIds);
 
       const existingByKopisId = new Map(
-        (existingPerfs ?? []).map((p) => [p.kopis_id as string, p.id as string])
+        (existingPerfs ?? []).map((performance) => [
+          performance.kopis_id as string,
+          performance.id as string,
+        ])
       );
 
-      // 1-b. 캠페인에 연결된 performances도 포함
-      //      (campaign.kopis_id 는 있지만 performance.kopis_id 는 아직 null인 경우)
       const { data: linkedCampaigns } = await supabase
         .from("ticket_campaigns")
         .select("kopis_id, performance_id")
         .not("kopis_id", "is", null)
         .not("performance_id", "is", null);
 
-      for (const c of linkedCampaigns ?? []) {
-        if (c.kopis_id && c.performance_id && !existingByKopisId.has(c.kopis_id as string)) {
-          existingByKopisId.set(c.kopis_id as string, c.performance_id as string);
+      for (const campaign of linkedCampaigns ?? []) {
+        if (
+          campaign.kopis_id &&
+          campaign.performance_id &&
+          !existingByKopisId.has(campaign.kopis_id as string)
+        ) {
+          existingByKopisId.set(campaign.kopis_id as string, campaign.performance_id as string);
         }
       }
 
       const toUpdate: Array<{ id: string; data: PerformanceUpdate }> = [];
       const toInsert: PerformanceInsert[] = [];
 
-      for (const p of mapped) {
+      for (const performance of mapped) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const raw = p as any;
+        const raw = performance as any;
         const rowData: PerformanceUpdate = {
-          slug: p.slug,
-          title: p.title,
-          kopis_id: p.id,
+          slug: performance.slug,
+          title: performance.title,
+          kopis_id: performance.id,
           category: raw.category ?? null,
-          region: p.region ?? null,
-          venue: p.venue ?? null,
-          period_start: p.period_start ?? null,
-          period_end: p.period_end ?? null,
-          poster_url: p.poster_url ?? null,
-          // ticket_link은 list API에 없으므로 기존 값 보존 (null로 덮어쓰지 않음)
-          ...(p.ticket_link ? { ticket_link: p.ticket_link } : {}),
-          status: "ongoing",
+          region: performance.region ?? null,
+          venue: performance.venue ?? null,
+          period_start: performance.period_start ?? null,
+          period_end: performance.period_end ?? null,
+          poster_url: performance.poster_url ?? null,
+          state: raw.state ?? null,
+          openrun: raw.openrun ?? null,
+          detail_images: raw.images ?? null,
+          kopis_facility_id: raw.facility_id ?? null,
+          kopis_sections: raw.kopis_sections ?? null,
+          ...(performance.ticket_link ? { ticket_link: performance.ticket_link } : {}),
+          status: raw.status ?? "ongoing",
           source: "kopis",
           last_synced_at: syncedAt,
           sync_status: "synced",
           updated_at: syncedAt,
         };
 
-        const existingId = existingByKopisId.get(p.id);
+        const existingId = existingByKopisId.get(performance.id);
         if (existingId) {
           toUpdate.push({ id: existingId, data: rowData });
         } else {
-          toInsert.push({ ...rowData, slug: p.slug, title: p.title } as PerformanceInsert);
+          toInsert.push({
+            ...rowData,
+            slug: performance.slug,
+            title: performance.title,
+          } as PerformanceInsert);
         }
       }
 
-      // 1-c. 기존 performances UPDATE
       let updateErrors = 0;
       for (const { id, data } of toUpdate) {
-        const { error } = await supabase
-          .from("performances")
-          .update(data)
-          .eq("id", id);
+        const { error } = await supabase.from("performances").update(data).eq("id", id);
         if (error) {
           console.error(`[kopis-sync] update error (${data.kopis_id}):`, error);
           updateErrors++;
         }
       }
 
-      // 1-d. 신규 performances INSERT
       let insertErrors = 0;
       if (toInsert.length > 0) {
-        const { error } = await supabase
-          .from("performances")
-          .insert(toInsert);
+        const { error } = await supabase.from("performances").insert(toInsert);
         if (error) {
           console.error("[kopis-sync] insert error:", error);
-          // 슬러그 충돌 등으로 전체 실패 시 한 건씩 재시도
+
           for (const row of toInsert) {
-            const { error: singleErr } = await supabase
-              .from("performances")
-              .insert({ ...row, slug: `${row.slug ?? "perf"}-${row.kopis_id}` } as PerformanceInsert);
-            if (singleErr) insertErrors++;
+            const { error: singleErr } = await supabase.from("performances").insert({
+              ...row,
+              slug: `${row.slug ?? "perf"}-${row.kopis_id}`,
+            } as PerformanceInsert);
+
+            if (singleErr) {
+              insertErrors++;
+            }
           }
         }
       }
 
       result.errors += updateErrors + insertErrors;
       result.listSynced = toUpdate.length + (toInsert.length - insertErrors);
-      console.log(`[kopis-sync] ✅ 목록: ${toUpdate.length}건 업데이트, ${toInsert.length}건 신규, 오류 ${updateErrors + insertErrors}건`);
+
+      console.log(
+        `[kopis-sync] list sync complete: ${result.listSynced} records targeted (${mapped.length} selected, ${updateErrors + insertErrors} errors)`
+      );
     }
   } catch (err) {
-    console.error("[kopis-sync] 목록 수집 실패:", err);
+    console.error("[kopis-sync] list fetch failed:", err);
     result.errors++;
   }
 
-  // ─── 2단계: 상세 정보 미입력 공연 동기화 ────────────────────────
-  // description IS NULL인 KOPIS 공연 30개씩 처리 (타임아웃 방지)
-  // organization, description, cast, crew, runtime, age_limit, price,
-  // schedule, ticket_link, poster_url 모두 업데이트
   try {
-    const DETAIL_BATCH = 30;
-
-    // 2-a. 캠페인 연결 공연 (승인된 것, 우선순위 높음)
     const { data: campaigns } = await supabase
       .from("ticket_campaigns")
       .select("kopis_id, performance_id")
@@ -176,30 +218,36 @@ export async function POST() {
       .not("performance_id", "is", null)
       .eq("status", "approved");
 
-    const campaignPerfIds = new Set((campaigns ?? []).map((c) => c.performance_id as string));
+    const campaignPerfIds = new Set(
+      (campaigns ?? []).map((campaign) => campaign.performance_id as string)
+    );
     const campaignByPerfId = new Map(
-      (campaigns ?? []).map((c) => [c.performance_id as string, c.kopis_id as string])
+      (campaigns ?? []).map((campaign) => [
+        campaign.performance_id as string,
+        campaign.kopis_id as string,
+      ])
     );
 
-    // 2-b. description이 null인 KOPIS 공연 (배치 제한)
-    const { data: nullDescPerfs } = await supabase
-      .from("performances")
-      .select("id, kopis_id")
-      .not("kopis_id", "is", null)
-      .is("description", null)
-      .limit(DETAIL_BATCH);
+    const toDetailSync = new Map<string, string>();
 
-    // 캠페인 공연 + null-description 공연 합산 (중복 제거)
-    const toDetailSync = new Map<string, string>(); // performanceId → kopisId
-
-    for (const c of campaigns ?? []) {
-      if (c.performance_id && c.kopis_id) {
-        toDetailSync.set(c.performance_id as string, c.kopis_id as string);
+    for (const campaign of campaigns ?? []) {
+      if (campaign.performance_id && campaign.kopis_id) {
+        toDetailSync.set(campaign.performance_id as string, campaign.kopis_id as string);
       }
     }
-    for (const p of nullDescPerfs ?? []) {
-      if (!toDetailSync.has(p.id as string)) {
-        toDetailSync.set(p.id as string, p.kopis_id as string);
+
+    if (targetKopisIds.size > 0) {
+      const { data: targetPerformances } = await supabase
+        .from("performances")
+        .select("id, kopis_id")
+        .in("kopis_id", [...targetKopisIds])
+        .order("period_start", { ascending: true })
+        .limit(KOPIS_DETAIL_BATCH);
+
+      for (const performance of targetPerformances ?? []) {
+        if (!toDetailSync.has(performance.id as string) && performance.kopis_id) {
+          toDetailSync.set(performance.id as string, performance.kopis_id as string);
+        }
       }
     }
 
@@ -212,6 +260,10 @@ export async function POST() {
           .from("performances")
           .update({
             kopis_id: kopisId,
+            category: mapped.category ?? null,
+            status: mapped.status ?? "ongoing",
+            state: mapped.state ?? null,
+            openrun: mapped.openrun ?? null,
             organization: mapped.organization ?? null,
             description: mapped.description ?? null,
             synopsis: mapped.description ?? null,
@@ -221,6 +273,9 @@ export async function POST() {
             age_limit: mapped.age_limit ?? null,
             price_info: mapped.price ?? null,
             schedule_info: mapped.schedule ?? null,
+            detail_images: mapped.images ?? null,
+            kopis_facility_id: mapped.facility_id ?? null,
+            kopis_sections: mapped.kopis_sections ?? null,
             ...(mapped.ticket_link ? { ticket_link: mapped.ticket_link } : {}),
             ...(mapped.poster_url ? { poster_url: mapped.poster_url } : {}),
             last_synced_at: syncedAt,
@@ -231,23 +286,26 @@ export async function POST() {
           .eq("id", performanceId);
 
         if (error) {
-          console.error(`[kopis-sync] 상세 업데이트 오류 (${kopisId}):`, error);
+          console.error(`[kopis-sync] detail update error (${kopisId}):`, error);
           result.errors++;
         } else {
           result.detailSynced++;
+
           if (campaignPerfIds.has(performanceId)) {
-            console.log(`[kopis-sync] ✅ 캠페인 상세: ${mapped.title} (${kopisId})`);
+            console.log(`[kopis-sync] campaign detail synced: ${mapped.title} (${kopisId})`);
           }
         }
       } catch (err) {
-        console.error(`[kopis-sync] 상세 수집 실패 (${kopisId}):`, err);
+        console.error(`[kopis-sync] detail fetch failed (${kopisId}):`, err);
         result.errors++;
       }
     }
 
-    console.log(`[kopis-sync] ✅ 상세: ${result.detailSynced}건 완료 (캠페인 ${campaignByPerfId.size}건 포함)`);
+    console.log(
+      `[kopis-sync] detail sync complete: ${result.detailSynced} updated (${campaignByPerfId.size} campaign-linked)`
+    );
   } catch (err) {
-    console.error("[kopis-sync] 상세 동기화 단계 실패:", err);
+    console.error("[kopis-sync] detail stage failed:", err);
     result.errors++;
   }
 
@@ -257,8 +315,8 @@ export async function POST() {
     list_synced: result.listSynced,
     detail_synced: result.detailSynced,
     errors: result.errors,
+    target_count: KOPIS_SYNC_TARGET_COUNT,
   });
 }
 
-// Vercel Cron은 GET을 사용 — 내부적으로 POST와 동일 처리
 export { POST as GET };

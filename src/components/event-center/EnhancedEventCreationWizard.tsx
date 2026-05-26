@@ -1,7 +1,8 @@
 "use client";
 
-import { type ChangeEvent, type FormEvent, useId, useState, useTransition } from "react";
+import { type ChangeEvent, useId, useState, useTransition } from "react";
 import { MultiStepForm, FormStep } from "@/components/forms/MultiStepForm";
+import { createEnhancedEventCampaign } from "@/app/event-center/actions";
 
 type TicketAllocation = {
   date: string;
@@ -79,14 +80,17 @@ const initialState: FormState = {
   partnerPhone: "",
 };
 
-export function EnhancedEventCreationWizard() {
-  const [form, setForm] = useState<FormState>(initialState);
+export function EnhancedEventCreationWizard({ partnerEmail: sessionEmail }: { partnerEmail?: string }) {
+  const [form, setForm] = useState<FormState>({
+    ...initialState,
+    partnerEmail: sessionEmail ?? "",
+  });
   const [submitResult, setSubmitResult] = useState<{
     success: boolean;
     message: string;
   } | null>(null);
   const [isPending, startTransition] = useTransition();
-  const formId = useId();
+  useId(); // reserved for future field IDs
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -159,12 +163,49 @@ export function EnhancedEventCreationWizard() {
     }));
   };
 
-  const handleSubmit = async (formData: FormData) => {
-    // TODO: Implement submission logic with file uploads
-    console.log("Form submitted:", form);
-    setSubmitResult({
-      success: true,
-      message: "이벤트가 성공적으로 등록되었습니다. 관리자 승인 후 공개됩니다.",
+  const handleSubmit = async (_formData: FormData) => {
+    startTransition(async () => {
+      const result = await createEnhancedEventCampaign({
+        oneLineIntro: form.oneLineIntro,
+        posterImage: "",           // 이미지 업로드는 추후 지원
+        stillImages: [],
+        eventTitle: form.eventTitle || form.performanceTitle,
+        eventDescription: form.eventDescription || form.performanceDescription,
+        venueName: form.venue,
+        venueAddress: "",
+        performancePeriodStart: form.eventStartsAt,
+        performancePeriodEnd: form.eventEndsAt,
+        sessionsPerWeek: 0,
+        runningTime: parseInt(form.runningTime) || 0,
+        ageRating: form.ageRating,
+        snsInstagram: form.instagramAccount,
+        snsYoutube: "",
+        snsTiktok: "",
+        hashtags: form.hashtags,
+        productionTeam: form.productionTeam.map((m) => ({ ...m, contact: "" })),
+        ticketAllocations: form.ticketAllocations.map((a) => ({
+          date: a.date,
+          time: a.time,
+          quantity: a.ticketCount,
+        })),
+        startsAt: form.eventStartsAt,
+        endsAt: form.eventEndsAt,
+        ticketPurchaseUrl: form.ticketPurchaseUrl,
+        partnerEmail: form.partnerEmail,
+        partnerPhone: form.partnerPhone,
+      });
+
+      if (result.success) {
+        setSubmitResult({
+          success: true,
+          message: "이벤트 등록 신청이 완료됐습니다. 관리자 승인 후 공개됩니다.",
+        });
+      } else {
+        setSubmitResult({
+          success: false,
+          message: result.error || "등록 중 오류가 발생했습니다.",
+        });
+      }
     });
   };
 
@@ -568,7 +609,7 @@ export function EnhancedEventCreationWizard() {
               <button
                 type="button"
                 onClick={addTicketAllocation}
-                className="rounded-xl bg-coral px-4 py-2 text-sm font-semibold text-white hover:bg-coral-dark"
+                className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600"
               >
                 + 일정 추가
               </button>
@@ -641,18 +682,23 @@ export function EnhancedEventCreationWizard() {
             </label>
 
             <label className="block space-y-2 text-sm text-slate-700">
-              <span className="font-semibold text-slate-900">
-                이메일 <span className="text-rose-500">*</span>
-              </span>
+              <span className="font-semibold text-slate-900">이메일</span>
               <input
                 type="email"
                 name="partnerEmail"
                 value={form.partnerEmail}
                 onChange={handleChange}
                 placeholder="partner@example.com"
-                required
-                className="w-full rounded-2xl border border-slate-200 px-4 py-2.5"
+                readOnly={Boolean(sessionEmail)}
+                className={`w-full rounded-2xl border px-4 py-2.5 ${
+                  sessionEmail
+                    ? "border-slate-100 bg-slate-50 text-slate-500"
+                    : "border-slate-200"
+                }`}
               />
+              {sessionEmail && (
+                <span className="text-xs text-slate-400">로그인 이메일이 자동으로 사용됩니다</span>
+              )}
             </label>
 
             <label className="block space-y-2 text-sm text-slate-700">

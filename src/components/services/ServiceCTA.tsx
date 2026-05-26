@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, Mail, MessageCircle, Clock } from "lucide-react"
+import { ArrowRight, Mail, MessageCircle } from "lucide-react"
 import { companyMeta } from "@/constants/company"
 
 const FORM_URL = process.env.NEXT_PUBLIC_PARTNER_FORM_URL ?? "/contact"
@@ -20,12 +20,12 @@ export function ServiceCTA() {
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
             이번 작품부터
             <br className="hidden sm:block" />
-            공연을 수익으로 만들어보세요
+            관객을 직접 만나보세요
           </h2>
           <p className="mx-auto max-w-xl text-lg leading-relaxed text-muted-foreground">
-            초대권 자동화 · 보상형 광고 · SNS 콘텐츠 · 관객 CRM.
+            초대권 이벤트 운영 · SNS 홍보 콘텐츠 · 플랫폼 노출.
             <br className="hidden sm:block" />
-            알터즈가 공연 운영의 새로운 기준을 만들어갑니다.
+            알터즈가 공연단체의 관객 확보를 직접 돕습니다.
           </p>
         </div>
 
@@ -55,10 +55,7 @@ export function ServiceCTA() {
 
             {/* 퀵 팩트 */}
             <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-primary" />
-                신청 후 1~2 영업일 내 연락
-              </span>
+              <span>신청 후 1~2 영업일 내 연락</span>
               <span className="hidden h-3 w-px bg-border sm:block" />
               <span>자료가 없어도 시작 가능</span>
               <span className="hidden h-3 w-px bg-border sm:block" />
@@ -84,9 +81,6 @@ export function ServiceCTA() {
               <MessageCircle className="h-4 w-4" />
               @artause_official DM
             </a>
-            <div className="flex flex-1 items-center justify-center gap-2.5 px-6 py-4 text-sm text-muted-foreground">
-              카카오채널: 준비 중
-            </div>
           </div>
         </div>
       </div>

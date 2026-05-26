@@ -9,3 +9,5 @@ SET
   ]::text[],
   updated_at = NOW()
 WHERE slug = 'cloe-invite-2026';
+
+

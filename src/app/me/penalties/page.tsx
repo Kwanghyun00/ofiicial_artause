@@ -11,7 +11,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/config";
 
 export const metadata = {
-  title: "내 패널티 내역 | Artause",
+  title: "내 패널티 내역 | 알터즈",
   description: "신뢰도 점수 및 패널티 내역 확인",
 };
 
@@ -251,7 +251,7 @@ export default async function PenaltiesPage({
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/events"
+              href="/invites"
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-md hover:scale-105"
             >
               진행 중인 이벤트 보기

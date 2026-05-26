@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -14,50 +14,46 @@ export type Database = {
   }
   public: {
     Tables: {
-      adgate_verifications: {
+      audience_attendance: {
         Row: {
-          campaign_id: string
+          attendance_status: string
+          audience_id: string
           created_at: string
-          dwell_sec: number
           id: string
-          ttl_exp: string
-          user_id: string
-          utm: Json | null
-          verified: boolean
+          memo: string | null
+          performance_id: string | null
+          show_at: string
+          source: string | null
+          updated_at: string
         }
         Insert: {
-          campaign_id: string
+          attendance_status: string
+          audience_id: string
           created_at?: string
-          dwell_sec: number
           id?: string
-          ttl_exp: string
-          user_id: string
-          utm?: Json | null
-          verified: boolean
+          memo?: string | null
+          performance_id?: string | null
+          show_at: string
+          source?: string | null
+          updated_at?: string
         }
         Update: {
-          campaign_id?: string
+          attendance_status?: string
+          audience_id?: string
           created_at?: string
-          dwell_sec?: number
           id?: string
-          ttl_exp?: string
-          user_id?: string
-          utm?: Json | null
-          verified?: boolean
+          memo?: string | null
+          performance_id?: string | null
+          show_at?: string
+          source?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "adgate_verifications_campaign_id_fkey"
-            columns: ["campaign_id"]
+            foreignKeyName: "audience_attendance_performance_id_fkey"
+            columns: ["performance_id"]
             isOneToOne: false
-            referencedRelation: "event_campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "adgate_verifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "performances"
             referencedColumns: ["id"]
           },
         ]
@@ -112,6 +108,35 @@ export type Database = {
           },
         ]
       }
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          performance_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          performance_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          performance_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_performance_id_fkey"
+            columns: ["performance_id"]
+            isOneToOne: false
+            referencedRelation: "performances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_ad_watch_verifications: {
         Row: {
           ad_session_id: string
@@ -150,6 +175,13 @@ export type Database = {
           watched_ratio?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "campaign_ad_watch_verifications_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "campaign_ad_watch_verifications_campaign_id_fkey"
             columns: ["campaign_id"]
@@ -235,6 +267,13 @@ export type Database = {
             foreignKeyName: "campaign_draws_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_draws_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
             referencedRelation: "ticket_campaigns"
             referencedColumns: ["id"]
           },
@@ -311,6 +350,13 @@ export type Database = {
             foreignKeyName: "campaign_entries_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_entries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
             referencedRelation: "ticket_campaigns"
             referencedColumns: ["id"]
           },
@@ -356,6 +402,13 @@ export type Database = {
             foreignKeyName: "campaign_participants_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_participants_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
             referencedRelation: "ticket_campaigns"
             referencedColumns: ["id"]
           },
@@ -386,12 +439,40 @@ export type Database = {
           is_active?: boolean
           rule_type?: string
         }
+        Relationships: []
+      }
+      campaign_taste_tags: {
+        Row: {
+          auto_tagged: boolean
+          campaign_id: string
+          taste_tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          auto_tagged?: boolean
+          campaign_id: string
+          taste_tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          auto_tagged?: boolean
+          campaign_id?: string
+          taste_tags?: string[]
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "campaign_rules_campaign_id_fkey"
+            foreignKeyName: "campaign_taste_tags_campaign_id_fkey"
             columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "event_campaigns"
+            isOneToOne: true
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_taste_tags_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: true
+            referencedRelation: "ticket_campaigns"
             referencedColumns: ["id"]
           },
         ]
@@ -428,6 +509,13 @@ export type Database = {
           trigger?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "campaign_waitlist_promotions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "campaign_waitlist_promotions_campaign_id_fkey"
             columns: ["campaign_id"]
@@ -549,109 +637,176 @@ export type Database = {
           },
         ]
       }
-      entries: {
+      credit_transactions: {
         Row: {
-          ad_verified: boolean
-          campaign_id: string
-          cancellation_reason: string | null
-          cancelled_at: string | null
+          amount: number
+          balance_after: number
+          campaign_id: string | null
           created_at: string
+          description: string | null
+          entry_id: string | null
           id: string
-          intro_seen: boolean
-          is_cancelled: boolean
-          user_id: string
-          weight: number
-          weight_json: Json | null
+          partner_email: string
+          payment_ref: string | null
+          type: string
         }
         Insert: {
-          ad_verified?: boolean
-          campaign_id: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
+          amount: number
+          balance_after: number
+          campaign_id?: string | null
           created_at?: string
+          description?: string | null
+          entry_id?: string | null
           id?: string
-          intro_seen?: boolean
-          is_cancelled?: boolean
-          user_id: string
-          weight?: number
-          weight_json?: Json | null
+          partner_email: string
+          payment_ref?: string | null
+          type: string
         }
         Update: {
-          ad_verified?: boolean
-          campaign_id?: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
+          amount?: number
+          balance_after?: number
+          campaign_id?: string | null
           created_at?: string
+          description?: string | null
+          entry_id?: string | null
           id?: string
-          intro_seen?: boolean
-          is_cancelled?: boolean
-          user_id?: string
-          weight?: number
-          weight_json?: Json | null
+          partner_email?: string
+          payment_ref?: string | null
+          type?: string
         }
         Relationships: [
           {
-            foreignKeyName: "entries_campaign_id_fkey"
+            foreignKeyName: "credit_transactions_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
-            referencedRelation: "event_campaigns"
+            referencedRelation: "public_ticket_campaigns"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "entries_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "credit_transactions_campaign_id_fkey"
+            columns: ["campaign_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_entries"
             referencedColumns: ["id"]
           },
         ]
       }
-      event_campaigns: {
+      experience_reports: {
         Row: {
-          adgate_rules: Json
-          apply_end: string
-          apply_start: string
+          attendance_photo_url: string | null
+          attended: boolean
+          campaign_id: string
           created_at: string
-          draw_at: string
+          days_to_submit: number | null
+          entry_id: string
+          experience_date: string | null
+          genre_tags: string[] | null
+          hashtags_used: string[] | null
           id: string
-          seats: number
-          show_id: string
-          status: string
+          performance_id: string | null
+          rating_accessibility: number | null
+          rating_overall: number | null
+          rating_performance: number | null
+          rating_production: number | null
+          rating_value: number | null
+          rejection_reason: string | null
+          review_text: string | null
+          submitted_content: Json
+          submitter_email: string
+          submitter_name: string
           updated_at: string
-          weight_rules: Json
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
-          adgate_rules: Json
-          apply_end: string
-          apply_start: string
+          attendance_photo_url?: string | null
+          attended?: boolean
+          campaign_id: string
           created_at?: string
-          draw_at: string
+          days_to_submit?: number | null
+          entry_id: string
+          experience_date?: string | null
+          genre_tags?: string[] | null
+          hashtags_used?: string[] | null
           id?: string
-          seats: number
-          show_id: string
-          status?: string
+          performance_id?: string | null
+          rating_accessibility?: number | null
+          rating_overall?: number | null
+          rating_performance?: number | null
+          rating_production?: number | null
+          rating_value?: number | null
+          rejection_reason?: string | null
+          review_text?: string | null
+          submitted_content?: Json
+          submitter_email: string
+          submitter_name: string
           updated_at?: string
-          weight_rules: Json
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
-          adgate_rules?: Json
-          apply_end?: string
-          apply_start?: string
+          attendance_photo_url?: string | null
+          attended?: boolean
+          campaign_id?: string
           created_at?: string
-          draw_at?: string
+          days_to_submit?: number | null
+          entry_id?: string
+          experience_date?: string | null
+          genre_tags?: string[] | null
+          hashtags_used?: string[] | null
           id?: string
-          seats?: number
-          show_id?: string
-          status?: string
+          performance_id?: string | null
+          rating_accessibility?: number | null
+          rating_overall?: number | null
+          rating_performance?: number | null
+          rating_production?: number | null
+          rating_value?: number | null
+          rejection_reason?: string | null
+          review_text?: string | null
+          submitted_content?: Json
+          submitter_email?: string
+          submitter_name?: string
           updated_at?: string
-          weight_rules?: Json
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "event_campaigns_show_id_fkey"
-            columns: ["show_id"]
+            foreignKeyName: "experience_reports_campaign_id_fkey"
+            columns: ["campaign_id"]
             isOneToOne: false
-            referencedRelation: "shows"
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_reports_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_reports_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: true
+            referencedRelation: "ticket_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_reports_performance_id_fkey"
+            columns: ["performance_id"]
+            isOneToOne: false
+            referencedRelation: "performances"
             referencedColumns: ["id"]
           },
         ]
@@ -716,51 +871,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lottery_runs: {
-        Row: {
-          campaign_id: string
-          executed_at: string
-          executed_by: string
-          id: string
-          seed_hash: string
-          wait_json: Json
-          winners_json: Json
-        }
-        Insert: {
-          campaign_id: string
-          executed_at?: string
-          executed_by: string
-          id?: string
-          seed_hash: string
-          wait_json: Json
-          winners_json: Json
-        }
-        Update: {
-          campaign_id?: string
-          executed_at?: string
-          executed_by?: string
-          id?: string
-          seed_hash?: string
-          wait_json?: Json
-          winners_json?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lottery_runs_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "event_campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lottery_runs_executed_by_fkey"
-            columns: ["executed_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notifications: {
         Row: {
           campaign_id: string | null
@@ -794,52 +904,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "notifications_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "event_campaigns"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organization_followers: {
-        Row: {
-          created_at: string
-          follower_email: string | null
-          follower_name: string | null
-          follower_type: string
-          id: string
-          organization_id: string
-        }
-        Insert: {
-          created_at?: string
-          follower_email?: string | null
-          follower_name?: string | null
-          follower_type?: string
-          id?: string
-          organization_id: string
-        }
-        Update: {
-          created_at?: string
-          follower_email?: string | null
-          follower_name?: string | null
-          follower_type?: string
-          id?: string
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_followers_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -895,6 +963,36 @@ export type Database = {
           updated_at?: string
           website?: string | null
           youtube?: string | null
+        }
+        Relationships: []
+      }
+      partner_credits: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          partner_email: string
+          total_charged: number
+          total_used: number
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          partner_email: string
+          total_charged?: number
+          total_used?: number
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          partner_email?: string
+          total_charged?: number
+          total_used?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -981,12 +1079,16 @@ export type Database = {
           created_at: string
           crew_info: string | null
           description: string | null
+          detail_images: Json | null
           hero_headline: string | null
           hero_subtitle: string | null
           id: string
           is_featured: boolean
+          kopis_facility_id: string | null
           kopis_id: string | null
+          kopis_sections: Json | null
           last_synced_at: string | null
+          openrun: string | null
           organization: string | null
           organization_id: string | null
           period_end: string | null
@@ -998,7 +1100,9 @@ export type Database = {
           schedule_info: string | null
           slug: string
           source: string
+          state: string | null
           status: string
+          sync_status: string | null
           synopsis: string | null
           tags: string[] | null
           tasks: string[] | null
@@ -1006,7 +1110,6 @@ export type Database = {
           title: string
           updated_at: string
           venue: string | null
-          sync_status: string | null
         }
         Insert: {
           age_limit?: string | null
@@ -1015,12 +1118,16 @@ export type Database = {
           created_at?: string
           crew_info?: string | null
           description?: string | null
+          detail_images?: Json | null
           hero_headline?: string | null
           hero_subtitle?: string | null
           id?: string
           is_featured?: boolean
+          kopis_facility_id?: string | null
           kopis_id?: string | null
+          kopis_sections?: Json | null
           last_synced_at?: string | null
+          openrun?: string | null
           organization?: string | null
           organization_id?: string | null
           period_end?: string | null
@@ -1032,7 +1139,9 @@ export type Database = {
           schedule_info?: string | null
           slug: string
           source?: string
+          state?: string | null
           status?: string
+          sync_status?: string | null
           synopsis?: string | null
           tags?: string[] | null
           tasks?: string[] | null
@@ -1040,7 +1149,6 @@ export type Database = {
           title: string
           updated_at?: string
           venue?: string | null
-          sync_status?: string | null
         }
         Update: {
           age_limit?: string | null
@@ -1049,12 +1157,16 @@ export type Database = {
           created_at?: string
           crew_info?: string | null
           description?: string | null
+          detail_images?: Json | null
           hero_headline?: string | null
           hero_subtitle?: string | null
           id?: string
           is_featured?: boolean
+          kopis_facility_id?: string | null
           kopis_id?: string | null
+          kopis_sections?: Json | null
           last_synced_at?: string | null
+          openrun?: string | null
           organization?: string | null
           organization_id?: string | null
           period_end?: string | null
@@ -1066,7 +1178,9 @@ export type Database = {
           schedule_info?: string | null
           slug?: string
           source?: string
+          state?: string | null
           status?: string
+          sync_status?: string | null
           synopsis?: string | null
           tags?: string[] | null
           tasks?: string[] | null
@@ -1074,7 +1188,6 @@ export type Database = {
           title?: string
           updated_at?: string
           venue?: string | null
-          sync_status?: string | null
         }
         Relationships: [
           {
@@ -1149,90 +1262,187 @@ export type Database = {
         }
         Relationships: []
       }
-      show_performances: {
+      research_config: {
+        Row: {
+          key: string
+          note: string | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          note?: string | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          note?: string | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      review_events: {
         Row: {
           created_at: string
+          event_type: string
           id: string
-          seat_capacity: number | null
-          show_id: string
-          starts_at: string
-          venue: string | null
+          metadata: Json | null
+          performance_id: string | null
+          review_id: string | null
+          user_identifier: string
         }
         Insert: {
           created_at?: string
+          event_type: string
           id?: string
-          seat_capacity?: number | null
-          show_id: string
-          starts_at: string
-          venue?: string | null
+          metadata?: Json | null
+          performance_id?: string | null
+          review_id?: string | null
+          user_identifier: string
         }
         Update: {
           created_at?: string
+          event_type?: string
           id?: string
-          seat_capacity?: number | null
-          show_id?: string
-          starts_at?: string
-          venue?: string | null
+          metadata?: Json | null
+          performance_id?: string | null
+          review_id?: string | null
+          user_identifier?: string
         }
         Relationships: [
           {
-            foreignKeyName: "show_performances_show_id_fkey"
-            columns: ["show_id"]
+            foreignKeyName: "review_events_performance_id_fkey"
+            columns: ["performance_id"]
             isOneToOne: false
-            referencedRelation: "shows"
+            referencedRelation: "performances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_events_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
         ]
       }
-      shows: {
+      reviews: {
         Row: {
-          category: string | null
+          author_email: string
+          author_name: string
           created_at: string
-          hero_image: string | null
+          helpful_count: number
           id: string
-          intro_html: string | null
-          partner_id: string | null
-          region: string | null
-          slug: string
+          performance_id: string
+          rating_acting: number | null
+          rating_direction: number | null
+          rating_immersion: number | null
+          rating_overall: number
+          report_count: number
+          reservation_id: string | null
+          review_headline: string | null
+          review_text: string | null
+          spoiler_flag: boolean
           status: string
-          summary: string | null
-          title: string
+          tags: string[] | null
           updated_at: string
+          verified_attendance: boolean
         }
         Insert: {
-          category?: string | null
+          author_email: string
+          author_name: string
           created_at?: string
-          hero_image?: string | null
+          helpful_count?: number
           id?: string
-          intro_html?: string | null
-          partner_id?: string | null
-          region?: string | null
-          slug: string
+          performance_id: string
+          rating_acting?: number | null
+          rating_direction?: number | null
+          rating_immersion?: number | null
+          rating_overall: number
+          report_count?: number
+          reservation_id?: string | null
+          review_headline?: string | null
+          review_text?: string | null
+          spoiler_flag?: boolean
           status?: string
-          summary?: string | null
-          title: string
+          tags?: string[] | null
           updated_at?: string
+          verified_attendance?: boolean
         }
         Update: {
-          category?: string | null
+          author_email?: string
+          author_name?: string
           created_at?: string
-          hero_image?: string | null
+          helpful_count?: number
           id?: string
-          intro_html?: string | null
-          partner_id?: string | null
-          region?: string | null
-          slug?: string
+          performance_id?: string
+          rating_acting?: number | null
+          rating_direction?: number | null
+          rating_immersion?: number | null
+          rating_overall?: number
+          report_count?: number
+          reservation_id?: string | null
+          review_headline?: string | null
+          review_text?: string | null
+          spoiler_flag?: boolean
           status?: string
-          summary?: string | null
-          title?: string
+          tags?: string[] | null
           updated_at?: string
+          verified_attendance?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "shows_partner_id_fkey"
-            columns: ["partner_id"]
+            foreignKeyName: "reviews_performance_id_fkey"
+            columns: ["performance_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "performances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_sessions: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          id: string
+          performance_id: string
+          session_date: string
+          start_time: string | null
+          venue_name: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          performance_id: string
+          session_date: string
+          start_time?: string | null
+          venue_name?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          performance_id?: string
+          session_date?: string
+          start_time?: string | null
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_sessions_performance_id_fkey"
+            columns: ["performance_id"]
+            isOneToOne: false
+            referencedRelation: "performances"
             referencedColumns: ["id"]
           },
         ]
@@ -1245,16 +1455,21 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           available_dates: string[] | null
+          billing_enabled: boolean
           config: Json
+          cost_per_slot: number
           created_at: string
           description: string | null
           ends_at: string
           entry_count: number
+          experience_dates: Json | null
+          experience_type: string | null
           form_link: string | null
           hashtags: Json | null
           id: string
           kopis_id: string | null
           last_draw_at: string | null
+          min_follower_criteria: Json | null
           one_line_intro: string | null
           partner_email: string | null
           partner_name: string | null
@@ -1264,8 +1479,13 @@ export type Database = {
           performance_period_start: string | null
           poster_image: string | null
           production_team: Json | null
+          recruit_count: number
+          recruit_phase: string
+          required_review_platforms: string[]
+          review_deadline_days: number
           reward: string | null
           running_time: number | null
+          selection_criteria_text: string | null
           sessions_per_week: number | null
           slug: string | null
           snapshot_seed: number | null
@@ -1278,6 +1498,7 @@ export type Database = {
           ticket_allocations: Json | null
           ticket_purchase_url: string | null
           title: string
+          total_slots_billed: number
           updated_at: string
           venue_address: string | null
           venue_name: string | null
@@ -1289,16 +1510,21 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           available_dates?: string[] | null
+          billing_enabled?: boolean
           config?: Json
+          cost_per_slot?: number
           created_at?: string
           description?: string | null
           ends_at: string
           entry_count?: number
+          experience_dates?: Json | null
+          experience_type?: string | null
           form_link?: string | null
           hashtags?: Json | null
           id?: string
           kopis_id?: string | null
           last_draw_at?: string | null
+          min_follower_criteria?: Json | null
           one_line_intro?: string | null
           partner_email?: string | null
           partner_name?: string | null
@@ -1308,8 +1534,13 @@ export type Database = {
           performance_period_start?: string | null
           poster_image?: string | null
           production_team?: Json | null
+          recruit_count?: number
+          recruit_phase?: string
+          required_review_platforms?: string[]
+          review_deadline_days?: number
           reward?: string | null
           running_time?: number | null
+          selection_criteria_text?: string | null
           sessions_per_week?: number | null
           slug?: string | null
           snapshot_seed?: number | null
@@ -1322,6 +1553,7 @@ export type Database = {
           ticket_allocations?: Json | null
           ticket_purchase_url?: string | null
           title: string
+          total_slots_billed?: number
           updated_at?: string
           venue_address?: string | null
           venue_name?: string | null
@@ -1333,16 +1565,21 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           available_dates?: string[] | null
+          billing_enabled?: boolean
           config?: Json
+          cost_per_slot?: number
           created_at?: string
           description?: string | null
           ends_at?: string
           entry_count?: number
+          experience_dates?: Json | null
+          experience_type?: string | null
           form_link?: string | null
           hashtags?: Json | null
           id?: string
           kopis_id?: string | null
           last_draw_at?: string | null
+          min_follower_criteria?: Json | null
           one_line_intro?: string | null
           partner_email?: string | null
           partner_name?: string | null
@@ -1352,8 +1589,13 @@ export type Database = {
           performance_period_start?: string | null
           poster_image?: string | null
           production_team?: Json | null
+          recruit_count?: number
+          recruit_phase?: string
+          required_review_platforms?: string[]
+          review_deadline_days?: number
           reward?: string | null
           running_time?: number | null
+          selection_criteria_text?: string | null
           sessions_per_week?: number | null
           slug?: string | null
           snapshot_seed?: number | null
@@ -1366,6 +1608,7 @@ export type Database = {
           ticket_allocations?: Json | null
           ticket_purchase_url?: string | null
           title?: string
+          total_slots_billed?: number
           updated_at?: string
           venue_address?: string | null
           venue_name?: string | null
@@ -1387,12 +1630,40 @@ export type Database = {
           applicant_name: string
           applicant_phone: string | null
           attendance_status: string
+          available_experience_dates: string[] | null
           campaign_id: string
           checked_in_at: string | null
+          confirm_token: string | null
+          confirm_token_exp: string | null
+          confirmed_at: string | null
+          confirmed_date: string | null
+          confirmed_time: string | null
           consent_marketing: boolean
+          content_type_preference: string[] | null
+          declined_at: string | null
           id: string
+          motivation_text: string | null
+          partner_review_notes: string | null
+          past_experience_text: string | null
+          qr_token: string | null
+          review_sample_url: string | null
+          review_submitted: boolean
+          review_submitted_at: string | null
           selected_at: string | null
           selection_status: string
+          slot_cost: number | null
+          sns_blog_monthly_visitors: number | null
+          sns_blog_url: string | null
+          sns_instagram_followers: number | null
+          sns_instagram_handle: string | null
+          sns_power_score: number
+          sns_tier: string
+          sns_tiktok_followers: number | null
+          sns_tiktok_handle: string | null
+          sns_verified_at: string | null
+          sns_verified_by: string | null
+          sns_youtube_subscribers: number | null
+          sns_youtube_url: string | null
           submitted_at: string
         }
         Insert: {
@@ -1401,12 +1672,40 @@ export type Database = {
           applicant_name: string
           applicant_phone?: string | null
           attendance_status?: string
+          available_experience_dates?: string[] | null
           campaign_id: string
           checked_in_at?: string | null
+          confirm_token?: string | null
+          confirm_token_exp?: string | null
+          confirmed_at?: string | null
+          confirmed_date?: string | null
+          confirmed_time?: string | null
           consent_marketing?: boolean
+          content_type_preference?: string[] | null
+          declined_at?: string | null
           id?: string
+          motivation_text?: string | null
+          partner_review_notes?: string | null
+          past_experience_text?: string | null
+          qr_token?: string | null
+          review_sample_url?: string | null
+          review_submitted?: boolean
+          review_submitted_at?: string | null
           selected_at?: string | null
           selection_status?: string
+          slot_cost?: number | null
+          sns_blog_monthly_visitors?: number | null
+          sns_blog_url?: string | null
+          sns_instagram_followers?: number | null
+          sns_instagram_handle?: string | null
+          sns_power_score?: number
+          sns_tier?: string
+          sns_tiktok_followers?: number | null
+          sns_tiktok_handle?: string | null
+          sns_verified_at?: string | null
+          sns_verified_by?: string | null
+          sns_youtube_subscribers?: number | null
+          sns_youtube_url?: string | null
           submitted_at?: string
         }
         Update: {
@@ -1415,15 +1714,50 @@ export type Database = {
           applicant_name?: string
           applicant_phone?: string | null
           attendance_status?: string
+          available_experience_dates?: string[] | null
           campaign_id?: string
           checked_in_at?: string | null
+          confirm_token?: string | null
+          confirm_token_exp?: string | null
+          confirmed_at?: string | null
+          confirmed_date?: string | null
+          confirmed_time?: string | null
           consent_marketing?: boolean
+          content_type_preference?: string[] | null
+          declined_at?: string | null
           id?: string
+          motivation_text?: string | null
+          partner_review_notes?: string | null
+          past_experience_text?: string | null
+          qr_token?: string | null
+          review_sample_url?: string | null
+          review_submitted?: boolean
+          review_submitted_at?: string | null
           selected_at?: string | null
           selection_status?: string
+          slot_cost?: number | null
+          sns_blog_monthly_visitors?: number | null
+          sns_blog_url?: string | null
+          sns_instagram_followers?: number | null
+          sns_instagram_handle?: string | null
+          sns_power_score?: number
+          sns_tier?: string
+          sns_tiktok_followers?: number | null
+          sns_tiktok_handle?: string | null
+          sns_verified_at?: string | null
+          sns_verified_by?: string | null
+          sns_youtube_subscribers?: number | null
+          sns_youtube_url?: string | null
           submitted_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ticket_entries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ticket_entries_campaign_id_fkey"
             columns: ["campaign_id"]
@@ -1475,7 +1809,14 @@ export type Database = {
             foreignKeyName: "user_penalties_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
-            referencedRelation: "event_campaigns"
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_penalties_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_campaigns"
             referencedColumns: ["id"]
           },
           {
@@ -1486,17 +1827,100 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_penalties_entry_id_fkey"
-            columns: ["entry_id"]
-            isOneToOne: false
-            referencedRelation: "entries"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_penalties_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          audience_type: string | null
+          companion_type: string | null
+          created_at: string
+          discovery_channel: string | null
+          id: string
+          onboarding_done: boolean
+          persona: string | null
+          profile_done: boolean
+          taste_tags: string[]
+          updated_at: string
+          user_id: string
+          visit_frequency: string | null
+        }
+        Insert: {
+          audience_type?: string | null
+          companion_type?: string | null
+          created_at?: string
+          discovery_channel?: string | null
+          id?: string
+          onboarding_done?: boolean
+          persona?: string | null
+          profile_done?: boolean
+          taste_tags?: string[]
+          updated_at?: string
+          user_id: string
+          visit_frequency?: string | null
+        }
+        Update: {
+          audience_type?: string | null
+          companion_type?: string | null
+          created_at?: string
+          discovery_channel?: string | null
+          id?: string
+          onboarding_done?: boolean
+          persona?: string | null
+          profile_done?: boolean
+          taste_tags?: string[]
+          updated_at?: string
+          user_id?: string
+          visit_frequency?: string | null
+        }
+        Relationships: []
+      }
+      user_taste_signals: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          id: string
+          signal_type: string
+          taste_tags: string[]
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          signal_type: string
+          taste_tags?: string[]
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          signal_type?: string
+          taste_tags?: string[]
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_taste_signals_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "public_ticket_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_taste_signals_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_campaigns"
             referencedColumns: ["id"]
           },
         ]
@@ -1539,73 +1963,22 @@ export type Database = {
       }
     }
     Views: {
-      active_penalties: {
-        Row: {
-          campaign_id: string | null
-          campaign_title: string | null
-          created_at: string | null
-          created_by: string | null
-          entry_id: string | null
-          expires_at: string | null
-          id: string | null
-          penalty_type: string | null
-          points: number | null
-          reason: string | null
-          trust_score: number | null
-          user_email: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_penalties_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "event_campaigns"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_penalties_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_penalties_entry_id_fkey"
-            columns: ["entry_id"]
-            isOneToOne: false
-            referencedRelation: "entries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_penalties_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       public_ticket_campaigns: {
         Row: {
           age_rating: string | null
-          algorithm_version: string
-          allocation: Json
-          approved_at: string | null
-          approved_by: string | null
+          allocation: Json | null
           available_dates: string[] | null
-          config: Json
-          created_at: string
+          created_at: string | null
           description: string | null
-          ends_at: string
-          entry_count: number
+          ends_at: string | null
+          entry_count: number | null
           form_link: string | null
           hashtags: Json | null
-          id: string
+          id: string | null
           kopis_id: string | null
           last_draw_at: string | null
           one_line_intro: string | null
-          performance_id: string
+          performance_id: string | null
           performance_period_end: string | null
           performance_period_start: string | null
           poster_image: string | null
@@ -1614,24 +1987,108 @@ export type Database = {
           running_time: number | null
           sessions_per_week: number | null
           slug: string | null
-          snapshot_seed: number | null
           sns_instagram: string | null
           sns_tiktok: string | null
           sns_youtube: string | null
-          starts_at: string
-          status: string
+          starts_at: string | null
+          status: string | null
           still_images: Json | null
           ticket_allocations: Json | null
           ticket_purchase_url: string | null
-          title: string
-          updated_at: string
+          title: string | null
+          updated_at: string | null
           venue_address: string | null
           venue_name: string | null
         }
-        Relationships: []
+        Insert: {
+          age_rating?: string | null
+          allocation?: Json | null
+          available_dates?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          ends_at?: string | null
+          entry_count?: number | null
+          form_link?: string | null
+          hashtags?: Json | null
+          id?: string | null
+          kopis_id?: string | null
+          last_draw_at?: string | null
+          one_line_intro?: string | null
+          performance_id?: string | null
+          performance_period_end?: string | null
+          performance_period_start?: string | null
+          poster_image?: string | null
+          production_team?: Json | null
+          reward?: string | null
+          running_time?: number | null
+          sessions_per_week?: number | null
+          slug?: string | null
+          sns_instagram?: string | null
+          sns_tiktok?: string | null
+          sns_youtube?: string | null
+          starts_at?: string | null
+          status?: string | null
+          still_images?: Json | null
+          ticket_allocations?: Json | null
+          ticket_purchase_url?: string | null
+          title?: string | null
+          updated_at?: string | null
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Update: {
+          age_rating?: string | null
+          allocation?: Json | null
+          available_dates?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          ends_at?: string | null
+          entry_count?: number | null
+          form_link?: string | null
+          hashtags?: Json | null
+          id?: string | null
+          kopis_id?: string | null
+          last_draw_at?: string | null
+          one_line_intro?: string | null
+          performance_id?: string | null
+          performance_period_end?: string | null
+          performance_period_start?: string | null
+          poster_image?: string | null
+          production_team?: Json | null
+          reward?: string | null
+          running_time?: number | null
+          sessions_per_week?: number | null
+          slug?: string | null
+          sns_instagram?: string | null
+          sns_tiktok?: string | null
+          sns_youtube?: string | null
+          starts_at?: string | null
+          status?: string | null
+          still_images?: Json | null
+          ticket_allocations?: Json | null
+          ticket_purchase_url?: string | null
+          title?: string | null
+          updated_at?: string | null
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_campaigns_performance_id_fkey"
+            columns: ["performance_id"]
+            isOneToOne: false
+            referencedRelation: "performances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
+      get_research_config: { Args: { p_key: string }; Returns: string }
+      increment_review_helpful: {
+        Args: { review_id: string }
+        Returns: undefined
+      }
       next_waitlist_promotions: {
         Args: { now: string }
         Returns: {
@@ -1793,4 +2250,3 @@ export const Constants = {
     },
   },
 } as const
-

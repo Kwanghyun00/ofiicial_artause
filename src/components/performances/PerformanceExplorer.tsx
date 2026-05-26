@@ -266,7 +266,7 @@ function PerformanceCard({ performance }: { performance: Performance }) {
         </div>
 
         <Link
-          href={`/performances/${performance.slug}`}
+          href={`/shows/${performance.slug}`}
           className="mt-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
         >
           <Ticket className="h-4 w-4" />

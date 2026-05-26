@@ -47,6 +47,7 @@ const PERFORMANCE_SELECT = `
   age_limit,
   price_info,
   schedule_info,
+  detail_images,
   created_at,
   updated_at
 `;
@@ -104,13 +105,8 @@ const PUBLIC_TICKET_CAMPAIGN_SELECT = `
   updated_at,
   status,
   allocation,
-  algorithm_version,
-  config,
-  snapshot_seed,
   last_draw_at,
   ticket_purchase_url,
-  approved_at,
-  approved_by,
   available_dates,
   performance_period_start,
   performance_period_end,
@@ -227,15 +223,18 @@ export const getOrganizationBySlug = cache(async (slug: string) => {
     return null;
   }
 
+  // URL 인코딩된 슬러그 디코딩
+  const decodedSlug = (() => { try { return decodeURIComponent(slug) } catch { return slug } })()
+
   if (!isSupabaseConfigured) {
-    return mockOrganizations.find((organization) => organization.slug === slug) ?? null;
+    return mockOrganizations.find((organization) => organization.slug === decodedSlug) ?? null;
   }
 
   const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("organizations")
     .select(ORGANIZATION_SELECT)
-    .eq("slug", slug)
+    .eq("slug", decodedSlug)
     .maybeSingle();
 
   if (error) {
@@ -246,6 +245,27 @@ export const getOrganizationBySlug = cache(async (slug: string) => {
   return data ?? null;
 });
 
+export const getOrganizationById = cache(async (id: string) => {
+  if (!id) return null;
+
+  if (!isSupabaseConfigured) {
+    return mockOrganizations.find((org) => org.id === id) ?? null;
+  }
+
+  const supabase = createReadOnlySupabaseClient();
+  const { data, error } = await supabase
+    .from("organizations")
+    .select(ORGANIZATION_SELECT)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("getOrganizationById error", error);
+    return null;
+  }
+
+  return data ?? null;
+});
 
 export const getCommunityPosts = cache(async () => {
   if (!isSupabaseConfigured) {
@@ -272,15 +292,17 @@ export const getCommunityPosts = cache(async () => {
 });
 
 export const getCommunityPostBySlug = cache(async (slug: string) => {
+  const decodedSlug = (() => { try { return decodeURIComponent(slug) } catch { return slug } })()
+
   if (!isSupabaseConfigured) {
-    return mockCommunityPosts.find((post) => post.slug === slug) ?? null;
+    return mockCommunityPosts.find((post) => post.slug === decodedSlug) ?? null;
   }
 
   const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("community_posts")
     .select(COMMUNITY_POST_SELECT)
-    .eq("slug", slug)
+    .eq("slug", decodedSlug)
     .maybeSingle();
 
   if (error) {
@@ -357,6 +379,11 @@ export const getRecentPerformances = cache(async () => {
 });
 
 export const getPerformanceBySlug = cache(async (slug: string) => {
+  // Next.js App Router에서 한글 슬러그가 URL 인코딩된 채로 전달되는 경우 디코딩
+  const decodedSlug = (() => {
+    try { return decodeURIComponent(slug) } catch { return slug }
+  })()
+
   // 1. Supabase에서 조회
   if (isSupabaseConfigured) {
     try {
@@ -364,7 +391,7 @@ export const getPerformanceBySlug = cache(async (slug: string) => {
       const { data: performance, error } = await supabase
         .from("performances")
         .select(PERFORMANCE_SELECT)
-        .eq("slug", slug)
+        .eq("slug", decodedSlug)
         .maybeSingle();
 
       if (!error && performance) {
@@ -389,7 +416,7 @@ export const getPerformanceBySlug = cache(async (slug: string) => {
   }
 
   // 2. Mock 데이터 fallback
-  const performance = mockPerformances.find((item) => item.slug === slug);
+  const performance = mockPerformances.find((item) => item.slug === decodedSlug);
   if (!performance) return null;
   const campaigns = mockCampaigns.filter((item) => item.performance_id === performance.id);
   return { ...performance, ticket_campaigns: campaigns };
@@ -477,8 +504,11 @@ export const getTicketCampaigns = cache(async () => {
   }
 });
 export const getTicketCampaignBySlug = cache(async (identifier: string) => {
+  // URL 인코딩된 슬러그 디코딩
+  const decodedIdentifier = (() => { try { return decodeURIComponent(identifier) } catch { return identifier } })()
+
   if (!isSupabaseConfigured) {
-    const campaign = mockCampaigns.find((item) => item.slug === identifier || item.id === identifier);
+    const campaign = mockCampaigns.find((item) => item.slug === decodedIdentifier || item.id === decodedIdentifier);
     return campaign ?? null;
   }
 
@@ -491,12 +521,12 @@ export const getTicketCampaignBySlug = cache(async (identifier: string) => {
         .eq(field, value)
         .maybeSingle();
 
-    const identifierIsUuid = isUuid(identifier);
+    const identifierIsUuid = isUuid(decodedIdentifier);
 
-    let { data, error } = await fetchCampaign(identifierIsUuid ? "id" : "slug", identifier);
+    let { data, error } = await fetchCampaign(identifierIsUuid ? "id" : "slug", decodedIdentifier);
 
     if (!data && !error && !identifierIsUuid) {
-      const fallback = await fetchCampaign("id", identifier);
+      const fallback = await fetchCampaign("id", decodedIdentifier);
       data = fallback.data;
       error = fallback.error;
     }
@@ -504,7 +534,7 @@ export const getTicketCampaignBySlug = cache(async (identifier: string) => {
     if (error) {
       console.error("getTicketCampaignBySlug error", error);
       // Fallback to mock data on error
-      const campaign = mockCampaigns.find((item) => item.slug === identifier || item.id === identifier);
+      const campaign = mockCampaigns.find((item) => item.slug === decodedIdentifier || item.id === decodedIdentifier);
       return campaign ?? null;
     }
 
@@ -512,7 +542,7 @@ export const getTicketCampaignBySlug = cache(async (identifier: string) => {
   } catch (err) {
     console.error("getTicketCampaignBySlug exception", err);
     // Fallback to mock data on exception
-    const campaign = mockCampaigns.find((item) => item.slug === identifier || item.id === identifier);
+    const campaign = mockCampaigns.find((item) => item.slug === decodedIdentifier || item.id === decodedIdentifier);
     return campaign ?? null;
   }
 });

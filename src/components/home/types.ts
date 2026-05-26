@@ -1,12 +1,14 @@
 export type Show = {
   id: string
-  slug: string
+  slug?: string | null
   title: string
   region?: string | null
   tags?: string[] | null
   period_start?: string | null
   period_end?: string | null
   poster_url?: string | null
+  summary?: string | null
+  campaign_slug?: string | null
 }
 
 export type Campaign = {

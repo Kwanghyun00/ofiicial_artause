@@ -17,95 +17,67 @@ type Package = {
 
 const PACKAGES: Package[] = [
   {
-    name: "Starter",
+    name: "Basic",
     tag: "기본",
     tagClass: "bg-slate-100 text-slate-600",
-    desc: "처음 초대권 운영을 시작하는 공연단체",
+    desc: "초대권 이벤트를 처음 운영해보는 공연단체",
     features: [
-      "공연/회차 등록 (단건)",
-      "초대권 이벤트 오픈",
-      "관객 선정 운영",
-      "2단계 확정 처리",
-      "현장 체크인 콘솔",
-      "기본 운영 리포트",
+      "알터즈 플랫폼 공연 정보 등록",
+      "초대권 이벤트 페이지 개설",
+      "응모 접수 및 추첨 운영",
+      "당첨자 이메일 발송 대행",
+      "이벤트 결과 리포트",
     ],
     excluded: [
-      "보상형 광고 AdGate",
-      "웨이트리스트 자동 승격",
       "SNS 홍보 콘텐츠 제작",
-      "관객 세그먼트·CRM",
-      "재방문 맞춤 캠페인",
+      "보상형 광고 AdGate (준비 중)",
     ],
-    cta: "Starter 신청",
-    ctaKey: "starter",
+    cta: "Basic 신청",
+    ctaKey: "basic",
     highlight: false,
   },
   {
-    name: "Growth",
+    name: "Partner",
     tag: "추천",
     tagClass: "bg-primary text-primary-foreground",
-    desc: "운영 자동화·광고 수익·SNS 콘텐츠를 함께 운영하는 단체",
+    desc: "SNS 홍보 콘텐츠까지 함께 운영하는 단체",
     features: [
-      "Starter 전체 포함",
-      "보상형 광고 AdGate",
-      "웨이트리스트 자동 승격",
-      "D-3·D-1 리마인드 메시지",
-      "SNS 홍보 콘텐츠 제작",
+      "Basic 전체 포함",
+      "카드뉴스 · 숏폼 콘텐츠 제작",
+      "인스타그램 · 유튜브 맞춤 포맷",
+      "관람 포인트 큐레이션",
       "이벤트 인사이트 리포트",
-      "다음 작품 타겟 리스트",
-    ],
-    excluded: [
-      "관객 세그먼트 CRM",
-      "재방문 맞춤 캠페인",
-      "전담 운영 매니저",
-    ],
-    cta: "Growth 신청",
-    ctaKey: "growth",
-    highlight: true,
-  },
-  {
-    name: "Pro",
-    tag: "풀서비스",
-    tagClass: "bg-foreground text-background",
-    desc: "데이터 기반 관객 자산화·재방문 전략까지 맡기는 단체",
-    features: [
-      "Growth 전체 포함",
-      "관객 세그먼트 CRM",
-      "재방문 맞춤 캠페인",
-      "보증금/페널티 커스텀 정책",
-      "채널별 UTM 전환 분석",
-      "월간 퍼포먼스 리뷰",
-      "전담 운영 매니저 배정",
+      "보상형 광고 AdGate (베타 출시 시 우선 적용)",
     ],
     excluded: [],
-    cta: "Pro 상담 신청",
-    ctaKey: "pro",
-    highlight: false,
+    cta: "Partner 신청",
+    ctaKey: "partner",
+    highlight: true,
   },
 ]
 
 export function Packages() {
   return (
     <section className="border-t border-border/40 py-16 md:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* 헤더 */}
         <div className="mb-12 space-y-3 text-center">
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
             운영 규모에 맞는 플랜
           </h2>
           <p className="mx-auto max-w-xl text-muted-foreground">
-            단건 운영부터 AdGate 수익화·관객 CRM까지. 모든 플랜은 상황에 맞게 조정 가능합니다.
+            단건 이벤트부터 SNS 콘텐츠 제작까지. 모든 플랜은 상황에 맞게 조정 가능합니다.
           </p>
         </div>
 
         {/* 패키지 카드 */}
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2">
           {PACKAGES.map((pkg) => (
             <div
               key={pkg.name}
               className={`relative flex flex-col stage-panel p-6 transition-all ${
                 pkg.highlight
-                  ? "border-primary/50 shadow-xl shadow-primary/10 ring-2 ring-primary/20 md:scale-[1.03]"
+                  ? "border-primary/50 shadow-xl shadow-primary/10 ring-2 ring-primary/20 md:scale-[1.02]"
                   : "hover:border-border/60"
               }`}
             >

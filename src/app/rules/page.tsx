@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 export const metadata = {
-  title: "이용 규정 | Artause",
+  title: "이용 규정",
   description: "초대권 이벤트 응모 규정, 취소 정책, 출석 규정, 페널티 안내",
 }
 
@@ -116,13 +116,13 @@ export default function RulesPage() {
           </p>
           <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href="/events"
+              href="/invites"
               className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-6 text-base font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90"
             >
               진행 중 이벤트 보기
             </Link>
             <Link
-              href="/events/guide"
+              href="/invites/guide"
               className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-background/60 px-6 text-base font-semibold text-foreground transition hover:border-primary hover:text-primary"
             >
               응모 가이드 보기

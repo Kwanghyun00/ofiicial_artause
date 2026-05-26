@@ -1,9 +1,9 @@
 "use client"
 
-import { useReducer, useEffect, useMemo, useState } from "react"
-import { PenLine } from "lucide-react"
+import { useReducer, useEffect, useMemo } from "react"
+import { ExternalLink } from "lucide-react"
 import { ReviewCard } from "./ReviewCard"
-import { ReviewWriteModal } from "./ReviewWriteModal"
+import { WriteReviewFlow } from "./WriteReviewFlow"
 import type { Review } from "@/lib/supabase/review-types"
 
 /**
@@ -25,8 +25,21 @@ interface ReviewsListingClientProps {
   initialOrganizationSlug: string | null
 }
 
+const TAG_FILTER_OPTIONS = [
+  { value: "감동",         label: "🥹 감동적" },
+  { value: "몰입감",       label: "🔮 몰입감" },
+  { value: "연기력",       label: "🌟 연기력" },
+  { value: "음악",         label: "🎵 음악" },
+  { value: "연인추천",     label: "💑 연인 추천" },
+  { value: "친구추천",     label: "👫 친구 추천" },
+  { value: "울고싶을때",   label: "😢 울고 싶을 때" },
+  { value: "기분전환",     label: "😄 기분 전환" },
+  { value: "첫관람자추천", label: "🎓 첫 관람자" },
+] as const
+
 type State = {
   selectedOrg: OrgOption | null
+  selectedTag: string | null
   verifiedOnly: boolean
   reviews: Review[]
   loading: boolean
@@ -35,6 +48,7 @@ type State = {
 
 type Action =
   | { type: "select_org"; org: OrgOption | null }
+  | { type: "select_tag"; tag: string | null }
   | { type: "toggle_verified"; value: boolean }
   | { type: "fetch_success"; reviews: Review[] }
   | { type: "fetch_error" }
@@ -44,6 +58,8 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "select_org":
       return { ...state, selectedOrg: action.org, reviews: [], loading: true }
+    case "select_tag":
+      return { ...state, selectedTag: action.tag, reviews: [], loading: true }
     case "toggle_verified":
       return { ...state, verifiedOnly: action.value, reviews: [], loading: true }
     case "fetch_success":
@@ -66,25 +82,19 @@ export function ReviewsListingClient({
 
   const [state, dispatch] = useReducer(reducer, {
     selectedOrg: initialOrg,
+    selectedTag: null,
     verifiedOnly: false,
     reviews: [],
-    loading: true,   // 항상 로딩으로 시작 (기본 최신 후기 로드)
+    loading: true,
     reloadKey: 0,
   })
 
-  // 후기 작성 모달 상태 (로컬)
-  const [writeTargetSlug, setWriteTargetSlug] = useState("")
-  const [writeOpen, setWriteOpen] = useState(false)
-
-  // queryType별로 그룹 분리
+  // queryType별로 그룹 분리 (드롭다운 그룹핑용)
   const supabaseOrgs = organizations.filter((o) => o.queryType === "orgId")
   const kopisOrgs = organizations.filter((o) => o.queryType === "orgName")
   const portfolioOrgs = organizations.filter((o) => o.queryType === "performanceId")
 
-  // 후기 작성 대상: 포트폴리오 공연만 (performanceId + slug 있음)
-  const writeTargets = portfolioOrgs
-
-  // performanceId → 공연명 맵
+  // performanceId → 공연명 맵 (ReviewCard에 공연명 표시용)
   const performanceNameById = useMemo(
     () =>
       Object.fromEntries(
@@ -93,7 +103,9 @@ export function ReviewsListingClient({
     [portfolioOrgs]
   )
 
-  const selectedWriteTarget = writeTargets.find((o) => o.slug === writeTargetSlug) ?? null
+  // 선택된 공연이 직접 후기 작성 가능한지 (performanceId 타입만 가능)
+  const writablePerformance =
+    state.selectedOrg?.queryType === "performanceId" ? state.selectedOrg : null
 
   useEffect(() => {
     const params = new URLSearchParams({
@@ -110,8 +122,11 @@ export function ReviewsListingClient({
         params.set("organizationName", encodeURIComponent(state.selectedOrg.queryValue))
       }
     } else {
-      // 필터 없음 → 최신 후기 전체
       params.set("recent", "true")
+    }
+
+    if (state.selectedTag) {
+      params.set("tag", state.selectedTag)
     }
 
     fetch(`/api/reviews?${params.toString()}`)
@@ -121,13 +136,33 @@ export function ReviewsListingClient({
         console.error("Failed to fetch reviews", err)
         dispatch({ type: "fetch_error" })
       })
-  }, [state.selectedOrg, state.verifiedOnly, state.reloadKey])
+  }, [state.selectedOrg, state.selectedTag, state.verifiedOnly, state.reloadKey])
 
-  const { selectedOrg, verifiedOnly, reviews, loading } = state
+  const { selectedOrg, selectedTag, verifiedOnly, reviews, loading } = state
 
   return (
     <div className="space-y-6">
-      {/* 필터 */}
+      {/* 태그 필터 칩 */}
+      <div className="flex flex-wrap gap-2">
+        {TAG_FILTER_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() =>
+              dispatch({ type: "select_tag", tag: selectedTag === value ? null : value })
+            }
+            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+              selectedTag === value
+                ? "border-primary bg-primary/10 text-primary shadow-sm"
+                : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* 공연/제작사 필터 + 컨텍스트 액션 */}
       <div className="flex flex-wrap items-center gap-3">
         <select
           value={selectedOrg?.slug ?? ""}
@@ -142,7 +177,7 @@ export function ReviewsListingClient({
         >
           <option value="">전체 최신 후기</option>
           {portfolioOrgs.length > 0 && (
-            <optgroup label="포트폴리오 공연">
+            <optgroup label="✏️ 후기 작성 가능한 공연">
               {portfolioOrgs.map((o) => (
                 <option key={o.id} value={o.slug}>
                   {o.name}
@@ -179,55 +214,63 @@ export function ReviewsListingClient({
           />
           인증 관람만 보기
         </label>
-      </div>
 
-      {/* 후기 작성 섹션 */}
-      {writeTargets.length > 0 && (
-        <div className="stage-panel p-5 space-y-3">
-          <p className="text-sm font-semibold text-foreground">후기 작성하기</p>
-          <p className="text-xs text-muted-foreground">
-            직접 관람하신 공연이 있다면 후기를 남겨 다른 관객에게 도움을 주세요.
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={writeTargetSlug}
-              onChange={(e) => setWriteTargetSlug(e.target.value)}
-              className="rounded-2xl border border-border bg-card px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
-            >
-              <option value="">공연 선택</option>
-              {writeTargets.map((o) => (
-                <option key={o.id} value={o.slug}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              disabled={!selectedWriteTarget}
-              onClick={() => setWriteOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <PenLine className="h-4 w-4" />
-              후기 작성하기
-            </button>
-          </div>
-        </div>
-      )}
+        {/* 후기 작성 버튼: 포트폴리오 공연 선택 시에만 표시 */}
+        {writablePerformance && (
+          <WriteReviewFlow
+            label="이 공연 후기 쓰기"
+            preselectedPerformance={{
+              id: writablePerformance.queryValue,
+              slug: writablePerformance.slug,
+              title: writablePerformance.name,
+            }}
+            onSuccess={() => dispatch({ type: "reload" })}
+          />
+        )}
+
+        {/* 단체/제작사 선택 시: 공연 목록으로 안내 */}
+        {selectedOrg && !writablePerformance && (
+          <a
+            href="/shows"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition"
+          >
+            <ExternalLink className="h-3 w-3" />
+            공연 상세 페이지에서 후기 작성
+          </a>
+        )}
+      </div>
 
       {/* 결과 */}
       {loading && <p className="text-sm text-muted-foreground">불러오는 중...</p>}
 
       {!loading && reviews.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          {verifiedOnly ? "인증 관람 후기가 없습니다." : "아직 등록된 후기가 없습니다."}
-        </p>
+        <div className="rounded-2xl border border-dashed border-border bg-background/60 p-8 text-center space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {selectedTag
+              ? `"${TAG_FILTER_OPTIONS.find((t) => t.value === selectedTag)?.label}" 태그가 달린 후기가 없습니다.`
+              : verifiedOnly
+                ? "인증 관람 후기가 없습니다."
+                : "아직 등록된 후기가 없습니다."}
+          </p>
+          {writablePerformance && (
+            <WriteReviewFlow
+              label="첫 번째 후기 남기기"
+              preselectedPerformance={{
+                id: writablePerformance.queryValue,
+                slug: writablePerformance.slug,
+                title: writablePerformance.name,
+              }}
+              onSuccess={() => dispatch({ type: "reload" })}
+            />
+          )}
+        </div>
       )}
 
       {!loading && reviews.length > 0 && (
         <>
           {!selectedOrg && (
             <p className="text-xs text-muted-foreground">
-              최신 후기 {reviews.length}개 · 공연을 선택하면 해당 공연 후기만 볼 수 있습니다.
+              최신 후기 {reviews.length}개 · 위에서 공연을 선택하면 해당 공연 후기만 볼 수 있습니다.
             </p>
           )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -242,17 +285,6 @@ export function ReviewsListingClient({
         </>
       )}
 
-      {/* 후기 작성 모달 */}
-      {writeOpen && selectedWriteTarget && (
-        <ReviewWriteModal
-          performanceId={selectedWriteTarget.queryValue}
-          performanceSlug={selectedWriteTarget.slug}
-          onClose={() => {
-            setWriteOpen(false)
-            dispatch({ type: "reload" })
-          }}
-        />
-      )}
     </div>
   )
 }

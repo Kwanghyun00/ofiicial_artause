@@ -1,6 +1,3 @@
-"use client"
-
-import { useState } from "react"
 import Image from "next/image"
 
 type Props = {
@@ -9,46 +6,26 @@ type Props = {
 }
 
 export function DetailImageGallery({ title, images }: Props) {
-  const [active, setActive] = useState<string | null>(null)
-
   if (!images.length) return null
 
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-2">
-        {images.map((url, index) => (
-          <button
-            key={`${url}-${index}`}
-            type="button"
-            onClick={() => setActive(url)}
-            className="spotlight-card group h-64 w-full"
-            aria-label={`상세 이미지 ${index + 1} 확대`}
-          >
-            <Image src={url} alt={`${title} 상세 이미지 ${index + 1}`} fill className="object-cover transition group-hover:scale-[1.02]" />
-            <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
-          </button>
-        ))}
-      </div>
-
-      {active && (
+    <div className="flex flex-col gap-3">
+      {images.map((url, index) => (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setActive(null)}
+          key={`${url}-${index}`}
+          className="w-full overflow-hidden rounded-2xl border border-border/60"
         >
-          <button
-            type="button"
-            className="absolute right-4 top-4 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-semibold text-foreground"
-            onClick={() => setActive(null)}
-          >
-            닫기
-          </button>
-          <div className="relative h-[80vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-black">
-            <Image src={active} alt={`${title} 상세 이미지 확대`} fill className="object-contain" />
-          </div>
+          <Image
+            src={url}
+            alt={`${title} 상세 이미지 ${index + 1}`}
+            width={0}
+            height={0}
+            sizes="(max-width: 768px) 100vw, 800px"
+            style={{ width: "100%", height: "auto" }}
+            unoptimized={url.startsWith("http://")}
+          />
         </div>
-      )}
-    </>
+      ))}
+    </div>
   )
 }
