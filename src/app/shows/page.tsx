@@ -6,6 +6,7 @@ import { PerformanceFilter } from "@/components/shows/PerformanceFilter"
 import { ShowsAutoRefresh } from "@/components/shows/ShowsAutoRefresh"
 import { buildActiveCampaignSlugMap } from "@/lib/campaigns"
 import { getShowsPerformances, getTicketCampaigns } from "@/lib/supabase/queries"
+import { GENRE_MAP, REGION_MAP } from "@/constants/curation"
 
 type RawPerformance = Awaited<ReturnType<typeof getShowsPerformances>>[number]
 type RawCampaign = Awaited<ReturnType<typeof getTicketCampaigns>>[number]
@@ -81,7 +82,61 @@ export default async function ShowsPage({
         </Reveal>
       </section>
 
+      {/* 장르별 큐레이션 빠른 탐색 */}
       <section className="mx-auto mt-12 max-w-6xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">장르별 공연</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(GENRE_MAP).map(([slug, meta]) => (
+                <Link
+                  key={slug}
+                  href={`/shows/genre/${slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+                >
+                  <span>{meta.emoji}</span>
+                  {meta.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* 지역별 큐레이션 빠른 탐색 */}
+      <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">지역별 공연</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(REGION_MAP)
+                .filter(([slug]) => ["seoul", "gyeonggi", "busan", "daegu", "incheon", "gwangju", "daejeon"].includes(slug))
+                .map(([slug, meta]) => (
+                  <Link
+                    key={slug}
+                    href={`/shows/region/${slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground transition hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+                  >
+                    <span>{meta.emoji}</span>
+                    {meta.label}
+                  </Link>
+                ))}
+              <Link
+                href="/shows/region/gangwon"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-3.5 py-2 text-sm font-medium text-muted-foreground transition hover:border-primary/50 hover:text-primary"
+              >
+                + 더 많은 지역
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="mx-auto mt-8 max-w-6xl px-4 sm:px-6 lg:px-8">
         <Reveal>
           <Link
             href="/invites"

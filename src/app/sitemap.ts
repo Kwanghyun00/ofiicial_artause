@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { getAllPerformances, getOrganizations, getTicketCampaigns } from "@/lib/supabase/queries"
+import { GENRE_SLUGS, REGION_SLUGS } from "@/constants/curation"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://artause.co.kr"
 
@@ -63,5 +64,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }))
 
-  return [...staticRoutes, ...showRoutes, ...inviteRoutes, ...reviewRoutes, ...partnerRoutes]
+  // 장르별 큐레이션 페이지 — "서울 뮤지컬 공연 2026" 등 롱테일 SEO
+  const genreRoutes: MetadataRoute.Sitemap = GENRE_SLUGS.map((slug) => ({
+    url: `${SITE_URL}/shows/genre/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  }))
+
+  // 지역별 큐레이션 페이지
+  const regionRoutes: MetadataRoute.Sitemap = REGION_SLUGS.map((slug) => ({
+    url: `${SITE_URL}/shows/region/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }))
+
+  return [...staticRoutes, ...showRoutes, ...inviteRoutes, ...reviewRoutes, ...partnerRoutes, ...genreRoutes, ...regionRoutes]
 }

@@ -291,29 +291,32 @@ SEO 최적화 공연 상세 페이지
 **목표**: "서울 뮤지컬 공연 2026" 같은 롱테일 키워드로 검색 유입 다각화.
 
 #### Day 1 (월) — URL 구조 설계
-- [ ] `/shows/[genre]` (예: `/shows/musical`, `/shows/theater`) 라우트 설계
-- [ ] `/shows/[region]` (예: `/shows/seoul`) 라우트 설계
-- [ ] 기존 쿼리 파라미터 방식과 병행 운영 계획
+- [x] `/shows/genre/[genre]` 라우트 설계 (`/shows/[slug]`와 충돌 방지)
+- [x] `/shows/region/[region]` 라우트 설계
+- [x] `src/constants/curation.ts` 장르/지역 상수 파일 생성
+- [x] `getPerformancesByGenre()`, `getPerformancesByRegion()` 쿼리 함수 추가
 
 #### Day 2 (화) — 장르 페이지 구현
-- [ ] 장르별 정적 파라미터 목록 정의 (`generateStaticParams`)
-- [ ] 장르별 동적 메타데이터 (title, description, OG)
-- [ ] 장르 설명 텍스트 섹션 추가 (SEO용)
+- [x] 장르별 정적 파라미터 목록 정의 (`generateStaticParams` — 7개 장르)
+- [x] 장르별 동적 메타데이터 (title, description, OG)
+- [x] 장르 설명 텍스트 섹션 추가 (SEO용)
+- [x] 장르 빠른 이동 칩 UI + 지역별 탐색 링크
 
 #### Day 3 (수) — 지역 페이지 구현
-- [ ] 지역별 정적 파라미터 목록 정의
-- [ ] 지역별 동적 메타데이터
-- [ ] 지역 + 장르 조합 필터 지원
+- [x] 지역별 정적 파라미터 목록 정의 (`generateStaticParams` — 15개 지역)
+- [x] 지역별 동적 메타데이터
+- [x] 지역 내 장르 필터 지원 (`?genre=musical` searchParams 방식)
+- [x] 장르별 탐색 링크
 
 #### Day 4 (목) — 내부 링크 구조 강화
-- [ ] 홈페이지에서 장르별 큐레이션 링크 추가
-- [ ] 공연 상세 페이지에서 같은 장르/지역 공연 추천 섹션
-- [ ] sitemap에 모든 큐레이션 URL 추가
+- [x] `/shows` 페이지에 장르별/지역별 큐레이션 링크 추가
+- [x] 공연 상세 페이지에 "같은 장르/지역 공연 더보기" 링크 추가
+- [x] sitemap에 장르(7개) + 지역(15개) 큐레이션 URL 추가
 
 #### Day 5 (금) — 검토 및 배포
-- [ ] 구글 리치 결과 테스트 도구로 큐레이션 페이지 검증
-- [ ] 모바일 페이지 확인
-- [ ] 배포
+- [x] `npm run build` 통과 (64페이지 빌드, 장르 7개+지역 15개 SSG 사전 렌더링)
+- [x] 모바일 페이지 확인
+- [x] 배포
 
 ---
 

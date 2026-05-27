@@ -27,6 +27,7 @@ import {
   getReviewSummary,
 } from "@/lib/supabase/queries"
 import { checkIsBookmarked } from "@/app/my/actions"
+import { GENRE_MAP, REGION_MAP } from "@/constants/curation"
 
 type RawPerformance = Awaited<ReturnType<typeof getPerformanceBySlug>>
 
@@ -547,6 +548,49 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
             <li>공연 소개 이미지는 참고용이며 실제와 다를 수 있습니다.</li>
             <li>공연 관련 문의는 주최 측 공식 채널을 이용해 주세요.</li>
           </ul>
+        </div>
+
+        {/* 같은 장르/지역 탐색 링크 */}
+        <div className="space-y-4 border-t border-border/60 pt-10">
+          <h2 className="text-xl font-semibold">더 많은 공연 탐색</h2>
+          <div className="flex flex-wrap gap-3">
+            {category && (() => {
+              const genreEntry = Object.entries(GENRE_MAP).find(([, g]) => g.categoryValue === category)
+              if (!genreEntry) return null
+              const [genreSlug, genreMeta] = genreEntry
+              return (
+                <Link
+                  href={`/shows/genre/${genreSlug}`}
+                  className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10"
+                >
+                  <span>{genreMeta.emoji}</span>
+                  {genreMeta.label} 공연 더보기
+                </Link>
+              )
+            })()}
+            {d.region && (() => {
+              const regionEntry = Object.entries(REGION_MAP).find(([, r]) =>
+                String(d.region).includes(r.categoryValue)
+              )
+              if (!regionEntry) return null
+              const [regionSlug, regionMeta] = regionEntry
+              return (
+                <Link
+                  href={`/shows/region/${regionSlug}`}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
+                >
+                  <span>{regionMeta.emoji}</span>
+                  {regionMeta.label} 공연 전체보기
+                </Link>
+              )
+            })()}
+            <Link
+              href="/shows"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+            >
+              공연 전체 검색
+            </Link>
+          </div>
         </div>
       </section>
     </div>

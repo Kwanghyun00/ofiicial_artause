@@ -778,6 +778,58 @@ export const getAllPerformances = cache(async () => {
 });
 
 /**
+ * 장르별 공연 목록 조회
+ * /shows/genre/[genre] 큐레이션 페이지에서 사용
+ */
+export const getPerformancesByGenre = cache(async (categoryValue: string) => {
+  if (!isSupabaseConfigured) {
+    return mockPerformances.filter((p) => p.category === categoryValue);
+  }
+
+  try {
+    const supabase = createReadOnlySupabaseClient();
+    const { data, error } = await supabase
+      .from("performances")
+      .select(PERFORMANCE_SELECT)
+      .ilike("category", categoryValue)
+      .order("is_featured", { ascending: false })
+      .order("period_start", { ascending: false });
+
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error("getPerformancesByGenre error:", err);
+    return mockPerformances.filter((p) => p.category === categoryValue);
+  }
+});
+
+/**
+ * 지역별 공연 목록 조회
+ * /shows/region/[region] 큐레이션 페이지에서 사용
+ */
+export const getPerformancesByRegion = cache(async (regionValue: string) => {
+  if (!isSupabaseConfigured) {
+    return mockPerformances.filter((p) => p.region === regionValue);
+  }
+
+  try {
+    const supabase = createReadOnlySupabaseClient();
+    const { data, error } = await supabase
+      .from("performances")
+      .select(PERFORMANCE_SELECT)
+      .ilike("region", `%${regionValue}%`)
+      .order("is_featured", { ascending: false })
+      .order("period_start", { ascending: false });
+
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error("getPerformancesByRegion error:", err);
+    return mockPerformances.filter((p) => p.region === regionValue);
+  }
+});
+
+/**
  * KOPIS ID로 공연 상세 조회 (DB에서)
  * events/[slug]/page.tsx 에서 kopis_id로 공연 정보 표시에 사용
  */
