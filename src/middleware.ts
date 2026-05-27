@@ -15,8 +15,9 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const adminSecret = process.env.ADMIN_SECRET;
 
+    // ADMIN_SECRET 미설정 시 전면 차단 (환경변수 없이 오픈되는 것 방지)
     if (!adminSecret) {
-      return NextResponse.next();
+      return new NextResponse("Admin access is not configured.", { status: 503 });
     }
 
     const authHeader = request.headers.get("authorization");

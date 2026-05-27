@@ -1,6 +1,7 @@
 "use client"
 
 import { useReducer, useEffect, useMemo } from "react"
+import Link from "next/link"
 import { ExternalLink } from "lucide-react"
 import { ReviewCard } from "./ReviewCard"
 import { WriteReviewFlow } from "./WriteReviewFlow"
@@ -230,13 +231,13 @@ export function ReviewsListingClient({
 
         {/* 단체/제작사 선택 시: 공연 목록으로 안내 */}
         {selectedOrg && !writablePerformance && (
-          <a
+          <Link
             href="/shows"
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition"
           >
             <ExternalLink className="h-3 w-3" />
             공연 상세 페이지에서 후기 작성
-          </a>
+          </Link>
         )}
       </div>
 

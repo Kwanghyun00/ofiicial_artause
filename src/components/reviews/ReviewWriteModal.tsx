@@ -471,7 +471,7 @@ export function ReviewWriteModal({
                   </div>
                 )}
                 {reviewHeadline && (
-                  <p className="text-sm font-semibold text-foreground">"{reviewHeadline}"</p>
+                  <p className="text-sm font-semibold text-foreground">&ldquo;{reviewHeadline}&rdquo;</p>
                 )}
               </div>
 

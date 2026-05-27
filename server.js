@@ -1,4 +1,5 @@
-﻿const express = require('express');
+﻿/* eslint-disable @typescript-eslint/no-require-imports */
+const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 

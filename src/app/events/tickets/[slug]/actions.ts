@@ -169,6 +169,18 @@ export async function submitTicketEntryAction(
     revalidatePath("/");
     return { status: "success", message: "응모가 완료되었습니다. 선정 결과는 이메일로 안내드릴게요." };
   } catch (error) {
+    // PostgreSQL unique violation → 중복 신청
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      (error as { code: string }).code === "23505"
+    ) {
+      return {
+        status: "duplicate",
+        message: "이미 신청하셨습니다. 이 이메일로는 해당 이벤트에 중복 신청할 수 없습니다.",
+      };
+    }
     console.error("submitTicketEntryAction error", error);
     return { status: "error", message: "일시적인 문제가 발생했습니다. 잠시 후 다시 시도해 주세요." };
   }

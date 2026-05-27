@@ -7,7 +7,10 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "agents": "tsx scripts/agents/run.ts",
+    "agents:dry": "tsx scripts/agents/run.ts --dry-run",
+    "agents:status": "tsx scripts/agents/run.ts --status"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -40,6 +43,7 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
+    "@types/nodemailer": "^8.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
@@ -49,23 +53,26 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.0",
     "fast-xml-parser": "^5.3.2",
+    "framer-motion": "^11.0.0",
     "input-otp": "^1.4.1",
     "lucide-react": "^0.562.0",
     "next": "15.5.9",
     "next-themes": "^0.4.6",
+    "nodemailer": "^8.0.7",
     "react": "19.1.0",
     "react-day-picker": "^9.8.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.60.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.4",
+    "resend": "^6.12.3",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.25.76",
-    "framer-motion": "^11.0.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.97.0",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.6.3",
@@ -78,6 +85,7 @@
     "eslint-config-next": "15.5.9",
     "jsdom": "^26.1.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.2",
     "typescript": "^5",
     "vitest": "^2.1.8"
   }

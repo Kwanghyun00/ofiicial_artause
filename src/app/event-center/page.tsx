@@ -2,9 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { AttendanceConsole, PartnerCampaignDashboard } from "@/components/event-center";
-import type { CampaignItem } from "@/components/event-center/PartnerCampaignDashboard";
+import type { CampaignItem, DrawRecord } from "@/components/event-center/PartnerCampaignDashboard";
 import { getPartnerCampaigns, getCampaignEntries } from "@/lib/supabase/queries";
 import { getPartnerSession } from "@/lib/auth/partner-session";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/config";
 import { partnerLogout } from "../partner/login/actions";
 
 export const metadata = {
@@ -19,6 +21,37 @@ export default async function EventCenterPage() {
   }
 
   const campaigns = await getPartnerCampaigns(partnerEmail);
+
+  // 추첨 이력 조회
+  const drawsByCampaign: Record<string, DrawRecord[]> = {};
+  if (isSupabaseConfigured && campaigns.length > 0) {
+    try {
+      const supabase = await createServerSupabaseClient();
+      const campaignIds = campaigns.map((c) => c.id);
+      const { data: draws } = await supabase
+        .from('campaign_draws')
+        .select('id, campaign_id, run_at, winners, config, algorithm_version, executed_by')
+        .in('campaign_id', campaignIds)
+        .order('run_at', { ascending: false });
+
+      for (const draw of draws ?? []) {
+        const list = drawsByCampaign[draw.campaign_id] ?? [];
+        const winners = Array.isArray(draw.winners) ? draw.winners as { id: string; name?: string }[] : [];
+        const config = draw.config as Record<string, number> | null;
+        list.push({
+          id: draw.id,
+          runAt: draw.run_at,
+          winnerCount: winners.length,
+          totalEntries: config?.total_entries ?? 0,
+          algorithmVersion: draw.algorithm_version,
+          executedBy: draw.executed_by ?? null,
+        });
+        drawsByCampaign[draw.campaign_id] = list;
+      }
+    } catch (err) {
+      console.error('추첨 이력 조회 실패:', err);
+    }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const guestsData: Record<string, any[]> = {};
@@ -53,6 +86,7 @@ export default async function EventCenterPage() {
       ends_at: campaign.ends_at ?? null,
       allocation: typeof campaign.allocation === "number" ? campaign.allocation : null,
       stats: { total, selected, checkedIn, noShow },
+      draws: drawsByCampaign[campaign.id] ?? [],
     });
 
     guestsData[campaign.id] = entries

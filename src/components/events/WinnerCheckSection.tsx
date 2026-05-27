@@ -9,7 +9,7 @@ import Link from "next/link"
 type Props = {
   campaignId: string
   performanceId?: string | null
-  hasWinnersSelected: boolean
+  hasWinnersSelected?: boolean
 }
 
 const initialState: WinnerStatus = { found: false, message: "" }
@@ -22,7 +22,7 @@ function checkAction(campaignId: string) {
   }
 }
 
-export function WinnerCheckSection({ campaignId, performanceId, hasWinnersSelected }: Props) {
+export function WinnerCheckSection({ campaignId, performanceId, hasWinnersSelected = false }: Props) {
   const [state, formAction] = useActionState(checkAction(campaignId), initialState)
 
   return (

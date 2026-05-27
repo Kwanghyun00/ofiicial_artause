@@ -3,58 +3,87 @@ import type React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Award, CalendarDays, ChevronLeft, Clapperboard, MapPin, Share2, Ticket, Users } from "lucide-react"
+import {
+  Award,
+  CalendarDays,
+  ChevronLeft,
+  Clapperboard,
+  Clock,
+  ExternalLink,
+  Globe,
+  MapPin,
+  Share2,
+  Ticket,
+  Users,
+} from "lucide-react"
 import { DetailImageGallery } from "@/components/performances/DetailImageGallery"
 import { ReviewSummary } from "@/components/reviews/ReviewSummary"
 import { BookmarkButton } from "@/components/shows/BookmarkButton"
 import { getPosterFallback } from "@/constants/posters"
-import { getCampaignByPerformanceId, getPerformanceBySlug } from "@/lib/supabase/queries"
+import {
+  getCampaignByPerformanceId,
+  getOrganizationById,
+  getPerformanceBySlug,
+  getReviewSummary,
+} from "@/lib/supabase/queries"
 import { checkIsBookmarked } from "@/app/my/actions"
 
 type RawPerformance = Awaited<ReturnType<typeof getPerformanceBySlug>>
 
-type PerformanceDetailFields = {
-  tags?: string[] | null
-  openrun?: string | null
-  synopsis?: string | null
-  description?: string | null
-  images?: string[] | null
-  hero_subtitle?: string | null
-  schedule?: string | null
-  runtime?: string | null
-  age_limit?: string | null
-  price?: string | null
-  ticket_link?: string | null
-  cast?: string | null
-  crew?: string | null
-  kopis_sections_map?: Record<string, unknown> | null
-  poster_url?: string | null
-  venue?: string | null
-  region?: string | null
-  period_start?: string | null
-  period_end?: string | null
-  status?: string | null
-  category?: string | null
-  organization?: string | null
-  title: string
-  id: string
-}
-
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://artause.co.kr"
-
-const KOPIS_SECTION_ORDER = [
-  { key: "performanceList", title: "공연목록" },
-  { key: "performanceDetail", title: "공연상세" },
-  { key: "facilityList", title: "공연시설목록" },
-  { key: "facilityDetail", title: "공연시설상세" },
-  { key: "producerList", title: "기획/제작사 목록" },
-  { key: "awardList", title: "수상작 목록" },
-  { key: "festivalList", title: "축제 목록" },
-  { key: "creatorList", title: "원·창작자 목록" },
-] as const
 
 const isPerformanceRecord = (record: RawPerformance): record is NonNullable<RawPerformance> =>
   Boolean(record && typeof record === "object" && "id" in record && "title" in record)
+
+/** OG 이미지 URL 결정 */
+function resolveOgImage(
+  title: string,
+  description: string,
+  posterUrl?: string | null
+): { url: string; width: number; height: number; alt: string } {
+  if (posterUrl) return { url: posterUrl, width: 800, height: 600, alt: title }
+  const params = new URLSearchParams({ title, description: description.slice(0, 120), type: "show" })
+  return { url: `${SITE_URL}/api/og?${params.toString()}`, width: 1200, height: 630, alt: `${title} | 알터즈` }
+}
+
+/** cast_info/crew_info 파싱: "홍길동, 김철수(역할)" → ["홍길동", "김철수(역할)"] */
+function parseNames(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  return raw
+    .split(/[,，\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 30)
+}
+
+/** price_info 파싱: "R석 80,000원, S석 50,000원" → [{grade, price}] */
+function parsePrices(raw: string | null | undefined): Array<{ grade: string; price: string }> {
+  if (!raw) return []
+  // 한국 금액 패턴으로 분리 ("R석 80,000원" 형태)
+  const segments = raw.split(/(?<=원)[,\s/]+|[\n]+/).map((s) => s.trim()).filter(Boolean)
+  return segments.map((seg) => {
+    // "R석 80,000원" or "전석 무료" 형태 파싱
+    const match = seg.match(/^(.+?)\s+([\d,]+원|무료|전석무료|초대)$/)
+    if (match) return { grade: match[1].trim(), price: match[2].trim() }
+    return { grade: "가격", price: seg }
+  })
+}
+
+/** schedule_info 파싱: "화~금 19:30, 토 14:00/19:00" → [{day, times}] */
+function parseSchedule(raw: string | null | undefined): Array<{ day: string; times: string[] }> {
+  if (!raw) return []
+  const segments = raw.split(",").map((s) => s.trim()).filter(Boolean)
+  return segments.map((seg) => {
+    // "화~금 19:30" or "토 14:00/19:00" 형태
+    const match = seg.match(/^([가-힣~]+(?:요일)?)\s+(.+)$/)
+    if (match) {
+      const day = match[1].trim()
+      const times = match[2].split(/[/\s]+/).map((t) => t.trim()).filter((t) => /\d+:\d+/.test(t))
+      return { day, times: times.length ? times : [match[2].trim()] }
+    }
+    return { day: "공연", times: [seg] }
+  })
+}
 
 export async function generateMetadata({
   params,
@@ -65,49 +94,32 @@ export async function generateMetadata({
   const performance = await getPerformanceBySlug(slug)
 
   if (!isPerformanceRecord(performance)) {
-    return {
-      title: "공연 정보",
-      description: "알터즈 공연 상세 페이지",
-      alternates: {
-        canonical: `/shows/${slug}`,
-      },
-    }
+    return { title: "공연 정보", description: "알터즈 공연 상세 페이지", alternates: { canonical: `/shows/${slug}` } }
   }
 
-  const detailFields = performance as NonNullable<RawPerformance> & PerformanceDetailFields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const d = performance as any
   const description =
-    detailFields.hero_subtitle ??
-    detailFields.description ??
-    detailFields.synopsis ??
+    d.hero_subtitle ?? d.description ?? d.synopsis ??
     `${performance.title} 공연 정보와 연결된 초대 이벤트를 확인해 보세요.`
-
-  const image = performance.poster_url ?? undefined
+  const ogImage = resolveOgImage(performance.title, description, performance.poster_url)
 
   return {
     title: performance.title,
     description,
-    alternates: {
-      canonical: `/shows/${slug}`,
-    },
+    alternates: { canonical: `/shows/${slug}` },
     openGraph: {
       title: `${performance.title} | 알터즈`,
       description,
       url: `/shows/${slug}`,
       type: "article",
-      images: image
-        ? [
-            {
-              url: image,
-              alt: performance.title,
-            },
-          ]
-        : undefined,
+      images: [{ url: ogImage.url, width: ogImage.width, height: ogImage.height, alt: ogImage.alt }],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: `${performance.title} | 알터즈`,
       description,
-      images: image ? [image] : undefined,
+      images: [ogImage.url],
     },
   }
 }
@@ -115,99 +127,95 @@ export async function generateMetadata({
 export default async function ShowDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const performance = await getPerformanceBySlug(slug)
-  if (!isPerformanceRecord(performance)) {
-    notFound()
-  }
+  if (!isPerformanceRecord(performance)) notFound()
 
-  const [campaign, isBookmarked] = await Promise.all([
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const d = performance as any
+
+  const [campaign, isBookmarked, reviewSummary, organization] = await Promise.all([
     getCampaignByPerformanceId(performance.id),
-    // checkIsBookmarked는 RSC에서 cookies() set이 실패할 수 있으므로 방어적 처리
     checkIsBookmarked(performance.id).catch(() => false),
+    getReviewSummary(performance.id),
+    d.organization_id ? getOrganizationById(d.organization_id as string).catch(() => null) : null,
   ])
 
-  const detailFields = performance as NonNullable<RawPerformance> & PerformanceDetailFields
-  const status = performance.status
-  const openrunLabel = detailFields.openrun === "Y" ? "오픈런" : null
-  const category =
-    typeof performance === "object" && "category" in performance ? performance.category : null
-  const tags = [
-    category,
-    ...(Array.isArray(detailFields.tags) ? detailFields.tags : []),
-    status,
-    openrunLabel,
-  ].filter(Boolean)
-  const posterUrl = performance.poster_url ?? getPosterFallback(0)
-  const synopsis =
-    detailFields.description ??
-    detailFields.synopsis ??
-    "공연 소개가 곧 업데이트될 예정입니다."
-  const heroSubtitle = detailFields.hero_subtitle
-  const images = Array.isArray(detailFields.images) ? detailFields.images : []
-  const kopisSections = isSectionMap(detailFields.kopis_sections_map) ? detailFields.kopis_sections_map : null
-  const campaignHref = campaign?.slug ? `/invites/${campaign.slug}` : "/invites"
+  // ─── Field extraction ───────────────────────────────────────────
+  const status = d.status as string | null
+  const openrunLabel = d.openrun === "Y" ? "오픈런" : null
+  const category = d.category as string | null
+  const tags = [category, ...(Array.isArray(d.tags) ? d.tags : []), status, openrunLabel].filter(Boolean) as string[]
 
-  const schemaEventStatus =
-    status === "completed"
-      ? "https://schema.org/EventScheduled" // 종료됐어도 Scheduled 유지 (Google 권장)
-      : "https://schema.org/EventScheduled"
+  const posterUrl = performance.poster_url ?? getPosterFallback(0)
+  const synopsis = d.description ?? d.synopsis ?? "공연 소개가 곧 업데이트될 예정입니다."
+  const heroSubtitle = d.hero_subtitle as string | null
+
+  // KOPIS enriched fields
+  const castNames = parseNames(d.cast_info)
+  const crewNames = parseNames(d.crew_info)
+  const prices = parsePrices(d.price_info)
+  const schedule = parseSchedule(d.schedule_info)
+  const runtime = d.runtime_text as string | null
+  const ageLimit = d.age_limit as string | null
+  const ticketLink = d.ticket_link as string | null
+  const orgName = d.organization as string | null
+
+  // Detail images (KOPIS 상세 이미지)
+  const detailImages: string[] = (() => {
+    const raw = d.detail_images
+    if (Array.isArray(raw)) return raw.filter((u: unknown): u is string => typeof u === "string")
+    return []
+  })()
+
+  const kopisSections = isSectionMap(d.kopis_sections) ? d.kopis_sections as Record<string, unknown> : null
+  const campaignHref = campaign?.slug ? `/invites/${campaign.slug}` : "/invites"
+  const mobileCTAHref = campaign?.slug ? `/invites/${campaign.slug}` : ticketLink ?? "/invites"
+  const mobileCTALabel = campaign ? "✨ 초대권 응모하기" : ticketLink ? "티켓 예매하기" : "초대권 전체보기"
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
     name: performance.title,
-    ...(performance.period_start && { startDate: performance.period_start }),
-    ...(performance.period_end && { endDate: performance.period_end }),
-    eventStatus: schemaEventStatus,
+    ...(d.period_start && { startDate: d.period_start }),
+    ...(d.period_end && { endDate: d.period_end }),
+    eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: performance.venue
-      ? {
-          "@type": "Place",
-          name: performance.venue,
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: performance.region ?? undefined,
-            addressCountry: "KR",
-          },
-        }
-      : undefined,
-    image: performance.poster_url
-      ? [performance.poster_url]
-      : [`${SITE_URL}/og-default.png`],
+    ...(d.venue && {
+      location: {
+        "@type": "Place",
+        name: d.venue,
+        address: { "@type": "PostalAddress", addressLocality: d.region ?? undefined, addressCountry: "KR" },
+      },
+    }),
+    image: performance.poster_url ? [performance.poster_url] : [`${SITE_URL}/og-default.png`],
     description: synopsis,
-    ...(performance.organization && {
-      organizer: { "@type": "Organization", name: performance.organization },
+    ...(orgName && { organizer: { "@type": "Organization", name: orgName } }),
+    ...(castNames.length > 0 && {
+      performer: castNames.slice(0, 5).map((name) => ({ "@type": "Person", name: name.replace(/\(.*?\)/, "").trim() })),
     }),
-    ...(detailFields.cast && {
-      performer: detailFields.cast
-        .split(/[,，]/)
-        .slice(0, 5)
-        .map((name: string) => ({ "@type": "Person", name: name.trim() })),
-    }),
-    ...(detailFields.price && {
+    ...(prices.length > 0 && {
       offers: {
         "@type": "Offer",
-        name: detailFields.price,
+        name: prices[0].price,
         priceCurrency: "KRW",
-        availability: status === "completed"
-          ? "https://schema.org/SoldOut"
-          : "https://schema.org/InStock",
-        ...(detailFields.ticket_link && { url: detailFields.ticket_link }),
+        availability: status === "completed" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        ...(ticketLink && { url: ticketLink }),
       },
     }),
     url: `${SITE_URL}/shows/${slug}`,
+    ...(reviewSummary.totalCount > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: String(reviewSummary.avgRating),
+        bestRating: "5",
+        worstRating: "1",
+        ratingCount: String(reviewSummary.totalCount),
+      },
+    }),
   }
-
-  const mobileCTAHref = campaign?.slug
-    ? `/invites/${campaign.slug}`
-    : detailFields.ticket_link ?? "/invites"
-  const mobileCTALabel = campaign ? "✨ 초대권 응모하기" : detailFields.ticket_link ? "티켓 예매하기" : "초대권 전체보기"
 
   return (
     <div className="pb-32 pt-6 text-foreground">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 모바일 하단 고정 CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur-xl lg:hidden">
@@ -230,14 +238,17 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
             공연 목록
           </Link>
         </nav>
+
         <div className="grid gap-8 lg:grid-cols-[1.1fr,1fr] lg:items-start">
+          {/* 포스터 */}
           <div className="spotlight-card relative overflow-hidden">
             <div className="relative h-[420px] w-full">
-              <Image src={posterUrl} alt={performance.title} fill className="object-cover" />
+              <Image src={posterUrl} alt={performance.title} fill className="object-cover" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
             </div>
           </div>
 
+          {/* 메타 */}
           <div className="space-y-6">
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
@@ -251,45 +262,50 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                 ))}
               </div>
               <h1 className="text-3xl font-semibold sm:text-4xl">{performance.title}</h1>
-              <p className="text-base text-muted-foreground">{heroSubtitle ?? synopsis}</p>
+              {(heroSubtitle ?? synopsis) && (
+                <p className="text-base text-muted-foreground line-clamp-3">{heroSubtitle ?? synopsis}</p>
+              )}
             </div>
 
+            {/* 공연 기본 정보 */}
             <div className="grid gap-3 rounded-2xl border border-border bg-background/60 p-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-primary" />
-                <span className="highlight-token">{formatPeriod(performance.period_start, performance.period_end)}</span>
+                <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+                <span className="highlight-token">{formatPeriod(d.period_start, d.period_end)}</span>
               </div>
-              {performance.region && (
+              {d.venue && (
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span className="highlight-token">{performance.region}</span>
+                  <MapPin className="h-4 w-4 text-primary shrink-0" />
+                  <span className="highlight-token">{d.venue}{d.region ? ` · ${d.region}` : ""}</span>
                 </div>
               )}
-              {performance.venue && (
+              {runtime && (
                 <div className="flex items-center gap-2">
-                  <Ticket className="h-4 w-4 text-primary" />
-                  <span className="highlight-token">{performance.venue}</span>
+                  <Clock className="h-4 w-4 text-primary shrink-0" />
+                  <span>러닝타임: {runtime}</span>
                 </div>
               )}
-              {detailFields.schedule && <div>공연 일정: {detailFields.schedule}</div>}
-              {detailFields.runtime && <div>러닝타임: {detailFields.runtime}</div>}
-              {detailFields.age_limit && <div>관람 연령: {detailFields.age_limit}</div>}
-              {detailFields.price && <div>가격: {detailFields.price}</div>}
+              {ageLimit && (
+                <div className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-primary shrink-0" />
+                  <span>관람 연령: {ageLimit}</span>
+                </div>
+              )}
             </div>
 
+            {/* 버튼 */}
             <div className="flex flex-wrap gap-3">
-              <BookmarkButton
-                performanceId={performance.id}
-                initialBookmarked={isBookmarked}
-                showLabel
-              />
-              {detailFields.ticket_link ? (
-                <Link
-                  href={detailFields.ticket_link}
-                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+              <BookmarkButton performanceId={performance.id} initialBookmarked={isBookmarked} showLabel />
+              {ticketLink ? (
+                <a
+                  href={ticketLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 justify-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
                 >
                   예매/문의
-                </Link>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
               ) : (
                 <span className="inline-flex items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-semibold text-foreground/70">
                   예매 정보 준비 중
@@ -308,46 +324,135 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
         </div>
       </section>
 
+      {/* ─── 상세 콘텐츠 ─── */}
       <section className="mx-auto mt-14 max-w-6xl space-y-10 px-4 sm:px-6 lg:px-8">
+
+        {/* 작품 소개 */}
         <div className="space-y-6 border-t border-border/60 pt-10">
           <h2 className="text-2xl font-semibold">작품 소개</h2>
           {synopsis && (
-            <p className="whitespace-pre-line text-base text-muted-foreground">{synopsis}</p>
+            <p className="whitespace-pre-line text-base text-muted-foreground leading-relaxed">{synopsis}</p>
           )}
-          {images.length > 0 && (
-            <DetailImageGallery title={performance.title} images={images} />
+          {detailImages.length > 0 && (
+            <DetailImageGallery title={performance.title} images={detailImages} />
           )}
         </div>
 
-        {/* 제작 · 출연 */}
-        <div id="people" className="space-y-5 border-t border-border/60 pt-10">
-          <h2 className="text-2xl font-semibold">제작 · 출연</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <CreditCard
-              icon={<Users className="h-4 w-4 text-primary" />}
-              label="제작"
-              value={performance.organization}
-            />
-            <CreditCard
-              icon={<Clapperboard className="h-4 w-4 text-primary" />}
-              label="출연"
-              value={detailFields.cast}
-            />
-            <CreditCard
-              icon={<Clapperboard className="h-4 w-4 text-primary" />}
-              label="스태프"
-              value={detailFields.crew}
-            />
+        {/* 출연진 */}
+        {castNames.length > 0 && (
+          <div id="cast" className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold">
+              <Users className="h-5 w-5 text-primary" />
+              출연진
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {castNames.map((name, i) => (
+                <CastChip key={i} name={name} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* 수상 · 이력 — KOPIS의 수상/축제/원창작 정보만 표시 */}
+        {/* 제작진 */}
+        {crewNames.length > 0 && (
+          <div id="crew" className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold">
+              <Clapperboard className="h-5 w-5 text-primary" />
+              제작진
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {crewNames.map((name, i) => (
+                <CrewChip key={i} name={name} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 제작사/단체 */}
+        {(orgName || organization) && (
+          <div className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold">
+              <Users className="h-5 w-5 text-primary" />
+              제작 단체
+            </h2>
+            {organization ? (
+              <OrgCard org={organization} />
+            ) : (
+              <div className="rounded-2xl border border-border bg-background/60 p-4 text-sm text-foreground">
+                {orgName}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 티켓 가격 */}
+        {prices.length > 0 && (
+          <div id="price" className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold">
+              <Ticket className="h-5 w-5 text-primary" />
+              티켓 가격
+            </h2>
+            <div className="overflow-hidden rounded-2xl border border-border">
+              {prices.map((p, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between border-b border-border/60 px-5 py-3 last:border-b-0 odd:bg-background/60 even:bg-background/30 text-sm"
+                >
+                  <span className="font-medium text-foreground">{p.grade}</span>
+                  <span className="font-bold text-primary tabular-nums">{p.price}</span>
+                </div>
+              ))}
+            </div>
+            {ticketLink && (
+              <a
+                href={ticketLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+              >
+                티켓 예매하러 가기 <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* 공연 일정 */}
+        {schedule.length > 0 && (
+          <div id="schedule" className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold">
+              <CalendarDays className="h-5 w-5 text-primary" />
+              공연 일정
+            </h2>
+            <div className="overflow-hidden rounded-2xl border border-border">
+              {schedule.map((s, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 border-b border-border/60 px-5 py-3 last:border-b-0 odd:bg-background/60 even:bg-background/30 text-sm"
+                >
+                  <span className="w-20 shrink-0 font-semibold text-foreground">{s.day}</span>
+                  <div className="flex flex-wrap gap-2">
+                    {s.times.map((t, j) => (
+                      <span
+                        key={j}
+                        className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 수상·이력 — KOPIS 섹션 */}
         {kopisSections && (() => {
           const usefulSections = [
-            { key: "awardList",   icon: <Award className="h-4 w-4 text-amber-500" />, title: "수상 이력" },
-            { key: "festivalList", icon: <Award className="h-4 w-4 text-rose-400" />, title: "참여 축제" },
+            { key: "awardList",    icon: <Award className="h-4 w-4 text-amber-500" />,    title: "수상 이력" },
+            { key: "festivalList", icon: <Award className="h-4 w-4 text-rose-400" />,     title: "참여 축제" },
             { key: "creatorList",  icon: <Clapperboard className="h-4 w-4 text-violet-400" />, title: "원작·창작" },
-            { key: "producerList", icon: <Users className="h-4 w-4 text-sky-400" />, title: "기획·제작사" },
+            { key: "producerList", icon: <Users className="h-4 w-4 text-sky-400" />,      title: "기획·제작사" },
           ]
           const populated = usefulSections.filter(
             (s) => getSectionBlocks(kopisSections[s.key] ?? null).length > 0
@@ -386,6 +491,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           )
         })()}
 
+        {/* 초대 이벤트 */}
         <div className="space-y-4 border-t border-border/60 pt-10">
           <h2 className="text-2xl font-semibold">초대 이벤트 안내</h2>
           {campaign ? (
@@ -428,10 +534,12 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           )}
         </div>
 
+        {/* 리뷰 */}
         <div className="space-y-4 border-t border-border/60 pt-10">
           <ReviewSummary performanceId={performance.id} performanceSlug={slug} />
         </div>
 
+        {/* 유의사항 */}
         <div className="space-y-4 border-t border-border/60 pt-10">
           <h2 className="text-2xl font-semibold">유의사항</h2>
           <ul className="space-y-2 text-sm text-muted-foreground">
@@ -445,20 +553,127 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
   )
 }
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function CastChip({ name }: { name: string }) {
+  // "(역할명)" 분리
+  const match = name.match(/^(.+?)\s*\((.+?)\)$/)
+  if (match) {
+    return (
+      <div className="flex flex-col items-center gap-0.5 rounded-2xl border border-border bg-background/60 px-4 py-2.5 text-center text-sm">
+        <span className="font-semibold text-foreground">{match[1].trim()}</span>
+        <span className="text-xs text-muted-foreground">{match[2].trim()}</span>
+      </div>
+    )
+  }
+  return (
+    <span className="rounded-full border border-border bg-background/60 px-4 py-2 text-sm font-medium text-foreground">
+      {name}
+    </span>
+  )
+}
+
+function CrewChip({ name }: { name: string }) {
+  // "역할 이름" 또는 "역할: 이름" 형태 파싱
+  const colonMatch = name.match(/^(.+?)[:：]\s*(.+)$/)
+  const spaceMatch = !colonMatch ? name.match(/^(연출|작가|작곡|음악감독|조명|무대|안무|의상|분장|제작|기획|협력)\s+(.+)$/) : null
+  const role = colonMatch?.[1] ?? spaceMatch?.[1]
+  const person = colonMatch?.[2] ?? spaceMatch?.[2]
+
+  if (role && person) {
+    return (
+      <div className="flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-4 py-2 text-sm">
+        <span className="text-xs font-semibold text-muted-foreground">{role}</span>
+        <span className="font-medium text-foreground">{person}</span>
+      </div>
+    )
+  }
+  return (
+    <span className="rounded-full border border-border bg-background/60 px-4 py-2 text-sm font-medium text-foreground">
+      {name}
+    </span>
+  )
+}
+
+function OrgCard({
+  org,
+}: {
+  org: { id: string; slug: string; name: string; tagline?: string | null; description?: string | null; logo_url?: string | null; genre_focus?: string[] | null; instagram?: string | null; website?: string | null }
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-background/60 p-5 space-y-3">
+      <div className="flex items-start gap-4">
+        {org.logo_url && (
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-border">
+            <Image src={org.logo_url} alt={org.name} fill className="object-contain p-1" sizes="56px" />
+          </div>
+        )}
+        <div className="min-w-0 space-y-1">
+          <Link
+            href={`/partners/${org.slug}`}
+            className="text-base font-bold text-foreground hover:text-primary transition"
+          >
+            {org.name}
+          </Link>
+          {org.tagline && <p className="text-sm text-muted-foreground">{org.tagline}</p>}
+          {org.genre_focus && org.genre_focus.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {org.genre_focus.map((g) => (
+                <span key={g} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                  {g}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <Link
+          href={`/partners/${org.slug}`}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+        >
+          <Users className="h-3.5 w-3.5" />
+          단체 프로필 보기
+        </Link>
+        {org.instagram && (
+          <a
+            href={`https://instagram.com/${org.instagram.replace("@", "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            Instagram
+          </a>
+        )}
+        {org.website && (
+          <a
+            href={org.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            웹사이트
+          </a>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Utility functions ────────────────────────────────────────────────────────
+
 function formatShortDate(value?: string | null) {
   if (!value) return "미정"
-  return new Date(value).toLocaleDateString("ko-KR", {
-    month: "short",
-    day: "numeric",
-  })
+  return new Date(value).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })
 }
 
 function formatPeriod(start?: string | null, end?: string | null) {
   if (!start && !end) return "일정 미정"
-  const startText = formatShortDate(start)
-  const endText = formatShortDate(end)
-  if (startText === endText) return startText
-  return `${startText} ~ ${endText}`
+  const s = formatShortDate(start)
+  const e = formatShortDate(end)
+  return s === e ? s : `${s} ~ ${e}`
 }
 
 function isSectionMap(value: unknown): value is Record<string, unknown> {
@@ -467,13 +682,11 @@ function isSectionMap(value: unknown): value is Record<string, unknown> {
 
 function getSectionBlocks(value: unknown): Array<Array<{ label: string; value: string }>> {
   if (!value) return []
-
   if (Array.isArray(value)) {
-    return value.map((item) => normalizeSectionEntries(item)).filter((entries) => entries.length > 0)
+    return value.map((item) => normalizeSectionEntries(item)).filter((e) => e.length > 0)
   }
-
-  const singleBlock = normalizeSectionEntries(value)
-  return singleBlock.length ? [singleBlock] : []
+  const single = normalizeSectionEntries(value)
+  return single.length ? [single] : []
 }
 
 function normalizeSectionEntries(value: unknown): Array<{ label: string; value: string }> {
@@ -481,65 +694,26 @@ function normalizeSectionEntries(value: unknown): Array<{ label: string; value: 
     const text = formatSectionValue(value)
     return text ? [{ label: "내용", value: text }] : []
   }
-
   return Object.entries(value)
-    .map(([label, entryValue]) => {
-      const formatted = formatSectionValue(entryValue)
+    .map(([label, v]) => {
+      const formatted = formatSectionValue(v)
       return formatted ? { label, value: formatted } : null
     })
-    .filter((entry): entry is { label: string; value: string } => Boolean(entry))
-}
-
-function CreditCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode
-  label: string
-  value?: string | null
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-background/60 p-4 space-y-2">
-      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {icon}
-        {label}
-      </p>
-      <p className="text-sm text-foreground leading-relaxed">
-        {value ?? <span className="text-muted-foreground/60">정보 준비 중</span>}
-      </p>
-    </div>
-  )
+    .filter((e): e is { label: string; value: string } => Boolean(e))
 }
 
 function formatSectionValue(value: unknown): string | null {
-  if (typeof value === "string") {
-    const normalized = value.trim()
-    return normalized.length ? normalized : null
-  }
-
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value)
-  }
-
+  if (typeof value === "string") return value.trim() || null
+  if (typeof value === "number" || typeof value === "boolean") return String(value)
   if (Array.isArray(value)) {
-    const normalized = value
-      .map((item) => formatSectionValue(item))
-      .filter((item): item is string => Boolean(item))
-
-    return normalized.length ? normalized.join("\n") : null
+    const parts = value.map((i) => formatSectionValue(i)).filter((i): i is string => Boolean(i))
+    return parts.length ? parts.join("\n") : null
   }
-
   if (isSectionMap(value)) {
-    const normalized = Object.entries(value)
-      .map(([label, entryValue]) => {
-        const formatted = formatSectionValue(entryValue)
-        return formatted ? `${label}: ${formatted}` : null
-      })
-      .filter((item): item is string => Boolean(item))
-
-    return normalized.length ? normalized.join("\n") : null
+    const parts = Object.entries(value)
+      .map(([k, v]) => { const f = formatSectionValue(v); return f ? `${k}: ${f}` : null })
+      .filter((i): i is string => Boolean(i))
+    return parts.length ? parts.join("\n") : null
   }
-
   return null
 }

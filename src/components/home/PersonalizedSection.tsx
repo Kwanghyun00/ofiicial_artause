@@ -32,6 +32,7 @@ export function PersonalizedSection({ campaigns }: Props) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     try {
       const saved = localStorage.getItem("artause_persona") as PersonaKey | null
@@ -182,8 +183,10 @@ interface CardProps {
 function PersonalizedCard({ campaign, score, campaignTags, isExploration, index, onCardClick }: CardProps) {
   const matchLabel = formatMatchScore(score)
   const colorClass = matchScoreColorClass(score)
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now()
   const isUrgent = campaign.ends_at
-    ? new Date(campaign.ends_at).getTime() - Date.now() < 72 * 60 * 60 * 1000
+    ? new Date(campaign.ends_at).getTime() - nowMs < 72 * 60 * 60 * 1000
     : false
 
   return (

@@ -131,9 +131,46 @@
       "Bash(node .tmp_kopis_search.mjs)",
       "Bash(node .tmp_insert_performances.mjs)",
       "Bash(grep -l \"audience\\\\|taste\\\\|preference\\\\|users\" c:/Users/김광현/Desktop/Homepage/supabase/migrations/*.sql)",
-      "Bash(grep -n \"create table.*users\\\\|create table.*profile\" c:/Users/김광현/Desktop/Homepage/supabase/migrations/*.sql)"
+      "Bash(grep -n \"create table.*users\\\\|create table.*profile\" c:/Users/김광현/Desktop/Homepage/supabase/migrations/*.sql)",
+      "PowerShell(cmd /c \"dir /b /s \"\"c:\\\\Users\\\\�豤��\\\\Desktop\\\\Homepage\\\\artause-plan.md\"\" 2>nul\")",
+      "PowerShell(cmd /c \"dir /b /s \"\"c:\\\\Users\\\\�豤��\\\\Desktop\\\\Homepage\\\\.claude\\\\artause-plan.md\"\" 2>nul\")",
+      "Bash(npx tsx *)",
+      "Bash(cmd /c \"\\\\\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\\\\\" --print\")",
+      "Bash(echo \"Hello, respond with just: OK\")",
+      "Bash(cmd /c \"\\\\\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\\\\\" --print < \\\\\"C:\\\\Users\\\\김광현\\\\Desktop\\\\Homepage\\\\.claude\\\\.tmp_test.txt\\\\\"\")",
+      "Bash(cmd /c \"\\\\\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\\\\\" --version\")",
+      "Bash(\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\" --version)",
+      "Bash(\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\" --print \"Hello, respond with just the word OK and nothing else.\")",
+      "Bash(\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\" --help)",
+      "Bash(\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\" -p \"Say OK\" --tools \"\")",
+      "Bash(\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\" -p \"Say OK\" --dangerously-skip-permissions)",
+      "Bash(cmd /c \"set ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5-20251001 && \\\\\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\\\\\" -p \\\\\"Say OK\\\\\" --tools \\\\\"\\\\\"\")",
+      "Bash(env)",
+      "Bash(cmd /c \"set CLAUDECODE= && \\\\\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\\\\\" -p \\\\\"Say OK\\\\\" --tools \\\\\"\\\\\"\")",
+      "Bash(cmd /c \"set CLAUDECODE= && \\\\\"C:\\\\Users\\\\김광현\\\\.vscode\\\\extensions\\\\anthropic.claude-code-2.1.144-win32-x64\\\\resources\\\\native-binary\\\\claude.exe\\\\\" -p \\\\\"Say OK\\\\\" --tools \\\\\"\\\\\"\")",
+      "Bash(cmd /c \"set CLAUDECODE=& \\\\\"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\\\\\" -p \\\\\"Say OK\\\\\" > C:\\\\Users\\\\김광현\\\\Desktop\\\\Homepage\\\\.claude\\\\test_output.txt 2>&1 & type C:\\\\Users\\\\김광현\\\\Desktop\\\\Homepage\\\\.claude\\\\test_output.txt\")",
+      "Bash(CLAUDECODE=\"\" \"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\claude.cmd\" -p \"Say OK\" --tools \"\")",
+      "Read(//c/Users/김광현/AppData/Roaming/npm/**)",
+      "Bash(node \"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\@anthropic-ai\\\\claude-code\\\\cli.js\" -p \"Say OK\" --tools \"\")",
+      "Bash(node \"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\@anthropic-ai\\\\claude-code\\\\cli.js\" -p \"Say OK\" --tools \"\" --debug)",
+      "Bash(CLAUDECODE=\"\" node \"C:\\\\Users\\\\김광현\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\@anthropic-ai\\\\claude-code\\\\cli.js\" -p \"Say OK\" --tools \"\")",
+      "Bash(CLAUDECODE=\"\" \"C:\\\\Users\\\\김광현\\\\.vscode\\\\extensions\\\\anthropic.claude-code-2.1.144-win32-x64\\\\resources\\\\native-binary\\\\claude.exe\" -p \"Say OK\" --tools \"\")",
+      "Bash(grep -E \"^C:\\\\\\\\\\\\\\\\.*email|^C:\\\\\\\\\\\\\\\\.*admin/actions|^C:\\\\\\\\\\\\\\\\.*event-center/actions|^C:\\\\\\\\\\\\\\\\.*ticket-entry-confirm\")",
+      "Bash(grep -E \"^C:\\\\\\\\\\\\\\\\.*Homepage\\\\\\\\\\\\\\\\src\")",
+      "Bash(grep -A3 \"FeedbackList\\\\|feedback\\\\\\\\\\\\\\\\page\\\\|app\\\\\\\\\\\\\\\\page\\\\|Portal\\\\|kopis\\\\\\\\\\\\\\\\parser\\\\|PerformanceFilter\\\\|ReviewsListingClient\")",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(grep -E \"^C:|\\\\.tsx?$|\\\\.ts$|\\\\.js$|:186:|:474:|:233:|:132:\")",
+      "Bash(git show *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git ls-tree *)",
+      "Bash(cat src/lib/email.ts)",
+      "Bash(ls src/lib/email/)",
+      "Bash(mkdir -p \"c:/Users/김광현/Desktop/Homepage/src/app/partners/[slug]\")"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "c:\\Users\\김광현\\Desktop\\Homepage\\src\\app\\partners"
+    ]
   }
 }

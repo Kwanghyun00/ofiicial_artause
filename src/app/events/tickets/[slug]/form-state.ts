@@ -1,5 +1,5 @@
 export interface TicketEntryFormState {
-  status: "idle" | "success" | "error";
+  status: "idle" | "success" | "error" | "duplicate";
   message?: string;
 }
 

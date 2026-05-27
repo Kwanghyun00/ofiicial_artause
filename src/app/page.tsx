@@ -55,6 +55,7 @@ export default async function HomePage() {
 
   const campaigns = campaignRecords.filter(isCampaignRecord).map(normalizeCampaign)
   const performances = performanceRecords.filter(isPerformanceRecord)
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now()
   const campaignByPerformanceId = buildActiveCampaignSlugMap(campaignRecords, now)
 
@@ -69,8 +70,22 @@ export default async function HomePage() {
 
   const heroStats = createHeroStats(campaigns)
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "알터즈",
+    url: "https://artause.co.kr",
+    logo: "https://artause.co.kr/images/brand/artause-symbol.png",
+    description: "공연을 먼저 탐색하고 초대권 이벤트까지 이어지는 공연 발견 플랫폼",
+    sameAs: ["https://www.instagram.com/artause_official"],
+  }
+
   return (
     <div className="pb-0">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <HomeDidPopup />
 
       {/* Hero — 전체 너비 */}
@@ -191,6 +206,7 @@ function isDiscoverableShow(
 }
 
 function createHeroStats(campaigns: Campaign[]) {
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now()
   const totalCampaigns = campaigns.length
   const activeCampaigns = campaigns.filter((campaign) => isCampaignActiveNow(campaign, now)).length

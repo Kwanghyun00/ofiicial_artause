@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next"
-import { getAllPerformances, getTicketCampaigns } from "@/lib/supabase/queries"
+import { getAllPerformances, getOrganizations, getTicketCampaigns } from "@/lib/supabase/queries"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://artause.co.kr"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [performances, campaigns] = await Promise.all([
+  const [performances, campaigns, organizations] = await Promise.all([
     getAllPerformances().catch(() => []),
     getTicketCampaigns().catch(() => []),
+    getOrganizations().catch(() => []),
   ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -42,5 +43,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     }))
 
-  return [...staticRoutes, ...showRoutes, ...inviteRoutes]
+  // 공연별 리뷰 페이지 — 구글 "공연명 후기" 키워드 SEO
+  const reviewRoutes: MetadataRoute.Sitemap = performances
+    .filter((p): p is typeof p & { slug: string } => Boolean(p && "slug" in p && p.slug))
+    .map((p) => ({
+      url: `${SITE_URL}/reviews/${p.slug}`,
+      lastModified: ("updated_at" in p && p.updated_at) ? new Date(p.updated_at as string) : new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.75,
+    }))
+
+  // 공연 단체 프로필 페이지 — "극단명 공연" 키워드 SEO
+  const partnerRoutes: MetadataRoute.Sitemap = organizations
+    .filter((o): o is typeof o & { slug: string } => Boolean(o && "slug" in o && o.slug))
+    .map((o) => ({
+      url: `${SITE_URL}/partners/${o.slug}`,
+      lastModified: ("updated_at" in o && o.updated_at) ? new Date(o.updated_at as string) : new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
+
+  return [...staticRoutes, ...showRoutes, ...inviteRoutes, ...reviewRoutes, ...partnerRoutes]
 }

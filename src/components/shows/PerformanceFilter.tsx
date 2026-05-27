@@ -171,7 +171,7 @@ export function PerformanceFilter({ performances, initialQuery, campaignByPerfId
       if (bFeat !== aFeat) return bFeat - aFeat
       return comparePerformance(a, b, filters.sort)
     })
-  }, [filters, performances])
+  }, [filters, performances, campaignByPerfId])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)

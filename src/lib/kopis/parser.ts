@@ -38,6 +38,7 @@ export function parseXML<T>(xmlString: string): T {
  * 공연 목록 XML 응답 파싱
  */
 export function parsePerformanceList(xmlString: string): KopisPerformanceListResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parsed = parseXML<{ dbs: any }>(xmlString);
 
   // XML 구조 정규화
@@ -57,6 +58,7 @@ export function parsePerformanceList(xmlString: string): KopisPerformanceListRes
  * 공연 상세 XML 응답 파싱
  */
 export function parsePerformanceDetail(xmlString: string): KopisPerformanceDetailResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parsed = parseXML<{ dbs: { db: any } }>(xmlString);
 
   if (!parsed.dbs || !parsed.dbs.db) {

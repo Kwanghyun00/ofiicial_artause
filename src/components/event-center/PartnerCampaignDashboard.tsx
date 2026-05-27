@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { BarChart3, Calendar, CheckCircle2, Ticket, Trophy, Users } from "lucide-react";
+import { BarChart3, Calendar, CheckCircle2, Clock, Ticket, Trophy, Users } from "lucide-react";
 import { runLotteryDraw } from "@/app/event-center/actions";
 
 export type CampaignStats = {
@@ -9,6 +9,15 @@ export type CampaignStats = {
   selected: number;
   checkedIn: number;
   noShow: number;
+};
+
+export type DrawRecord = {
+  id: string;
+  runAt: string;
+  winnerCount: number;
+  totalEntries: number;
+  algorithmVersion: string;
+  executedBy: string | null;
 };
 
 export type CampaignItem = {
@@ -19,6 +28,7 @@ export type CampaignItem = {
   ends_at: string | null;
   allocation: number | null;
   stats: CampaignStats;
+  draws?: DrawRecord[];
 };
 
 type Props = {
@@ -172,8 +182,13 @@ export function PartnerCampaignDashboard({ campaigns }: Props) {
               {/* 추첨 버튼 */}
               {lotteryReady && <LotteryButton campaign={campaign} />}
 
-              {/* 추첨 완료 */}
-              {campaign.stats.selected > 0 && (
+              {/* 추첨 이력 */}
+              {(campaign.draws?.length ?? 0) > 0 && (
+                <DrawHistory draws={campaign.draws!} />
+              )}
+
+              {/* 추첨 완료 (이력 없을 때 fallback) */}
+              {campaign.stats.selected > 0 && !campaign.draws?.length && (
                 <p className="mt-3 text-xs font-semibold text-emerald-600">
                   ✅ {campaign.stats.selected}명 선정 완료 — 체크인 {campaign.stats.checkedIn}명
                 </p>
@@ -213,4 +228,53 @@ function formatDateRange(start: string | null, end: string | null): string {
   if (start) return `${fmt(start)} ~`;
   if (end) return `~ ${fmt(end)}`;
   return "";
+}
+
+function DrawHistory({ draws }: { draws: DrawRecord[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const shown = expanded ? draws : draws.slice(0, 1);
+
+  return (
+    <div className="mt-3 border-t border-border/50 pt-3">
+      <button
+        type="button"
+        className="mb-2 flex w-full items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <Clock className="h-3 w-3" />
+        추첨 이력 ({draws.length}회){expanded ? " ▲" : " ▼"}
+      </button>
+      <ul className="space-y-1.5">
+        {shown.map((draw) => (
+          <li key={draw.id} className="rounded bg-muted/40 px-3 py-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-emerald-600">
+                🏆 {draw.winnerCount}명 선정
+              </span>
+              <span className="text-muted-foreground">
+                {new Date(draw.runAt).toLocaleString("ko-KR", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+            <p className="mt-0.5 text-muted-foreground">
+              응모 {draw.totalEntries}명 중 · {draw.algorithmVersion}
+            </p>
+          </li>
+        ))}
+      </ul>
+      {draws.length > 1 && !expanded && (
+        <button
+          type="button"
+          className="mt-1 text-xs text-primary hover:underline"
+          onClick={() => setExpanded(true)}
+        >
+          이전 {draws.length - 1}건 더 보기
+        </button>
+      )}
+    </div>
+  );
 }

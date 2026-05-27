@@ -583,6 +583,11 @@ export async function submitPerformanceSubmission(payload: PerformanceSubmission
     throw error;
   }
 }
+/**
+ * 초대권 신청 저장 — Supabase 직접 insert (Edge Function 제거)
+ * 중복 신청 시 PostgreSQL unique violation(23505) 에러가 발생하며
+ * 호출 측에서 error.code === "23505" 여부로 사용자 메시지를 분기한다.
+ */
 export async function submitTicketEntry(payload: TicketEntryPayload) {
   if (!isSupabaseConfigured) {
     console.info("Ticket entry received (mock mode):", payload);
@@ -593,20 +598,6 @@ export async function submitTicketEntry(payload: TicketEntryPayload) {
     ? createAdminSupabaseClient()
     : await createServerSupabaseClient();
 
-  let edgeFnError: unknown = null;
-  try {
-    const { error } = await supabase.functions.invoke("campaign-entry-submit", {
-      body: payload,
-    });
-    if (!error) return;
-    edgeFnError = error;
-  } catch (invokeErr) {
-    edgeFnError = invokeErr;
-  }
-
-  console.warn("campaign-entry-submit edge function unavailable, falling back to direct insert:", edgeFnError);
-
-  // Fallback: store minimal entry data when the edge function is unavailable or not authorized.
   const metadata = (payload.metadata ?? {}) as Record<string, unknown>;
   const applicantName = typeof metadata.applicantName === "string" ? metadata.applicantName : "익명";
   const applicantEmail = typeof metadata.email === "string" ? metadata.email : "";
@@ -627,7 +618,7 @@ export async function submitTicketEntry(payload: TicketEntryPayload) {
   });
 
   if (insertError) {
-    console.error("submitTicketEntry error", edgeFnError, insertError);
+    console.error("submitTicketEntry error", insertError);
     throw insertError;
   }
 }

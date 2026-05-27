@@ -120,7 +120,7 @@ export function EventsExplorer({ campaigns }: Props) {
         </div>
 
         {filteredCampaigns.length > 0 ? (
-          <CampaignBoard campaigns={filteredCampaigns as any} />
+          <CampaignBoard campaigns={filteredCampaigns as never} />
         ) : (
           <div className="rounded-3xl border-2 border-dashed border-border bg-background/60 px-8 py-12 text-center text-sm text-muted-foreground">
             조건에 맞는 초대가 없습니다.

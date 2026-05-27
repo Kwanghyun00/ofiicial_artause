@@ -1,6 +1,6 @@
 # Artause 개발 로드맵 & 데일리 플랜
 
-> **마지막 업데이트**: 2026년 5월 19일
+> **마지막 업데이트**: 2026년 5월 27일
 > **목표**: 공연 정보 허브로 자연 유입을 늘리고, 파트너 → 캠페인 → 신청 → 당첨 → 리뷰까지 전체 플로우를 실제로 동작하게 만든다.
 
 ---
@@ -24,9 +24,9 @@
 | 공연 파트너 등록 | 30% | 🔴 회원가입 없음, 초대코드 로그인만 존재 |
 | 캠페인 생성 | 70% | 🟡 이미지 업로드 미구현, 일부 데이터 미저장 |
 | 관리자 승인 | 75% | 🔴 `/admin` 인증 없음 (누구나 접근 가능) |
-| 관객 초대권 신청 | 75% | 🟡 중복 신청 방지 없음, 확인 이메일 없음 |
+| 관객 초대권 신청 | 95% | 🟢 중복 신청 방지 완료, 확인 이메일 발송 완료 |
 | 당첨자 추첨 | 70% | 🟡 알고리즘 편향, 추첨 이력 없음 |
-| 당첨 확인 / 출석 | 50% | 🔴 당첨 안내 이메일 없음, Edge Function 없음 |
+| 당첨 확인 / 출석 | 80% | 🟡 당첨 안내 이메일 완료, Edge Function 인라인화 완료 |
 | 리뷰 작성 | 80% | 🟡 모더레이션 UI 없음, 알림 미발송 |
 | SEO / 콘텐츠 | 60% | 🟡 sitemap 없음, robots.txt 없음 |
 
@@ -39,8 +39,8 @@
 | # | 문제 | 위치 | 영향 |
 |---|------|------|------|
 | 1 | `/admin` 인증 미들웨어 없음 | `src/app/admin/page.tsx` | 누구나 캠페인 승인/거부 가능 |
-| 2 | `campaign-entry-submit` Edge Function 없음 | `src/app/events/tickets/[slug]/actions.ts` | 초대권 신청 제출 자체가 실패 |
-| 3 | `penalty-apply` Edge Function 없음 | `src/components/event-center/AttendanceConsole.tsx` | 노쇼 패널티 적용 실패 |
+| 2 | ~~`campaign-entry-submit` Edge Function 없음~~ | ~~`src/app/events/tickets/[slug]/actions.ts`~~ | ✅ 직접 insert로 인라인화 완료 |
+| 3 | ~~`penalty-apply` Edge Function 없음~~ | ~~`src/components/event-center/AttendanceConsole.tsx`~~ | ✅ 직접 DB 로직으로 인라인화 완료 |
 | 4 | 이메일 발송 코드 없음 | 전체 코드베이스 | 당첨 안내, 신청 확인 등 모든 알림 불가 |
 | 5 | `selection_status` 쿼리 조건 불일치 | `src/app/event-center/actions.ts:570` | DB 기본값 `'pending'`인데 `null`로 조회 → 추첨 대상 0명 |
 
@@ -117,36 +117,36 @@ SEO 최적화 공연 상세 페이지
 **목표**: 구글이 사이트를 제대로 색인할 수 있게 하고, 관리자 페이지 보안 구멍을 막는다.
 
 #### Day 1 (월) — sitemap.xml 자동 생성
-- [ ] `src/app/sitemap.ts` 파일 생성 (Next.js App Router 방식)
-- [ ] `/shows/[slug]` 전체 URL 포함 (DB에서 모든 performance slug 조회)
-- [ ] `/invites/[slug]` 캠페인 URL 포함
-- [ ] `/reviews` 및 정적 페이지 포함
-- [ ] 배포 후 구글 서치콘솔에 sitemap 제출
+- [x] `src/app/sitemap.ts` 파일 생성 (Next.js App Router 방식)
+- [x] `/shows/[slug]` 전체 URL 포함 (DB에서 모든 performance slug 조회)
+- [x] `/invites/[slug]` 캠페인 URL 포함
+- [x] `/reviews` 및 정적 페이지 포함
+- [x] 배포 후 구글 서치콘솔에 sitemap 제출
 
 #### Day 2 (화) — robots.txt + OG 태그 보완
-- [ ] `src/app/robots.ts` 파일 생성
-- [ ] `/admin`, `/event-center`, `/partner` 크롤링 차단 설정
-- [ ] `/reviews/page.tsx` OG 태그 추가 (현재 title/description만 있음)
-- [ ] 홈페이지 Organization JSON-LD 추가
+- [x] `src/app/robots.ts` 파일 생성
+- [x] `/admin`, `/event-center`, `/partner` 크롤링 차단 설정
+- [x] `/reviews/page.tsx` OG 태그 추가 (현재 title/description만 있음)
+- [x] 홈페이지 Organization JSON-LD 추가
 
 #### Day 3 (수) — 관리자 인증 미들웨어 추가 (P0)
-- [ ] `src/middleware.ts` 에 `/admin` 경로 인증 체크 추가
-- [ ] Supabase 세션 기반 admin role 검증
-- [ ] 미인증 시 로그인 페이지로 리다이렉트
-- [ ] 관리자 로그인 페이지 생성 또는 기존 인증 연동
+- [x] `src/middleware.ts` 에 `/admin` 경로 인증 체크 추가
+- [x] Supabase 세션 기반 admin role 검증
+- [x] 미인증 시 로그인 페이지로 리다이렉트
+- [x] 관리자 로그인 페이지 생성 또는 기존 인증 연동
 
 #### Day 4 (목) — `selection_status` 버그 수정 (P0)
-- [ ] `src/app/event-center/actions.ts:570` 쿼리 조건 수정
-- [ ] `is('selection_status', null)` → `.eq('selection_status', 'pending')` 으로 변경
-- [ ] 기존 `ticket_entries` DB 데이터 `selection_status` 기본값 확인
-- [ ] 추첨 기능 로컬에서 end-to-end 테스트
+- [x] `src/app/event-center/actions.ts:570` 쿼리 조건 수정
+- [x] `is('selection_status', null)` → `.eq('selection_status', 'pending')` 으로 변경
+- [x] 기존 `ticket_entries` DB 데이터 `selection_status` 기본값 확인
+- [x] 추첨 기능 로컬에서 end-to-end 테스트
 
 #### Day 5 (금) — 검토 및 배포
-- [ ] 1주차 작업 전체 리뷰
-- [ ] `npm run build` 빌드 오류 없음 확인
-- [ ] `npm run lint` 린트 통과 확인
-- [ ] Vercel 배포 후 sitemap URL 직접 확인
-- [ ] 구글 서치콘솔 URL 검사 도구로 크롤링 테스트
+- [x] 1주차 작업 전체 리뷰
+- [x] `npm run build` 빌드 오류 없음 확인
+- [x] `npm run lint` 린트 통과 확인
+- [x] Vercel 배포 후 sitemap URL 직접 확인
+- [x] 구글 서치콘솔 URL 검사 도구로 크롤링 테스트
 
 ---
 
@@ -155,33 +155,33 @@ SEO 최적화 공연 상세 페이지
 **목표**: 당첨 안내, 신청 확인 이메일을 실제로 발송할 수 있게 한다.
 
 #### Day 1 (월) — 이메일 서비스 설정
-- [ ] Resend 또는 SendGrid 계정 생성 및 도메인 인증 (artause.co.kr)
-- [ ] `.env.local` 에 API 키 추가
-- [ ] `src/lib/email/` 디렉토리 생성
-- [ ] 이메일 발송 유틸 함수 작성 (`sendEmail(to, subject, html)`)
+- [x] Resend 또는 SendGrid 계정 생성 및 도메인 인증 (artause.co.kr)
+- [x] `.env.local` 에 API 키 추가
+- [x] `src/lib/email/` 디렉토리 생성
+- [x] 이메일 발송 유틸 함수 작성 (`sendEmail(to, subject, html)`)
 
 #### Day 2 (화) — 이메일 템플릿 작성
-- [ ] 신청 접수 확인 템플릿 (신청자명, 공연명, 신청일시)
-- [ ] 당첨 안내 템플릿 (공연일, 장소, 확인 방법)
-- [ ] 캠페인 승인 안내 템플릿 (파트너용)
-- [ ] 캠페인 거부 안내 템플릿 (파트너용, 사유 포함)
+- [x] 신청 접수 확인 템플릿 (신청자명, 공연명, 신청일시)
+- [x] 당첨 안내 템플릿 (공연일, 장소, 확인 방법)
+- [x] 캠페인 승인 안내 템플릿 (파트너용)
+- [x] 캠페인 거부 안내 템플릿 (파트너용, 사유 포함)
 
 #### Day 3 (수) — 이메일 발송 연결 (신청/승인)
-- [ ] 초대권 신청 완료 시 확인 이메일 발송 연결
-- [ ] 캠페인 승인 시 파트너 이메일 발송 연결 (`actions.ts:125`)
-- [ ] 캠페인 거부 시 파트너 이메일 발송 연결 (`actions.ts:174`)
-- [ ] 관리자 거부 사유 입력 UI 추가 (`ApprovalQueue.tsx`)
+- [x] 초대권 신청 완료 시 확인 이메일 발송 연결
+- [x] 캠페인 승인 시 파트너 이메일 발송 연결 (`actions.ts:125`)
+- [x] 캠페인 거부 시 파트너 이메일 발송 연결 (`actions.ts:174`)
+- [x] 관리자 거부 사유 입력 UI 추가 (`ApprovalQueue.tsx`)
 
 #### Day 4 (목) — 당첨 이메일 + 추첨 알고리즘 수정
-- [ ] 추첨 완료 시 당첨자 이메일 발송 연결
-- [ ] Fisher-Yates 셔플 알고리즘으로 교체 (`actions.ts:577`)
-- [ ] 추첨 이력 로깅 (campaign_id, draw_at, winner_count, algorithm_version)
-- [ ] 추첨 결과 파트너 대시보드에 목록으로 표시
+- [x] 추첨 완료 시 당첨자 이메일 발송 연결
+- [x] Fisher-Yates 셔플 알고리즘으로 교체 (`actions.ts:577`)
+- [x] 추첨 이력 로깅 (campaign_id, draw_at, winner_count, algorithm_version)
+- [x] 추첨 결과 파트너 대시보드에 목록으로 표시
 
 #### Day 5 (금) — 테스트 및 배포
-- [ ] 이메일 발송 전체 플로우 테스트 (신청 → 승인 → 추첨 → 당첨 이메일)
-- [ ] 스팸 필터 우회 설정 확인 (SPF, DKIM 레코드)
-- [ ] 배포 및 실제 이메일 수신 확인
+- [x] 이메일 발송 전체 플로우 테스트 (신청 → 승인 → 추첨 → 당첨 이메일)
+- [x] 스팸 필터 우회 설정 확인 (SPF, DKIM 레코드)
+- [x] 배포 및 실제 이메일 수신 확인
 
 ---
 
@@ -190,32 +190,32 @@ SEO 최적화 공연 상세 페이지
 **목표**: "공연명 + 후기/리뷰" 키워드로 구글 검색 유입을 만든다.
 
 #### Day 1 (월) — 리뷰 독립 URL 구조 설계
-- [ ] `/reviews/[performanceSlug]` 라우트 생성
-- [ ] 공연별 리뷰 목록 페이지 구현
-- [ ] 기존 `/reviews?organization=` 필터와 호환성 유지
-- [ ] 공연 상세 페이지 (`/shows/[slug]`)에서 리뷰 섹션 링크 연결
+- [x] `/reviews/[performanceSlug]` 라우트 생성
+- [x] 공연별 리뷰 목록 페이지 구현
+- [x] 기존 `/reviews?organization=` 필터와 호환성 유지
+- [x] 공연 상세 페이지 (`/shows/[slug]`)에서 리뷰 섹션 링크 연결
 
 #### Day 2 (화) — AggregateRating JSON-LD 추가
-- [ ] 리뷰 페이지에 `AggregateRating` 스키마 추가
-- [ ] 공연 상세 페이지 JSON-LD에도 `aggregateRating` 필드 추가
-- [ ] 구글 리치 스니펫 미리보기 도구로 검증
+- [x] 리뷰 페이지에 `AggregateRating` 스키마 추가
+- [x] 공연 상세 페이지 JSON-LD에도 `aggregateRating` 필드 추가
+- [x] 구글 리치 스니펫 미리보기 도구로 검증
 
 #### Day 3 (수) — 리뷰 페이지 메타데이터 강화
-- [ ] 동적 메타데이터 생성 (`generateMetadata`)
+- [x] 동적 메타데이터 생성 (`generateMetadata`)
   - title: `"${공연명} 리뷰 | 알터즈"`
   - description: 최근 리뷰 요약 + 평균 별점
-- [ ] OG 이미지로 공연 포스터 사용
-- [ ] 소셜 공유 시 리뷰 내용 미리보기 확인
+- [x] OG 이미지로 공연 포스터 사용
+- [x] 소셜 공유 시 리뷰 내용 미리보기 확인
 
 #### Day 4 (목) — 리뷰 작성 리마인더 이메일
-- [ ] 당첨자 중 공연일 D-3 시점에 리뷰 리마인더 이메일 발송
-- [ ] Vercel Cron Job 으로 매일 오전 9시 실행 설정
-- [ ] `ticket_entries` 에서 `attendance_status = 'checked_in'` + 리뷰 미작성자 조회
+- [x] 당첨자 중 공연일 D-3 시점에 리뷰 리마인더 이메일 발송
+- [x] Vercel Cron Job 으로 매일 오전 9시 실행 설정
+- [x] `ticket_entries` 에서 `attendance_status = 'checked_in'` + 리뷰 미작성자 조회
 
 #### Day 5 (금) — 검토 및 배포
 - [ ] 리뷰 페이지 구글 서치콘솔 URL 검사
-- [ ] 리뷰 작성 전체 플로우 테스트
-- [ ] sitemap에 `/reviews/[slug]` URL 추가
+- [x] 리뷰 작성 전체 플로우 테스트
+- [x] sitemap에 `/reviews/[slug]` URL 추가
 
 ---
 
@@ -224,28 +224,28 @@ SEO 최적화 공연 상세 페이지
 **목표**: KOPIS에서 가져오는 출연진/가격/일정 데이터를 공연 상세 페이지에 풍부하게 표시한다.
 
 #### Day 1 (월) — 공연 상세 페이지 현황 파악
-- [ ] `/shows/[slug]` 에서 현재 표시하는 필드 목록 정리
-- [ ] KOPIS에서 가져오지만 표시 안 하는 필드 파악 (`cast_info`, `crew_info`, `price_info`, `schedule_info`, `detail_images`)
-- [ ] UI 개선 범위 결정
+- [x] `/shows/[slug]` 에서 현재 표시하는 필드 목록 정리
+- [x] KOPIS에서 가져오지만 표시 안 하는 필드 파악 (`cast_info`, `crew_info`, `price_info`, `schedule_info`, `detail_images`)
+- [x] UI 개선 범위 결정
 
 #### Day 2 (화) — 출연진 / 제작진 섹션
-- [ ] `cast_info` 파싱 후 출연진 카드 UI 구현
-- [ ] `crew_info` 파싱 후 제작진 섹션 구현
+- [x] `cast_info` 파싱 후 출연진 카드 UI 구현
+- [x] `crew_info` 파싱 후 제작진 섹션 구현
 - [ ] 인물명 클릭 시 해당 인물 출연 공연 검색 연결 (추후)
 
 #### Day 3 (수) — 가격 / 일정 / 상세 이미지 섹션
-- [ ] `price_info` 파싱 후 티켓 가격표 UI
-- [ ] `schedule_info` 파싱 후 요일별 공연 시간표 UI
-- [ ] `detail_images` 갤러리 컴포넌트 (`DetailImageGallery.tsx` 활용)
+- [x] `price_info` 파싱 후 티켓 가격표 UI
+- [x] `schedule_info` 파싱 후 요일별 공연 시간표 UI
+- [x] `detail_images` 갤러리 컴포넌트 (`DetailImageGallery.tsx` 활용)
 
 #### Day 4 (목) — 공연 단체 프로필 페이지 초안
-- [ ] `/partners/[slug]` 라우트 생성
-- [ ] `organizations` 테이블 데이터 표시 (소개, SNS, 공연 목록)
-- [ ] 공연 상세 페이지에서 단체명 클릭 시 이동 연결
+- [x] `/partners/[slug]` 라우트 생성
+- [x] `organizations` 테이블 데이터 표시 (소개, SNS, 공연 목록)
+- [x] 공연 상세 페이지에서 단체명 클릭 시 이동 연결
 
 #### Day 5 (금) — 검토 및 배포
-- [ ] 공연 상세 페이지 모바일 레이아웃 확인
-- [ ] KOPIS 이미지 HTTP → Next.js Image 최적화 처리 확인
+- [x] 공연 상세 페이지 모바일 레이아웃 확인
+- [x] KOPIS 이미지 HTTP → Next.js Image 최적화 처리 확인
 - [ ] 배포 후 실제 공연 페이지 3개 이상 직접 확인
 
 ---
@@ -255,33 +255,34 @@ SEO 최적화 공연 상세 페이지
 **목표**: Edge Function 없이도 신청이 완전히 동작하도록 인라인 코드로 대체한다.
 
 #### Day 1 (월) — `campaign-entry-submit` 인라인화
-- [ ] Edge Function 호출 코드 제거
-- [ ] Supabase 직접 insert로 대체 (`ticket_entries` 테이블)
-- [ ] 필수 필드 검증 로직 서버 액션 내부에 작성
-- [ ] 신청 제출 end-to-end 테스트
+- [x] Edge Function 호출 코드 제거
+- [x] Supabase 직접 insert로 대체 (`ticket_entries` 테이블)
+- [x] 필수 필드 검증 로직 서버 액션 내부에 작성
+- [x] 신청 제출 end-to-end 테스트
 
 #### Day 2 (화) — 중복 신청 방지
-- [ ] `ticket_entries` 테이블에 `(campaign_id, applicant_email)` unique constraint 추가 (마이그레이션)
-- [ ] 서버 액션에서 중복 시 명확한 에러 메시지 반환
-- [ ] 폼 UI에서 이미 신청한 경우 상태 표시
+- [x] `ticket_entries` 테이블에 `(campaign_id, applicant_email)` unique constraint 추가 (마이그레이션)
+- [x] 서버 액션에서 중복 시 명확한 에러 메시지 반환
+- [x] 폼 UI에서 이미 신청한 경우 상태 표시
 
 #### Day 3 (수) — `penalty-apply` 인라인화
-- [ ] Edge Function 호출 제거
-- [ ] 노쇼 패널티 로직 서버 액션으로 이전
+- [x] Edge Function 호출 제거
+- [x] 노쇼 패널티 로직 서버 액션으로 이전
   - `user_penalties` insert
   - `users.trust_score` 감산 업데이트
   - `users.is_restricted` 조건부 업데이트
-- [ ] 패널티 적용 후 사용자 알림 이메일 발송
+- [x] 패널티 적용 후 사용자 알림 이메일 발송
 
 #### Day 4 (목) — 신청 상태 페이지
-- [ ] 신청자가 본인 신청 현황을 확인할 수 있는 페이지 (`/me/entries`)
-- [ ] 이메일 기반 조회 (이메일 입력 → OTP 또는 링크 인증)
-- [ ] 상태 표시: 신청 완료 / 당첨 / 미당첨 / 출석 완료
+- [x] 신청자가 본인 신청 현황을 확인할 수 있는 페이지 (`/my/entries`)
+- [x] 이메일 기반 조회 (이메일 입력 → URL 파라미터 방식)
+- [x] 상태 표시: 신청 완료 / 당첨 / 미당첨 / 출석 완료 / 미관람 / 추첨 완료
 
 #### Day 5 (금) — 검토 및 배포
-- [ ] 전체 신청 → 추첨 → 당첨 이메일 → 출석 플로우 테스트
-- [ ] 패널티 적용 후 재신청 차단 확인
-- [ ] 배포
+- [x] 전체 신청 → 추첨 → 당첨 이메일 → 출석 플로우 테스트
+- [x] 패널티 적용 후 재신청 차단 확인
+- [x] `npm run build` 빌드 오류 없음 확인
+- [x] 배포
 
 ---
 

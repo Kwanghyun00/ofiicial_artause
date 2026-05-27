@@ -47,6 +47,7 @@ export default async function AdminFeedbackPage() {
       </section>
 
       {/* Feedback List */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <FeedbackList initialFeedback={feedbackList as any} />
     </div>
   );

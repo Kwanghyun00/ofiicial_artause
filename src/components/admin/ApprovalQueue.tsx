@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, XCircle, ExternalLink, Clock, User, Phone, Mail } from "lucide-react";
+import { CheckCircle2, XCircle, ExternalLink, Clock, User, Phone, Mail, AlertTriangle } from "lucide-react";
 import { approveEventCampaign, rejectEventCampaign } from "@/app/event-center/actions";
 
 export type PendingCampaign = {
@@ -17,7 +17,7 @@ export type PendingCampaign = {
 };
 
 type CampaignRowState = {
-  status: "idle" | "approved" | "rejected" | "error";
+  status: "idle" | "rejecting" | "approved" | "rejected" | "error";
   message?: string;
 };
 
@@ -28,6 +28,7 @@ function CampaignCard({
 }) {
   const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<CampaignRowState>({ status: "idle" });
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const handleApprove = () => {
     startTransition(async () => {
@@ -40,9 +41,20 @@ function CampaignCard({
     });
   };
 
-  const handleReject = () => {
+  const handleRejectClick = () => {
+    setState({ status: "rejecting" });
+    setRejectionReason("");
+  };
+
+  const handleRejectCancel = () => {
+    setState({ status: "idle" });
+    setRejectionReason("");
+  };
+
+  const handleRejectConfirm = () => {
+    if (!rejectionReason.trim()) return;
     startTransition(async () => {
-      const result = await rejectEventCampaign(campaign.id);
+      const result = await rejectEventCampaign(campaign.id, rejectionReason.trim());
       if (result.success) {
         setState({ status: "rejected", message: "거부 처리됐습니다." });
       } else {
@@ -125,6 +137,43 @@ function CampaignCard({
         </div>
       </div>
 
+      {/* 거부 사유 입력 영역 */}
+      {state.status === "rejecting" && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-rose-700">
+            <AlertTriangle className="h-4 w-4" />
+            거부 사유를 입력하세요 <span className="text-rose-500">*</span>
+          </div>
+          <textarea
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            placeholder="거부 사유를 입력하세요"
+            rows={3}
+            className="w-full rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 resize-none"
+            disabled={isPending}
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleRejectConfirm}
+              disabled={isPending || !rejectionReason.trim()}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <XCircle className="h-4 w-4" />
+              {isPending ? "처리 중..." : "거부 확정"}
+            </button>
+            <button
+              type="button"
+              onClick={handleRejectCancel}
+              disabled={isPending}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 에러 */}
       {state.status === "error" && (
         <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
@@ -133,26 +182,28 @@ function CampaignCard({
       )}
 
       {/* 액션 버튼 */}
-      <div className="flex gap-3 pt-1">
-        <button
-          type="button"
-          onClick={handleApprove}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
-        >
-          <CheckCircle2 className="h-4 w-4" />
-          {isPending ? "처리 중..." : "승인"}
-        </button>
-        <button
-          type="button"
-          onClick={handleReject}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
-        >
-          <XCircle className="h-4 w-4" />
-          거부
-        </button>
-      </div>
+      {state.status !== "rejecting" && (
+        <div className="flex gap-3 pt-1">
+          <button
+            type="button"
+            onClick={handleApprove}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            {isPending ? "처리 중..." : "승인"}
+          </button>
+          <button
+            type="button"
+            onClick={handleRejectClick}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+          >
+            <XCircle className="h-4 w-4" />
+            거부
+          </button>
+        </div>
+      )}
     </div>
   );
 }

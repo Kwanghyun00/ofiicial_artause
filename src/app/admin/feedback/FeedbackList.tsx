@@ -37,7 +37,7 @@ export function FeedbackList({ initialFeedback }: Props) {
 
   const handleStatusUpdate = (feedbackId: string, newStatus: string) => {
     startTransition(async () => {
-      const result = await updateFeedbackStatus(feedbackId, newStatus as any);
+      const result = await updateFeedbackStatus(feedbackId, newStatus as "new" | "in_review" | "planned" | "completed" | "rejected");
       if (result.success) {
         setFeedback(prev =>
           prev.map(f =>

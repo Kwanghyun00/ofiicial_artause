@@ -1,9 +1,8 @@
-export interface ReviewFormState {
-  status: "idle" | "success" | "error" | "verified" | "unverified"
-  message?: string
-  reviewId?: string
-  verifiedAttendance?: boolean
-  reservationId?: string | null
-}
+export type ReviewFormState =
+  | { status: 'idle' }
+  | { status: 'error'; message: string }
+  | { status: 'verified'; message: string; verifiedAttendance: true; reservationId: string | null }
+  | { status: 'unverified'; message: string; verifiedAttendance: false; reservationId: null }
+  | { status: 'success'; message: string; reviewId?: string }
 
-export const reviewInitialState: ReviewFormState = { status: "idle" }
+export const reviewInitialState: ReviewFormState = { status: 'idle' }

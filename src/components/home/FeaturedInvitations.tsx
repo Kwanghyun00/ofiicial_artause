@@ -125,8 +125,10 @@ export function FeaturedInvitations({ campaigns }: Props) {
 }
 
 function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }) {
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now()
   const isUrgent = campaign.ends_at
-    ? new Date(campaign.ends_at).getTime() - Date.now() < 72 * 60 * 60 * 1000
+    ? new Date(campaign.ends_at).getTime() - nowMs < 72 * 60 * 60 * 1000
     : false
 
   return (

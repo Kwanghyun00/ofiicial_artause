@@ -57,6 +57,30 @@ export function TicketEntryForm({
     );
   }
 
+  /* 중복 신청 상태 */
+  if (state.status === "duplicate") {
+    return (
+      <div className="flex flex-col items-center gap-4 px-6 py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+          <CheckCircle2 className="h-8 w-8 text-amber-600" />
+        </div>
+        <div className="space-y-2">
+          <p className="text-lg font-bold text-foreground">이미 신청하셨습니다</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {state.message ?? "이 이메일로 이미 응모가 완료되어 있습니다."}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            신청 내역은{" "}
+            <a href="/my/entries" className="font-semibold text-primary underline-offset-2 hover:underline">
+              신청 현황 페이지
+            </a>
+            에서 확인하실 수 있습니다.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form action={formAction} onSubmit={handleSubmit} className="space-y-0">
       {/* 폼 헤더 */}

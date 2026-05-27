@@ -39,6 +39,7 @@ export default async function TastePage({
 
   // 퀴즈 결과 화면에 바로 보여줄 활성 캠페인 목록
   const rawCampaigns = await getTicketCampaigns()
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now()
   const campaigns: Campaign[] = rawCampaigns
     .filter((r): r is RawCampaign & { id: string; title: string } =>

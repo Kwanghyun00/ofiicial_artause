@@ -31,6 +31,7 @@ export function HomeDidPopup() {
       // Ignore localStorage access failures in restricted environments.
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(true)
   }, [])
 
