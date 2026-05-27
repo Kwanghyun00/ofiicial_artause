@@ -7,7 +7,7 @@ import { Bookmark, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
 
 const navItems = [
-  { href: "/recruit", label: "체험단 모집" },
+  { href: "/blog", label: "큐레이션" },
   { href: "/shows", label: "공연검색" },
   { href: "/reviews", label: "후기" },
   { href: "/taste", label: "취향테스트" },
@@ -108,15 +108,6 @@ export function SiteHeader() {
               <Bookmark className="h-[16px] w-[16px]" />
             </Link>
 
-            {/* 주 CTA */}
-            <Link
-              href="/recruit"
-              className="inline-flex h-9 items-center justify-center gap-1.5 border-2 border-primary bg-primary px-5 text-sm font-bold text-primary-foreground transition-all duration-150 hover:bg-primary/90 sm:h-10 sm:px-6"
-            >
-              체험단 지원
-              <span className="text-sm leading-none">✦</span>
-            </Link>
-
             {/* 모바일 메뉴 토글 */}
             <button
               type="button"
@@ -197,11 +188,11 @@ export function SiteHeader() {
 
           <div className="space-y-3">
             <Link
-              href="/recruit"
+              href="/blog"
               onClick={() => setMobileOpen(false)}
               className="flex w-full items-center justify-center border-2 border-primary bg-primary py-4 text-lg font-bold text-primary-foreground"
             >
-              체험단 지원하기 ✦
+              큐레이션 에세이 ✦
             </Link>
             <div className="grid grid-cols-2 gap-2">
               <Link

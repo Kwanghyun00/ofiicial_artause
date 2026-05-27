@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Calendar, MapPin, Ticket } from "lucide-react"
+import { Calendar, MapPin } from "lucide-react"
 import { getPosterFallback } from "@/constants/posters"
 import type { Show } from "./types"
 
@@ -22,7 +22,7 @@ export function PerformanceShowcase({ shows }: Props) {
               지금 둘러볼 만한 공연
             </h2>
             <p className="max-w-lg text-sm text-muted-foreground sm:text-base">
-              작품을 먼저 살펴보고, 초대 이벤트가 연결되어 있다면 바로 응모하세요.
+              지금 공연 중이거나 곧 시작하는 작품들을 둘러보세요.
             </p>
           </div>
           <Link
@@ -96,13 +96,6 @@ function PosterCard({
         {/* 그라데이션 오버레이 — 항상 하단 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
-        {/* 초대 이벤트 배지 */}
-        {show.campaign_slug && (
-          <span className="absolute left-2.5 top-2.5 rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm">
-            초대권
-          </span>
-        )}
-
         {/* 하단 텍스트 */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
           {/* 태그 (대형 카드에만 표시) */}
@@ -146,24 +139,6 @@ function PosterCard({
           )}
         </div>
 
-        {/* 호버 오버레이 — 초대 이벤트 응모 버튼 */}
-        {show.campaign_slug && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <span
-              onClick={(e) => e.preventDefault()}
-              className="pointer-events-none"
-            >
-              <Link
-                href={`/invites/${show.campaign_slug}`}
-                className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition hover:bg-primary/90"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Ticket className="h-4 w-4" />
-                응모하기
-              </Link>
-            </span>
-          </div>
-        )}
       </div>
     </Link>
   )

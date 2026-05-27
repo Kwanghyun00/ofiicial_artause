@@ -73,6 +73,30 @@ const ORGANIZATION_SELECT = `
 const COMMUNITY_POST_SELECT = `
   id,
   organization_id,
+  performance_id,
+  slug,
+  title,
+  excerpt,
+  body,
+  cover_image_url,
+  tags,
+  is_published,
+  published_at,
+  created_at,
+  updated_at,
+  organizations (
+    id,
+    slug,
+    name,
+    logo_url,
+    tagline
+  )
+`;
+
+// 마이그레이션 전 레거시 SELECT (performance_id, is_published 컬럼 없는 상태)
+const COMMUNITY_POST_SELECT_LEGACY = `
+  id,
+  organization_id,
   slug,
   title,
   excerpt,
@@ -273,25 +297,73 @@ export const getOrganizationById = cache(async (id: string) => {
   return data ?? null;
 });
 
-export const getCommunityPosts = cache(async () => {
+export const getCommunityPosts = cache(async ({ limit }: { limit?: number } = {}) => {
   if (!isSupabaseConfigured) {
-    return [...mockCommunityPosts].sort((a, b) => {
-      const aTime = a.published_at ? new Date(a.published_at).getTime() : 0;
-      const bTime = b.published_at ? new Date(b.published_at).getTime() : 0;
-      return bTime - aTime;
-    });
+    const sorted = [...mockCommunityPosts]
+      .filter((p) => p.is_published)
+      .sort((a, b) => {
+        const aTime = a.published_at ? new Date(a.published_at).getTime() : 0;
+        const bTime = b.published_at ? new Date(b.published_at).getTime() : 0;
+        return bTime - aTime;
+      });
+    return limit ? sorted.slice(0, limit) : sorted;
+  }
+
+  const supabase = createReadOnlySupabaseClient();
+
+  // 신규 컬럼(is_published, performance_id)을 포함한 쿼리 시도
+  let query = supabase
+    .from("community_posts")
+    .select(COMMUNITY_POST_SELECT)
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (limit) query = query.limit(limit);
+
+  const { data, error } = await query;
+
+  if (error) {
+    // 컬럼이 아직 없는 경우 (마이그레이션 미적용) — 레거시 쿼리로 fallback
+    if (error.code === "42703") {
+      console.warn("getCommunityPosts: new columns not found, using legacy select");
+      let legacyQuery = supabase
+        .from("community_posts")
+        .select(COMMUNITY_POST_SELECT_LEGACY)
+        .order("published_at", { ascending: false })
+        .order("created_at", { ascending: false });
+      if (limit) legacyQuery = legacyQuery.limit(limit);
+      const { data: legacyData, error: legacyError } = await legacyQuery;
+      if (legacyError) { console.error("getCommunityPosts legacy error", legacyError); return []; }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (legacyData ?? []).map((p: any) => ({ ...p, is_published: true, performance_id: null }));
+    }
+    console.error("getCommunityPosts error", error);
+    return [];
+  }
+
+  return data ?? [];
+});
+
+export const getCommunityPostsByPerformance = cache(async (performanceId: string) => {
+  if (!isSupabaseConfigured) {
+    return mockCommunityPosts.filter(
+      (p) => p.is_published && p.performance_id === performanceId
+    ).slice(0, 2);
   }
 
   const supabase = createReadOnlySupabaseClient();
   const { data, error } = await supabase
     .from("community_posts")
     .select(COMMUNITY_POST_SELECT)
+    .eq("is_published", true)
+    .eq("performance_id", performanceId)
     .order("published_at", { ascending: false })
-    .order("created_at", { ascending: false });
+    .limit(2);
 
   if (error) {
-    console.error("getCommunityPosts error", error);
-    throw error;
+    console.error("getCommunityPostsByPerformance error", error);
+    return [];
   }
 
   return data ?? [];
@@ -309,11 +381,24 @@ export const getCommunityPostBySlug = cache(async (slug: string) => {
     .from("community_posts")
     .select(COMMUNITY_POST_SELECT)
     .eq("slug", decodedSlug)
+    .eq("is_published", true)
     .maybeSingle();
 
   if (error) {
+    // 마이그레이션 미적용 fallback
+    if (error.code === "42703") {
+      console.warn("getCommunityPostBySlug: new columns not found, using legacy select");
+      const { data: legacyData } = await supabase
+        .from("community_posts")
+        .select(COMMUNITY_POST_SELECT_LEGACY)
+        .eq("slug", decodedSlug)
+        .maybeSingle();
+      if (!legacyData) return null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return { ...(legacyData as any), is_published: true, performance_id: null };
+    }
     console.error("getCommunityPostBySlug error", error);
-    throw error;
+    return null;
   }
 
   return data;
@@ -1275,6 +1360,113 @@ export const getReviewsByOrganization = cache(
     }
   }
 );
+
+// ─── SNS 에디터 픽 ────────────────────────────────────────────────────────────
+
+export type SnsPickWithPerformance = {
+  id: string
+  performance_id: string
+  caption: string | null
+  channel: string
+  display_order: number
+  promo_end: string | null
+  performance: {
+    id: string
+    title: string
+    slug: string | null
+    poster_url: string | null
+    region: string | null
+    period_start: string | null
+    period_end: string | null
+    tags: string[] | null
+  } | null
+}
+
+const SNS_PICK_SELECT = `
+  id,
+  performance_id,
+  caption,
+  channel,
+  display_order,
+  promo_end,
+  performances (
+    id,
+    title,
+    slug,
+    poster_url,
+    region,
+    period_start,
+    period_end,
+    tags
+  )
+`;
+
+export const getActiveSnsPicksWithPerformances = cache(async (): Promise<SnsPickWithPerformance[]> => {
+  if (!isSupabaseConfigured) return [];
+
+  const supabase = createReadOnlySupabaseClient();
+  const { data, error } = await supabase
+    .from("sns_picks")
+    .select(SNS_PICK_SELECT)
+    .eq("is_active", true)
+    .or("promo_end.is.null,promo_end.gt." + new Date().toISOString())
+    .order("display_order", { ascending: true })
+    .limit(20);
+
+  if (error) {
+    // 테이블이 아직 없는 경우 graceful 처리
+    if (error.code === "42P01" || error.code === "42703") {
+      console.warn("sns_picks table not found, migration not applied yet");
+      return [];
+    }
+    console.error("getActiveSnsPicksWithPerformances error", error);
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []).map((item: any) => ({
+    id: item.id,
+    performance_id: item.performance_id,
+    caption: item.caption,
+    channel: item.channel,
+    display_order: item.display_order,
+    promo_end: item.promo_end,
+    performance: Array.isArray(item.performances) ? item.performances[0] ?? null : item.performances ?? null,
+  }));
+});
+
+/** 특정 공연의 활성 SNS 픽 1건 조회 — 공연 상세 뱃지 표시용 */
+export const getSnsPickForPerformance = cache(async (performanceId: string): Promise<SnsPickWithPerformance | null> => {
+  if (!isSupabaseConfigured) return null;
+
+  const supabase = createReadOnlySupabaseClient();
+  const { data, error } = await supabase
+    .from("sns_picks")
+    .select("id, performance_id, caption, channel, display_order, promo_end")
+    .eq("performance_id", performanceId)
+    .eq("is_active", true)
+    .or("promo_end.is.null,promo_end.gt." + new Date().toISOString())
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    if (error.code === "42P01" || error.code === "42703") return null;
+    return null;
+  }
+
+  if (!data) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const item = data as any;
+  return {
+    id: item.id,
+    performance_id: item.performance_id,
+    caption: item.caption,
+    channel: item.channel,
+    display_order: item.display_order,
+    promo_end: item.promo_end,
+    performance: null,
+  };
+});
 
 
 

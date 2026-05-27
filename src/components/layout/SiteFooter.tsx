@@ -4,9 +4,9 @@ import { companyMeta } from "@/constants/company"
 
 const footerNav = [
   {
-    title: "관객",
+    title: "발견",
     items: [
-      { href: "/invites", label: "초대권 이벤트" },
+      { href: "/blog", label: "큐레이션 에세이" },
       { href: "/shows", label: "공연 검색" },
       { href: "/reviews", label: "관람 후기" },
       { href: "/my", label: "내 북마크" },
@@ -85,14 +85,14 @@ export function SiteFooter() {
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
               공연의 매력을 더 많은 관객에게 전달합니다.
-              초대권 이벤트·콘텐츠 제작으로 공연의 성장을 돕습니다.
+              에디터 큐레이션으로 공연을 발견하는 가장 좋은 방법.
             </p>
             <div>
               <Link
-                href="/invites"
+                href="/blog"
                 className="inline-flex items-center border border-primary/50 bg-primary/8 px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary transition hover:bg-primary/15"
               >
-                초대권 이벤트 →
+                공연 큐레이션 →
               </Link>
             </div>
           </div>

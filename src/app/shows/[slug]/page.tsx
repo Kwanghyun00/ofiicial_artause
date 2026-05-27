@@ -22,10 +22,13 @@ import { BookmarkButton } from "@/components/shows/BookmarkButton"
 import { getPosterFallback } from "@/constants/posters"
 import {
   getCampaignByPerformanceId,
+  getCommunityPostsByPerformance,
   getOrganizationById,
   getPerformanceBySlug,
   getReviewSummary,
+  getSnsPickForPerformance,
 } from "@/lib/supabase/queries"
+import { BlogCard } from "@/components/blog/BlogCard"
 import { checkIsBookmarked } from "@/app/my/actions"
 import { GENRE_MAP, REGION_MAP } from "@/constants/curation"
 
@@ -133,11 +136,13 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const d = performance as any
 
-  const [campaign, isBookmarked, reviewSummary, organization] = await Promise.all([
+  const [campaign, isBookmarked, reviewSummary, organization, relatedPosts, snsPick] = await Promise.all([
     getCampaignByPerformanceId(performance.id),
     checkIsBookmarked(performance.id).catch(() => false),
     getReviewSummary(performance.id),
     d.organization_id ? getOrganizationById(d.organization_id as string).catch(() => null) : null,
+    getCommunityPostsByPerformance(performance.id).catch(() => []),
+    getSnsPickForPerformance(performance.id).catch(() => null),
   ])
 
   // ─── Field extraction ───────────────────────────────────────────
@@ -253,6 +258,12 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           <div className="space-y-6">
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                {/* 알터즈 픽 뱃지 */}
+                {snsPick && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-primary/90 to-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm">
+                    ✦ 알터즈 픽
+                  </span>
+                )}
                 {tags.slice(0, 6).map((tag) => (
                   <span
                     key={tag}
@@ -265,6 +276,12 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
               <h1 className="text-3xl font-semibold sm:text-4xl">{performance.title}</h1>
               {(heroSubtitle ?? synopsis) && (
                 <p className="text-base text-muted-foreground line-clamp-3">{heroSubtitle ?? synopsis}</p>
+              )}
+              {snsPick?.caption && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-foreground/80 leading-relaxed">
+                  <span className="mr-1.5 font-bold text-primary text-xs">✦ 알터즈 픽</span>
+                  {snsPick.caption}
+                </div>
               )}
             </div>
 
@@ -539,6 +556,18 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
         <div className="space-y-4 border-t border-border/60 pt-10">
           <ReviewSummary performanceId={performance.id} performanceSlug={slug} />
         </div>
+
+        {/* 관련 에세이 */}
+        {relatedPosts.length > 0 && (
+          <div className="space-y-4 border-t border-border/60 pt-10">
+            <h2 className="text-xl font-semibold">이 공연의 에세이</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {relatedPosts.map((post) => (
+                <BlogCard key={post.id} post={post} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 유의사항 */}
         <div className="space-y-4 border-t border-border/60 pt-10">

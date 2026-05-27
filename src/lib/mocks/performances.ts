@@ -216,6 +216,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["연출", "비하인드"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {
@@ -241,6 +243,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["라인업", "페스티벌"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {
@@ -266,6 +270,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["플레이리스트", "라이브"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {
@@ -291,6 +297,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["스트리트댄스", "교육"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {
@@ -316,6 +324,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["야외영화", "운영"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {
@@ -341,6 +351,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["전통공간", "사운드"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {
@@ -366,6 +378,8 @@ export const mockCommunityPosts: CommunityPostRow[] = [
     cover_image_url: baseCover,
     tags: ["플리마켓", "운영"],
     published_at: now,
+    is_published: true,
+    performance_id: null,
     created_at: now,
     updated_at: now,
     organizations: {

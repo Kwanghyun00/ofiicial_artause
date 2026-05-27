@@ -1,21 +1,22 @@
 import type { MetadataRoute } from "next"
-import { getAllPerformances, getOrganizations, getTicketCampaigns } from "@/lib/supabase/queries"
+import { getAllPerformances, getOrganizations, getTicketCampaigns, getCommunityPosts } from "@/lib/supabase/queries"
 import { GENRE_SLUGS, REGION_SLUGS } from "@/constants/curation"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://artause.co.kr"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [performances, campaigns, organizations] = await Promise.all([
+  const [performances, campaigns, organizations, blogPosts] = await Promise.all([
     getAllPerformances().catch(() => []),
     getTicketCampaigns().catch(() => []),
     getOrganizations().catch(() => []),
+    getCommunityPosts().catch(() => []),
   ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
     // 핵심 랜딩
     { url: SITE_URL,                   lastModified: new Date(), changeFrequency: "daily",  priority: 1.0 },
-    { url: `${SITE_URL}/shows`,        lastModified: new Date(), changeFrequency: "hourly", priority: 0.95 },
-    { url: `${SITE_URL}/invites`,      lastModified: new Date(), changeFrequency: "hourly", priority: 0.95 },
+    { url: `${SITE_URL}/blog`,         lastModified: new Date(), changeFrequency: "daily",  priority: 0.95 },
+    { url: `${SITE_URL}/shows`,        lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
     // 콘텐츠
     { url: `${SITE_URL}/reviews`,      lastModified: new Date(), changeFrequency: "daily",  priority: 0.7 },
     // 정보성 페이지 (AdSense 승인용으로도 필요)
@@ -80,5 +81,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticRoutes, ...showRoutes, ...inviteRoutes, ...reviewRoutes, ...partnerRoutes, ...genreRoutes, ...regionRoutes]
+  // 블로그 에세이 페이지 — 공연명+에세이 롱테일 SEO
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts
+    .filter((p): p is typeof p & { slug: string } => Boolean(p && "slug" in p && p.slug))
+    .map((p) => ({
+      url: `${SITE_URL}/blog/${p.slug}`,
+      lastModified: ("updated_at" in p && p.updated_at) ? new Date(p.updated_at as string) : new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }))
+
+  return [...staticRoutes, ...showRoutes, ...inviteRoutes, ...reviewRoutes, ...partnerRoutes, ...genreRoutes, ...regionRoutes, ...blogRoutes]
 }

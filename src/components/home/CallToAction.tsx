@@ -25,24 +25,24 @@ export function CallToAction() {
         {/* 메인 콘텐츠 */}
         <div className="text-center">
           <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            공연 취향을 알면,
+            공연 이야기를
             <br />
-            <span className="gradient-text">다음 공연이 찾아옵니다.</span>
+            <span className="gradient-text">알터즈에서 만나보세요.</span>
           </h2>
 
           <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-            초대권 이벤트에 응모하고, 관람 후기를 남기면
-            취향에 맞는 공연을 먼저 알려드릴게요.
+            에디터가 직접 큐레이션한 공연 에세이와
+            알터즈가 주목하는 공연들을 소개합니다.
           </p>
 
           {/* CTA 버튼 */}
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/invites"
+              href="/blog"
               className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground shadow-stage transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl sm:h-14"
               style={{ transitionTimingFunction: "var(--ease-out-expo)" }}
             >
-              초대권 이벤트 보기
+              큐레이션 에세이 읽기
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link

@@ -594,7 +594,9 @@ export type Database = {
           created_at: string
           excerpt: string | null
           id: string
+          is_published: boolean
           organization_id: string | null
+          performance_id: string | null
           published_at: string | null
           slug: string
           tags: string[] | null
@@ -607,7 +609,9 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           id?: string
+          is_published?: boolean
           organization_id?: string | null
+          performance_id?: string | null
           published_at?: string | null
           slug: string
           tags?: string[] | null
@@ -620,7 +624,9 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           id?: string
+          is_published?: boolean
           organization_id?: string | null
+          performance_id?: string | null
           published_at?: string | null
           slug?: string
           tags?: string[] | null
@@ -633,6 +639,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_posts_performance_id_fkey"
+            columns: ["performance_id"]
+            isOneToOne: false
+            referencedRelation: "performances"
             referencedColumns: ["id"]
           },
         ]
@@ -1440,6 +1453,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "show_sessions_performance_id_fkey"
+            columns: ["performance_id"]
+            isOneToOne: false
+            referencedRelation: "performances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sns_picks: {
+        Row: {
+          id: string
+          performance_id: string
+          caption: string | null
+          channel: string
+          display_order: number
+          promo_start: string | null
+          promo_end: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          performance_id: string
+          caption?: string | null
+          channel?: string
+          display_order?: number
+          promo_start?: string | null
+          promo_end?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          performance_id?: string
+          caption?: string | null
+          channel?: string
+          display_order?: number
+          promo_start?: string | null
+          promo_end?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sns_picks_performance_id_fkey"
             columns: ["performance_id"]
             isOneToOne: false
             referencedRelation: "performances"
