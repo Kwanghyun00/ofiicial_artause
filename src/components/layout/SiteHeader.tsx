@@ -3,14 +3,13 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bookmark, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
 
+// MVP nav: 큐레이션 + 알터즈숍만 노출
+// 공연검색/후기/취향테스트/로그인은 다음 단계에서 재활성화 예정
 const navItems = [
   { href: "/blog", label: "큐레이션" },
-  { href: "/shows", label: "공연검색" },
-  { href: "/reviews", label: "후기" },
-  { href: "/taste", label: "취향테스트" },
   { href: "https://smartstore.naver.com/artause", label: "알터즈숍", external: true },
 ]
 
@@ -93,19 +92,6 @@ export function SiteHeader() {
               className="hidden items-center gap-1.5 border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-150 hover:border-foreground/40 hover:text-foreground md:inline-flex"
             >
               파트너 문의
-            </Link>
-
-            {/* 북마크 */}
-            <Link
-              href="/my"
-              aria-label="내 북마크"
-              className={`inline-flex h-9 w-9 items-center justify-center border transition-all duration-150 sm:h-10 sm:w-10 ${
-                pathname.startsWith("/my")
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-              }`}
-            >
-              <Bookmark className="h-[16px] w-[16px]" />
             </Link>
 
             {/* 모바일 메뉴 토글 */}
@@ -194,27 +180,13 @@ export function SiteHeader() {
             >
               큐레이션 에세이 ✦
             </Link>
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href="/my"
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center justify-center gap-2 border py-3 text-sm font-semibold transition-colors ${
-                  pathname.startsWith("/my")
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-foreground hover:border-foreground/50 hover:text-foreground"
-                }`}
-              >
-                <Bookmark className="h-4 w-4" />
-                내 북마크
-              </Link>
-              <Link
-                href="/services"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center border border-border py-3 text-sm font-semibold text-muted-foreground transition-colors hover:border-foreground/50 hover:text-foreground"
-              >
-                파트너 문의
-              </Link>
-            </div>
+            <Link
+              href="/services"
+              onClick={() => setMobileOpen(false)}
+              className="flex w-full items-center justify-center border border-border py-3 text-sm font-semibold text-muted-foreground transition-colors hover:border-foreground/50 hover:text-foreground"
+            >
+              파트너 문의
+            </Link>
           </div>
         </nav>
       </div>

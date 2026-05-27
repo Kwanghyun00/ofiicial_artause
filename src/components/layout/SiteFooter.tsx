@@ -9,7 +9,7 @@ const footerNav = [
       { href: "/blog", label: "큐레이션 에세이" },
       { href: "/shows", label: "공연 검색" },
       { href: "/reviews", label: "관람 후기" },
-      { href: "/my", label: "내 북마크" },
+      { href: "/taste", label: "취향 테스트" },
     ],
   },
   {

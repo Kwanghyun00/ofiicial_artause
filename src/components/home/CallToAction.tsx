@@ -46,10 +46,12 @@ export function CallToAction() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/shows"
+              href="https://smartstore.naver.com/artause"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex h-13 items-center justify-center rounded-full border-2 border-border px-8 text-base font-bold text-foreground transition hover:border-primary/60 hover:text-primary sm:h-14"
             >
-              공연 검색하기
+              알터즈숍 보기
             </Link>
           </div>
 
