@@ -1481,6 +1481,7 @@ export type Database = {
           production_team: Json | null
           recruit_count: number
           recruit_phase: string
+          rejection_reason: string | null
           required_review_platforms: string[]
           review_deadline_days: number
           reward: string | null
@@ -1536,6 +1537,7 @@ export type Database = {
           production_team?: Json | null
           recruit_count?: number
           recruit_phase?: string
+          rejection_reason?: string | null
           required_review_platforms?: string[]
           review_deadline_days?: number
           reward?: string | null
@@ -1591,6 +1593,7 @@ export type Database = {
           production_team?: Json | null
           recruit_count?: number
           recruit_phase?: string
+          rejection_reason?: string | null
           required_review_platforms?: string[]
           review_deadline_days?: number
           reward?: string | null

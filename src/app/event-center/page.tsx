@@ -85,6 +85,10 @@ export default async function EventCenterPage() {
       starts_at: campaign.starts_at ?? null,
       ends_at: campaign.ends_at ?? null,
       allocation: typeof campaign.allocation === "number" ? campaign.allocation : null,
+      poster_image: campaign.poster_image ?? null,
+      // rejection_reason column added via migration — null until migration applied
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rejection_reason: (campaign as any).rejection_reason ?? null,
       stats: { total, selected, checkedIn, noShow },
       draws: drawsByCampaign[campaign.id] ?? [],
     });

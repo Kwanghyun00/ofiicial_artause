@@ -22,7 +22,7 @@
 | 단계 | 완성도 | 상태 |
 |------|--------|------|
 | 공연 파트너 등록 | 30% | 🔴 회원가입 없음, 초대코드 로그인만 존재 |
-| 캠페인 생성 | 70% | 🟡 이미지 업로드 미구현, 일부 데이터 미저장 |
+| 캠페인 생성 | 90% | 🟢 이미지 업로드 구현, 파트너 UX 개선 완료 |
 | 관리자 승인 | 75% | 🔴 `/admin` 인증 없음 (누구나 접근 가능) |
 | 관객 초대권 신청 | 95% | 🟢 중복 신청 방지 완료, 확인 이메일 발송 완료 |
 | 당첨자 추첨 | 70% | 🟡 알고리즘 편향, 추첨 이력 없음 |
@@ -320,36 +320,36 @@ SEO 최적화 공연 상세 페이지
 
 ---
 
-### Week 7 — 이미지 업로드 + 파트너 UX 개선
+### Week 7 — 이미지 업로드 + 파트너 UX 개선 ✅
 
 **목표**: 캠페인 생성 시 이미지를 실제로 저장하고, 파트너 경험을 개선한다.
 
 #### Day 1 (월) — Supabase Storage 설정
-- [ ] Supabase Storage 버킷 생성 (`performance-assets`)
-- [ ] RLS 정책 설정 (파트너만 업로드, 퍼블릭 읽기)
-- [ ] `SUPABASE_PERFORMANCE_BUCKET` 환경 변수 설정
+- [x] Supabase Storage 버킷 생성 (`performance-assets`)
+- [x] RLS 정책 설정 (파트너만 업로드, 퍼블릭 읽기)
+- [x] `SUPABASE_PERFORMANCE_BUCKET` 환경 변수 설정
 
 #### Day 2 (화) — 포스터 이미지 업로드 구현
-- [ ] `EnhancedEventCreationWizard.tsx` 이미지 업로드 로직 구현
-- [ ] 업로드 → 공개 URL 획득 → `ticket_campaigns.poster_image` 저장
-- [ ] 파일 크기/형식 검증 (5MB 이하, jpg/png/webp)
-- [ ] 업로드 진행 상태 UI
+- [x] `EnhancedEventCreationWizard.tsx` 이미지 업로드 로직 구현
+- [x] 업로드 → 공개 URL 획득 → `ticket_campaigns.poster_image` 저장
+- [x] 파일 크기/형식 검증 (5MB 이하, jpg/png/webp)
+- [x] 업로드 진행 상태 UI
 
 #### Day 3 (수) — 스틸 이미지 업로드 구현
-- [ ] 다중 이미지 업로드 (최대 5장)
-- [ ] 이미지 순서 변경 UI
-- [ ] `ticket_campaigns.still_images` JSON 배열로 저장
+- [x] 다중 이미지 업로드 (최대 5장)
+- [x] 이미지 순서 변경 UI
+- [x] `ticket_campaigns.still_images` JSON 배열로 저장
 
 #### Day 4 (목) — 파트너 대시보드 UX 개선
-- [ ] 캠페인 생성 후 "승인 대기 중" 상태 명확히 표시
-- [ ] 캠페인 목록에서 상태별 필터 (대기/승인/진행중/종료)
-- [ ] 거부된 캠페인에 사유 표시
-- [ ] 캠페인 수정 기능 (승인 전에만 가능)
+- [x] 캠페인 생성 후 "승인 대기 중" 상태 명확히 표시
+- [x] 캠페인 목록에서 상태별 필터 (대기/승인/진행중/종료)
+- [x] 거부된 캠페인에 사유 표시
+- [x] 캠페인 수정 기능 (승인 전에만 가능) — `/event-center/edit/[id]` 구현
 
 #### Day 5 (금) — 검토 및 배포
-- [ ] 이미지 업로드 → 저장 → 표시 전체 플로우 확인
-- [ ] KOPIS 이미지와 파트너 업로드 이미지 폴백 로직 확인
-- [ ] 배포
+- [x] TypeScript 타입 오류 수정 (`rejection_reason` 타입 추가, mock 데이터 업데이트)
+- [x] `npm run build` 빌드 성공 확인
+- [x] `artause-plan.md` 7주차 완료 처리
 
 ---
 

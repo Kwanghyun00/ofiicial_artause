@@ -599,6 +599,7 @@ const campaignDefaults: CampaignRow = {
   performance_period_start: null,
   poster_image: null,
   production_team: null,
+  rejection_reason: null,
   reward: null,
   running_time: null,
   sessions_per_week: null,

@@ -846,6 +846,94 @@ export async function runLotteryDraw(
 }
 
 /**
+ * 공연 종사자가 승인 대기 중인 이벤트를 수정합니다.
+ * pending_approval 상태인 캠페인만 수정 가능합니다.
+ */
+export async function updateEventCampaign(
+  campaignId: string,
+  formData: {
+    title: string;
+    description?: string;
+    startsAt: string;
+    endsAt: string;
+    ticketPurchaseUrl?: string;
+    venueName?: string;
+    oneLineIntro?: string;
+    posterImage?: string;
+  },
+): Promise<ActionResult> {
+  const partnerEmail = await getPartnerSession();
+  if (!partnerEmail) {
+    return { success: false, error: '로그인이 필요합니다.' };
+  }
+
+  if (!formData.title?.trim()) {
+    return { success: false, error: '이벤트 제목을 입력해 주세요.' };
+  }
+  if (!formData.startsAt || !formData.endsAt) {
+    return { success: false, error: '이벤트 기간을 입력해 주세요.' };
+  }
+
+  if (!isSupabaseConfigured) {
+    console.info('[Mock Mode] 이벤트 수정 요청:', campaignId, formData);
+    return { success: true };
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // 1. 권한 확인 및 상태 검증
+    const { data: campaign } = await supabase
+      .from('ticket_campaigns')
+      .select('partner_email, status')
+      .eq('id', campaignId)
+      .single();
+
+    if (!campaign) {
+      return { success: false, error: '이벤트를 찾을 수 없습니다.' };
+    }
+    if (campaign.partner_email !== partnerEmail) {
+      return { success: false, error: '수정 권한이 없습니다.' };
+    }
+    if (campaign.status !== 'pending_approval') {
+      return { success: false, error: '승인 대기 중인 이벤트만 수정할 수 있습니다.' };
+    }
+
+    // 2. 업데이트
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatePayload: Record<string, any> = {
+      title: formData.title.trim(),
+      description: formData.description?.trim() || null,
+      starts_at: formData.startsAt,
+      ends_at: formData.endsAt,
+      ticket_purchase_url: formData.ticketPurchaseUrl?.trim() || null,
+      venue_name: formData.venueName?.trim() || null,
+      one_line_intro: formData.oneLineIntro?.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    if (formData.posterImage) {
+      updatePayload.poster_image = formData.posterImage;
+    }
+
+    const { error } = await supabase
+      .from('ticket_campaigns')
+      .update(updatePayload)
+      .eq('id', campaignId);
+
+    if (error) {
+      console.error('updateEventCampaign error:', error);
+      return { success: false, error: '수정에 실패했습니다.' };
+    }
+
+    revalidatePath('/event-center');
+    return { success: true };
+  } catch (error) {
+    console.error('Unexpected error in updateEventCampaign:', error);
+    return { success: false, error: '서버 오류가 발생했습니다.' };
+  }
+}
+
+/**
  * Slug 생성 헬퍼 함수
  */
 function generateSlug(title: string, date: string): string {
