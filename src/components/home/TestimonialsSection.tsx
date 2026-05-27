@@ -1,8 +1,7 @@
 import Link from "next/link"
-import { Quote, Star, BadgeCheck } from "lucide-react"
+import { Star } from "lucide-react"
 import type { ReviewRow } from "@/lib/supabase/review-types"
 
-// 하드코딩 샘플 — DB 후기가 없을 때 폴백
 const fallbackTestimonials = [
   {
     name: "뮤지컬덕후",
@@ -17,6 +16,14 @@ const fallbackTestimonials = [
     tag: "연극 관람",
     content: "당첨 결과를 이메일로 빠르게 받았고, 좌석 안내도 친절했어요. 다음 이벤트도 꼭 응모할 거예요.",
     show: "대학로 연극 초대권",
+    rating: 5,
+    verified: false,
+  },
+  {
+    name: "공연러버",
+    tag: "무용 관람",
+    content: "SNS에서 알터즈를 팔로우했는데, 소개해준 공연이 너무 좋았어요. 이런 큐레이션 서비스가 필요했어요.",
+    show: "컨템포러리 댄스 공연",
     rating: 5,
     verified: false,
   },
@@ -42,62 +49,76 @@ function fromReviewRow(r: ReviewRow): DisplayReview {
   }
 }
 
-type Props = {
-  reviews?: ReviewRow[]
-}
+type Props = { reviews?: ReviewRow[] }
 
 export function TestimonialsSection({ reviews }: Props) {
-  // DB 후기가 있고 내용이 있는 것만 사용, 없으면 폴백
   const dbReviews = (reviews ?? [])
     .filter((r) => r.review_text || r.review_headline)
     .slice(0, 3)
 
   const testimonials: DisplayReview[] =
-    dbReviews.length >= 2
-      ? dbReviews.map(fromReviewRow)
-      : fallbackTestimonials
+    dbReviews.length >= 2 ? dbReviews.map(fromReviewRow) : fallbackTestimonials
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2.5">
-            <span className="cue">관람 후기</span>
-            <h2 className="text-3xl font-bold text-foreground md:text-4xl">초대권으로 공연을 만난 관객들</h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              실제 응모 후 공연을 관람한 관객들의 이야기입니다.
+
+        {/* 섹션 헤더 */}
+        <div className="mb-10 flex items-end justify-between gap-4">
+          <div className="space-y-1.5">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+              — 04 · 관람 후기
             </p>
+            <h2 className="font-serif text-3xl font-bold text-foreground md:text-4xl">
+              공연을 경험한 관객들
+            </h2>
           </div>
           <Link
             href="/reviews"
-            className="self-start rounded-full border border-border/80 px-5 py-2.5 text-sm font-semibold text-foreground/80 transition hover:border-primary/60 hover:text-primary"
+            className="shrink-0 text-sm font-semibold text-muted-foreground transition hover:text-primary"
           >
-            후기 더 보기 →
+            후기 더보기 →
           </Link>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((testimonial, idx) => (
-            <article key={idx} className="spotlight-card relative flex h-full flex-col justify-between p-6">
-              <Quote className="absolute right-5 top-5 h-8 w-8 text-primary/15" />
+        {/* 후기 카드 */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          {testimonials.map((t, idx) => (
+            <article
+              key={idx}
+              className="flex flex-col justify-between border border-border bg-background p-5 sm:p-6"
+            >
+              {/* 별점 */}
               <div>
-                <div className="mb-3 flex gap-0.5">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                <div className="mb-4 flex gap-0.5">
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <Star key={i} className="h-3.5 w-3.5 fill-primary text-primary" />
                   ))}
                 </div>
-                <p className="text-[15px] leading-relaxed text-foreground">{testimonial.content}</p>
+
+                {/* 후기 내용 */}
+                <p className="font-serif text-[15px] leading-relaxed text-foreground">
+                  "{t.content}"
+                </p>
               </div>
-              <div className="mt-5 border-t border-border/60 pt-4 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <p className="font-semibold text-foreground">{testimonial.name}</p>
-                  {testimonial.verified && (
-                    <BadgeCheck className="h-4 w-4 text-emerald-500" aria-label="인증 관람" />
+
+              {/* 작성자 */}
+              <div className="mt-5 border-t border-border/60 pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.tag}</p>
+                  </div>
+                  {t.verified && (
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-primary">
+                      인증 ✓
+                    </span>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">{testimonial.tag}</p>
-                {testimonial.show && (
-                  <p className="mt-1.5 text-xs font-semibold text-primary">{testimonial.show}</p>
+                {t.show && (
+                  <p className="mt-1.5 text-[11px] font-semibold text-primary/70 line-clamp-1">
+                    {t.show}
+                  </p>
                 )}
               </div>
             </article>

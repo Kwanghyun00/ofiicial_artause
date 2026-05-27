@@ -3,70 +3,83 @@ import { ArrowRight } from "lucide-react"
 
 export function CallToAction() {
   return (
-    <section className="relative overflow-hidden py-16 lg:py-24">
-      {/* 배경 그라데이션 */}
-      <div className="absolute inset-0 -z-10">
+    <section className="bg-background">
+
+      {/* 파트너 배너 — 어두운 밴드 */}
+      <div
+        className="relative overflow-hidden"
+        style={{ background: "oklch(0.11 0.016 285)" }}
+      >
+        {/* 배경 글로우 */}
         <div
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
+          aria-hidden="true"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 50% 0%, oklch(0.64 0.18 55 / 0.1) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 60% 80% at 20% 50%, oklch(0.64 0.18 55 / 0.07) 0%, transparent 70%)",
           }}
         />
+
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="space-y-3">
+              <p
+                className="font-mono text-[11px] font-bold uppercase tracking-[0.2em]"
+                style={{ color: "oklch(0.64 0.18 55 / 0.7)" }}
+              >
+                ✦ 파트너
+              </p>
+              <h2 className="font-serif text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
+                공연단체이신가요?
+              </h2>
+              <p className="max-w-lg text-sm leading-relaxed text-white/50 sm:text-base">
+                알터즈와 함께 공연을 SNS에 소개하고,
+                더 많은 관객에게 닿을 수 있는 방법을 이야기해드립니다.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 lg:flex-col lg:items-end">
+              <Link
+                href="/services"
+                className="group inline-flex h-12 items-center gap-2.5 px-7 text-[14px] font-bold text-black transition-all sm:h-13"
+                style={{ background: "oklch(0.74 0.17 62)" }}
+              >
+                서비스 알아보기
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex h-12 items-center border border-white/20 px-7 text-[14px] font-bold text-white/60 transition hover:border-white/40 hover:text-white sm:h-13"
+              >
+                문의하기
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        {/* 가로 구분선 with 레이블 */}
-        <div className="mb-12 flex items-center gap-4">
-          <div className="h-px flex-1 bg-border/60" />
-          <span className="cue">Encore</span>
-          <div className="h-px flex-1 bg-border/60" />
-        </div>
-
-        {/* 메인 콘텐츠 */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            공연 이야기를
-            <br />
-            <span className="gradient-text">알터즈에서 만나보세요.</span>
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-            에디터가 직접 큐레이션한 공연 에세이와
-            알터즈가 주목하는 공연들을 소개합니다.
-          </p>
-
-          {/* CTA 버튼 */}
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+      {/* 하단 에세이 CTA — 밝은 섹션 */}
+      <div className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                알터즈 큐레이션 에세이 →
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                에디터가 직접 쓴 공연 이야기를 만나보세요.
+              </p>
+            </div>
             <Link
               href="/blog"
-              className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground shadow-stage transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl sm:h-14"
-              style={{ transitionTimingFunction: "var(--ease-out-expo)" }}
+              className="inline-flex shrink-0 items-center gap-2 border-2 border-primary px-6 py-2.5 text-sm font-bold text-primary transition hover:bg-primary/5"
             >
-              큐레이션 에세이 읽기
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="https://smartstore.naver.com/artause"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-13 items-center justify-center rounded-full border-2 border-border px-8 text-base font-bold text-foreground transition hover:border-primary/60 hover:text-primary sm:h-14"
-            >
-              알터즈숍 보기
+              에세이 읽기
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-
-          {/* 파트너 링크 */}
-          <p className="mt-6 text-sm text-muted-foreground">
-            공연단체이신가요?{" "}
-            <Link
-              href="/services"
-              className="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              파트너 서비스 보기 →
-            </Link>
-          </p>
         </div>
       </div>
+
     </section>
   )
 }

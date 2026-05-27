@@ -70,51 +70,39 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="pb-0">
+    <div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
       <HomeDidPopup />
 
-      {/* Hero — 전체 너비 */}
-      <Reveal>
-        <HomeHero />
-      </Reveal>
+      {/* 01 — Hero (다크) */}
+      <HomeHero />
 
-      {/* 구분선 */}
-      <div className="stage-divider mx-auto max-w-7xl" />
-
-      {/* 알터즈 픽 캐러셀 (SNS 에디터 픽) */}
+      {/* 02 — SNS 에디터 픽 캐러셀 (다크, sns픽 있을 때만) */}
       {snsPicks.length > 0 && (
         <Reveal>
           <SnsPicksSection picks={snsPicks} />
         </Reveal>
       )}
-      {snsPicks.length > 0 && <div className="stage-divider mx-auto max-w-7xl" />}
 
-      {/* 공연 쇼케이스 */}
+      {/* 03 — 공연 쇼케이스 (라이트) */}
       <Reveal>
         <PerformanceShowcase shows={showcaseShows} />
       </Reveal>
 
-      {/* 구분선 */}
-      <div className="stage-divider mx-auto max-w-7xl" />
-
-      {/* 최신 블로그 에세이 */}
+      {/* 04 — 큐레이션 에세이 (다크) */}
       <Reveal>
         <LatestBlogSection posts={latestPosts} />
       </Reveal>
 
-      {/* 구분선 */}
-      <div className="stage-divider mx-auto max-w-7xl" />
-
-      {/* 관람 후기 */}
+      {/* 05 — 관람 후기 (라이트) */}
       <Reveal>
         <TestimonialsSection reviews={recentReviews} />
       </Reveal>
 
-      {/* CTA — 전체 너비 */}
+      {/* 06 — 파트너 CTA + 에세이 CTA */}
       <Reveal>
         <CallToAction />
       </Reveal>
