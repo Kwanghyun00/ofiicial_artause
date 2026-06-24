@@ -1,26 +1,20 @@
 import type { Metadata } from "next"
-import {
-  HomeHero,
-  HomeDidPopup,
-  PerformanceShowcase,
-  TestimonialsSection,
-  CallToAction,
-} from "@/components/home/sections"
-import { LatestBlogSection } from "@/components/home/LatestBlogSection"
+import { HomeHero, HomeDidPopup } from "@/components/home/sections"
 import { SnsPicksSection } from "@/components/home/SnsPicksSection"
+import { BlogCard } from "@/components/blog/BlogCard"
 import { Reveal } from "@/components/motion/Reveal"
-import type { Show } from "@/components/home/types"
-import { getRecentReviews, getShowsPerformances, getCommunityPosts, getActiveSnsPicksWithPerformances } from "@/lib/supabase/queries"
-
-type RawPerformance = Awaited<ReturnType<typeof getShowsPerformances>>[number]
+import { isPerformanceEndedKst } from "@/lib/date"
+import {
+  getCommunityPosts,
+  getActiveSnsPicksWithPerformances,
+  getCommunityPostStatsBySlugs,
+} from "@/lib/supabase/queries"
 
 export const metadata: Metadata = {
   title: "공연 큐레이션 · 알터즈",
   description:
-    "에디터가 직접 큐레이션한 공연 에세이와 알터즈가 주목하는 공연들을 만나보세요.",
-  alternates: {
-    canonical: "/",
-  },
+    "알터즈가 관객 언어로 풀어 소개하는 공연들을 만나보세요.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "알터즈 | 공연 큐레이션",
     description:
@@ -36,28 +30,154 @@ export const metadata: Metadata = {
   },
 }
 
-const isPerformanceRecord = (
-  record: RawPerformance
-): record is RawPerformance & { id: string; title: string } =>
-  Boolean(record && typeof record === "object" && "id" in record && "title" in record)
+export const dynamic = "force-dynamic"
+
+const EXAMPLE_POSTS = [
+  {
+    id: "example-one-one-three",
+    slug: "one-one-three",
+    title: "수학과 연극, 두 언어로 바라보는 하나의 세계",
+    excerpt:
+      "리멘워커의 연극 '113'. 수학자 서혁과 제빵사 정태가 구름카페에서 순원의 시 「113」을 찾아 나서는 포스트드라마. 2026.07.03~07.12 · 대학로극장 쿼드",
+    cover_image_url: "/images/blog/one-one-three/poster.jpeg",
+    tags: ["연극", "수학", "포스트드라마"],
+    published_at: "2026-06-20",
+    performance_start_date: "2026-07-03",
+    performance_end_date: "2026-07-12",
+    organizations: { name: "알터즈 에디터", logo_url: null },
+  },
+  {
+    id: "example-maureen",
+    slug: "maureen",
+    title: "사라진 뒤에야 선명해지는 사랑",
+    excerpt:
+      "이효석문학상 수상 작가 안윤의 『모린』을 영화와 연극의 경계를 허문 영극으로 다시 쓰는 이향 프로젝트의 신작. 2026.06.19~06.28 · 서울연극창작센터 서울씨어터101",
+    cover_image_url: "/images/blog/maureen/poster.png",
+    tags: ["영극", "드라마", "알터즈 픽"],
+    published_at: "2026-06-18",
+    performance_start_date: "2026-06-19",
+    performance_end_date: "2026-06-28",
+    organizations: { name: "알터즈 에디터", logo_url: null },
+  },
+  {
+    id: "example-secret-royal-inspector",
+    slug: "secret-royal-inspector",
+    title: "가짜 암행어사의 거짓말이 판을 뒤집는다",
+    excerpt:
+      "극단 백의의 코미디 사극 '암행어사'. 도박으로 여비를 탕진한 조명식이 진짜 암행어사로 오해받으며 벌어지는 포복절도 코미디. 2026.06.06~06.14 · 삼일로창고극장",
+    cover_image_url: "/images/blog/secret-royal-inspector/poster.png",
+    tags: ["연극", "코미디", "사극"],
+    published_at: "2026-05-25",
+    performance_start_date: "2026-06-06",
+    performance_end_date: "2026-06-14",
+    organizations: { name: "아터즈 에디터", logo_url: null },
+  },
+  {
+    id: "example-0",
+    slug: "waegwaegi-was-there",
+    title: "잊는다는 것이 정말 가능한 걸까",
+    excerpt:
+      "문학동네청소년문학상 대상 수상작 원작 연극 '왝왝이가 그곳에 있었다'. 재난과 참사 앞에서 기억을 붙드는 청소년들의 이야기. 2026.06.19~06.25 · 아르코예술극장 소극장",
+    cover_image_url: "/images/blog/waegwaegi-was-there/poster.jpg",
+    tags: ["연극", "청소년극", "알터즈 픽"],
+    published_at: "2026-05-26",
+    performance_start_date: "2026-06-19",
+    performance_end_date: "2026-06-25",
+    organizations: { name: "알터즈 에디터", logo_url: null },
+  },
+  {
+    id: "example-1",
+    slug: "after-the-end",
+    title: "벙커는 정말 가장 안전한 장소일까",
+    excerpt:
+      "연극 '애프터 디 엔드'. 핵폭발 이후 지하 벙커에 단 둘이 남은 사람들 — 구원인가, 통제인가. 프로젝트 디본의 밀도 높은 심리극. 2026.05.29~06.21 · 대학로 업스테이지",
+    cover_image_url: "/images/blog/covers/after-the-end.jpg",
+    tags: ["연극", "심리극", "알터즈 픽"],
+    published_at: "2026-05-29",
+    performance_start_date: "2026-05-29",
+    performance_end_date: "2026-06-21",
+    organizations: { name: "알터즈 에디터", logo_url: null },
+  },
+  {
+    id: "example-2",
+    slug: "kkweman-village",
+    title: "살아남기 위해 우리는 어디까지 배제할 수 있을까",
+    excerpt:
+      "조예은 작가 원작 디스토피아 연극 '꿰맨 눈의 마을'. 2066년 감염과 추방, 배제의 논리를 무대 위에서 마주합니다. 2026.05.28~06.07 · 연희예술극장",
+    cover_image_url: "/images/blog/covers/kkweman-village.png",
+    tags: ["연극", "디스토피아", "알터즈 픽"],
+    published_at: "2026-05-28",
+    performance_start_date: "2026-05-28",
+    performance_end_date: "2026-06-07",
+    organizations: { name: "알터즈 에디터", logo_url: null },
+  },
+]
+
+type DisplayPost = {
+  id: string
+  slug: string
+  title: string
+  excerpt: string | null
+  cover_image_url: string | null
+  tags: string[] | null
+  published_at: string | null
+  performance_end_date?: string | null
+  organizations?: { name: string; logo_url: string | null } | null
+  view_count?: number
+  outbound_click_count?: number
+  click_rate?: number
+  last_viewed_at?: string | null
+  last_clicked_at?: string | null
+}
+
+function sortPostsByPopularity(posts: DisplayPost[]) {
+  return [...posts].sort((a, b) => {
+    const viewDiff = (b.view_count ?? 0) - (a.view_count ?? 0)
+    if (viewDiff !== 0) return viewDiff
+    return new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime()
+  })
+}
+
+function isPerformanceEnded(endDate: string | null | undefined) {
+  return isPerformanceEndedKst(endDate)
+}
 
 export default async function HomePage() {
-  // eslint-disable-next-line react-hooks/purity
-  const now = Date.now()
-
-  const [performanceRecords, recentReviews, latestPosts, snsPicks] = await Promise.all([
-    getShowsPerformances(),
-    getRecentReviews({ limit: 3 }),
-    getCommunityPosts({ limit: 3 }),
+  const [allPosts, snsPicks, manualStats] = await Promise.all([
+    getCommunityPosts(),
     getActiveSnsPicksWithPerformances(),
+    getCommunityPostStatsBySlugs(EXAMPLE_POSTS.map((post) => post.slug)),
   ])
 
-  const performances = performanceRecords.filter(isPerformanceRecord)
+  const manualPosts = EXAMPLE_POSTS.map((post) => {
+    const stats = manualStats.get(post.slug)
+    const viewCount = stats?.view_count ?? 0
+    const outboundClickCount = stats?.outbound_click_count ?? 0
+    return {
+      ...post,
+      view_count: viewCount,
+      outbound_click_count: outboundClickCount,
+      click_rate: viewCount > 0 ? outboundClickCount / viewCount : 0,
+      last_viewed_at: stats?.last_viewed_at ?? null,
+      last_clicked_at: stats?.last_clicked_at ?? null,
+    }
+  })
 
-  const visibleShows = performances.filter((performance) => isDiscoverableShow(performance, now))
-  const showcaseShows = (visibleShows.length > 0 ? visibleShows : performances)
-    .slice(0, 6)
-    .map((performance) => normalizeShow(performance))
+  const displayPosts = sortPostsByPopularity(
+    allPosts.length > 0
+      ? [
+          ...manualPosts.filter(
+            (manualPost) => !allPosts.some((post) => post.slug === manualPost.slug),
+          ),
+          ...allPosts,
+        ]
+      : manualPosts,
+  )
+
+  const ongoingPosts = displayPosts.filter((p) => !isPerformanceEnded(p.performance_end_date))
+  const archivedPosts = displayPosts.filter((p) => isPerformanceEnded(p.performance_end_date))
+  const activePosts = ongoingPosts.length > 0 ? ongoingPosts : displayPosts
+  const [featured, ...ongoingRest] = activePosts
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -77,76 +197,69 @@ export default async function HomePage() {
       />
       <HomeDidPopup />
 
-      {/* 01 — Hero (다크) */}
+      {/* 01 — 브랜드 히어로 */}
       <HomeHero />
 
-      {/* 02 — SNS 에디터 픽 캐러셀 (다크, sns픽 있을 때만) */}
+      {/* 02 — SNS 에디터 픽 캐러셀 (픽 데이터 있을 때만) */}
       {snsPicks.length > 0 && (
         <Reveal>
           <SnsPicksSection picks={snsPicks} />
         </Reveal>
       )}
 
-      {/* 03 — 공연 쇼케이스 (라이트) */}
+      {/* 03 — 큐레이션 에세이 전체 목록 */}
       <Reveal>
-        <PerformanceShowcase shows={showcaseShows} />
-      </Reveal>
+        <section className="border-t border-border bg-background">
+          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-24">
 
-      {/* 04 — 큐레이션 에세이 (다크) */}
-      <Reveal>
-        <LatestBlogSection posts={latestPosts} />
-      </Reveal>
+            {/* 섹션 헤더 */}
+            <div className="mb-12 flex items-end justify-between gap-4 border-b border-border pb-8">
+              <div className="space-y-2">
+                <span className="cue">— 공연 소개</span>
+                <h2 className="font-serif text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
+                  알터즈가 전하는 공연 이야기
+                </h2>
+              </div>
+              <p className="hidden shrink-0 text-sm text-muted-foreground lg:block">
+                {displayPosts.length}편의 공연 소개
+              </p>
+            </div>
 
-      {/* 05 — 관람 후기 (라이트) */}
-      <Reveal>
-        <TestimonialsSection reviews={recentReviews} />
-      </Reveal>
+            {/* 피처드 포스트 */}
+            {featured && (
+              <div className="mb-8 lg:mb-10">
+                <BlogCard post={featured} featured index={0} />
+              </div>
+            )}
 
-      {/* 06 — 파트너 CTA + 에세이 CTA */}
-      <Reveal>
-        <CallToAction />
+            {/* 공연 중 그리드 */}
+            {ongoingRest.length > 0 && (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+                {ongoingRest.map((post, i) => (
+                  <BlogCard key={post.id} post={post} index={i + 1} />
+                ))}
+              </div>
+            )}
+
+            {/* 지난 공연 아카이브 */}
+            {archivedPosts.length > 0 && (
+              <div className="mt-16">
+                <div className="mb-6 flex items-center gap-4">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/35">지난 공연</span>
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-[11px] text-foreground/30">{archivedPosts.length}편</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+                  {archivedPosts.map((post, i) => (
+                    <BlogCard key={post.id} post={post} index={activePosts.length + i} archived />
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </section>
       </Reveal>
     </div>
   )
 }
-
-function normalizeShow(record: RawPerformance & { id: string; title: string }): Show {
-  const performance = record as RawPerformance & {
-    slug?: string | null
-    region?: string | null
-    tags?: string[] | null
-    period_start?: string | null
-    period_end?: string | null
-    poster_url?: string | null
-    synopsis?: string | null
-    description?: string | null
-  }
-
-  return {
-    id: performance.id,
-    slug: performance.slug ?? null,
-    title: performance.title,
-    region: performance.region ?? null,
-    tags: performance.tags ?? null,
-    period_start: performance.period_start ?? null,
-    period_end: performance.period_end ?? null,
-    poster_url: performance.poster_url ?? null,
-    summary: performance.synopsis ?? performance.description ?? null,
-    campaign_slug: null,
-  }
-}
-
-function isDiscoverableShow(
-  performance: RawPerformance & { id: string; title: string },
-  now: number
-) {
-  const record = performance as {
-    period_end?: string | null
-  }
-
-  if (!record.period_end) return true
-  const endTime = new Date(record.period_end).getTime()
-  if (Number.isNaN(endTime)) return true
-  return endTime >= now
-}
-
